@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "dev.codex.oborokage.client.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "HandsMixin",
+    "CameraMixin",
+    "IaidoPoseMixin",
+    "SheathModelMixin",
+    "DualAttackMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

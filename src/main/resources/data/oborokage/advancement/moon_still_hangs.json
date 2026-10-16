@@ -1,0 +1,28 @@
+{
+  "parent": "oborokage:first_moon",
+  "display": {
+    "icon": {
+      "id": "oborokage:tachi"
+    },
+    "title": {
+      "translate": "advancement.oborokage.moon.title"
+    },
+    "description": {
+      "translate": "advancement.oborokage.moon.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "flawless_iaido": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "flawless_iaido"
+    ]
+  ]
+}

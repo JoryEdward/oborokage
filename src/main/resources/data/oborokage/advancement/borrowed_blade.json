@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "id": "oborokage:tachi"
+    },
+    "title": {
+      "translate": "advancement.oborokage.borrowed_blade.title"
+    },
+    "description": {
+      "translate": "advancement.oborokage.borrowed_blade.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "complete": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "complete"
+    ]
+  ],
+  "parent": "oborokage:twin_moons"
+}

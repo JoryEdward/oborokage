@@ -1,0 +1,15 @@
+Dedicated local server ready; launching two independent clients.
+server PASS Two independent clients connected to local dedicated server
+PASS Networked dual ultimate executes 1024 HP hostile
+
+actor PASS Server equipment reaches attacker client
+PASS Confirmed server hits synchronize full intent over network
+PASS Attacker receives own ultimate camera
+PASS Attacker camera restores after networked ultimate
+PASS Client remains connected after dual actions
+
+observer PASS Observer receives ordered remote combo and ultimate actions
+PASS Observer renders remote dual arm animation
+PASS Observer camera is never taken over
+PASS Client remains connected after dual actions
+

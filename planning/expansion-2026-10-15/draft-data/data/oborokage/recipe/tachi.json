@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "  D",
+    " ID",
+    "SA "
+  ],
+  "key": {
+    "D": "minecraft:diamond",
+    "I": "minecraft:iron_block",
+    "S": "minecraft:stick",
+    "A": "minecraft:amethyst_shard"
+  },
+  "result": {
+    "id": "oborokage:tachi"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "id": "oborokage:wakizashi"
+    },
+    "title": {
+      "translate": "advancement.oborokage.three_breaths.title"
+    },
+    "description": {
+      "translate": "advancement.oborokage.three_breaths.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "complete": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "complete"
+    ]
+  ],
+  "parent": "oborokage:borrowed_blade"
+}

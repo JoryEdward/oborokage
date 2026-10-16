@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "oborokage",
+  "version": "${version}",
+  "name": "胧影太刀 · Oborokage",
+  "description": "长刃居合、双刀连斩、精准架刀与双月奥义。",
+  "authors": [
+    "Codex"
+  ],
+  "license": "MIT",
+  "environment": "*",
+  "icon": "assets/oborokage/icon.png",
+  "entrypoints": {
+    "main": [
+      "dev.codex.oborokage.Oborokage"
+    ],
+    "client": [
+      "dev.codex.oborokage.client.OborokageClient"
+    ]
+  },
+  "mixins": [
+    {
+      "config": "oborokage.client.mixins.json",
+      "environment": "client"
+    },
+    "oborokage.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "~26.3",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
+}

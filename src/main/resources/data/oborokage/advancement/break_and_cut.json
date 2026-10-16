@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "id": "oborokage:tachi"
+    },
+    "title": {
+      "translate": "advancement.oborokage.break_and_cut.title"
+    },
+    "description": {
+      "translate": "advancement.oborokage.break_and_cut.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "complete": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "complete"
+    ]
+  ],
+  "parent": "oborokage:alternating_finish"
+}

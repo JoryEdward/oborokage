@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-16",
+  "version": "0.2.0",
+  "instance": "/Users/mac/Library/Application Support/minecraft/versions/26.3-Fabric",
+  "built_jar": "/Users/mac/Documents/Codex/2026-10-14/bilibili-mod-bilibili-copy/OborokageTachi/build/libs/oborokage-tachi-0.2.0.jar",
+  "installed_jar": "/Users/mac/Library/Application Support/minecraft/versions/26.3-Fabric/mods/oborokage-tachi-0.2.0.jar",
+  "sha256": "1a44061633bd8febcc41a46b99c528a40e9698e181ca7c1529d076f758716960",
+  "tested_copies": {
+    "/Users/mac/Documents/Codex/2026-10-14/bilibili-mod-bilibili-copy/OborokageTachi/build/verification-expansion-server/mods/oborokage-tachi-0.2.0.jar": "1a44061633bd8febcc41a46b99c528a40e9698e181ca7c1529d076f758716960",
+    "/Users/mac/Documents/Codex/2026-10-14/bilibili-mod-bilibili-copy/OborokageTachi/build/verification-expansion-client-fullpack/mods/oborokage-tachi-0.2.0.jar": "1a44061633bd8febcc41a46b99c528a40e9698e181ca7c1529d076f758716960",
+    "/Users/mac/Documents/Codex/2026-10-14/bilibili-mod-bilibili-copy/OborokageTachi/build/verification-network/server/mods/oborokage-tachi-0.2.0.jar": "1a44061633bd8febcc41a46b99c528a40e9698e181ca7c1529d076f758716960",
+    "/Users/mac/Documents/Codex/2026-10-14/bilibili-mod-bilibili-copy/OborokageTachi/build/verification-network/actor/mods/oborokage-tachi-0.2.0.jar": "1a44061633bd8febcc41a46b99c528a40e9698e181ca7c1529d076f758716960",
+    "/Users/mac/Documents/Codex/2026-10-14/bilibili-mod-bilibili-copy/OborokageTachi/build/verification-network/observer/mods/oborokage-tachi-0.2.0.jar": "1a44061633bd8febcc41a46b99c528a40e9698e181ca7c1529d076f758716960",
+    "/Users/mac/Documents/Codex/2026-10-14/bilibili-mod-bilibili-copy/OborokageTachi/build/verification-recipebook/mods/oborokage-tachi-0.2.0.jar": "1a44061633bd8febcc41a46b99c528a40e9698e181ca7c1529d076f758716960"
+  },
+  "installed_sha256": "1a44061633bd8febcc41a46b99c528a40e9698e181ca7c1529d076f758716960",
+  "old_jar_backup": "/Users/mac/Documents/Codex/2026-10-14/bilibili-mod-bilibili-copy/OborokageTachi/backups/release-20261016/oborokage-tachi-0.1.0.jar",
+  "old_sha256": "89cedb5b992e0ec520e7cb72edbbb487fba0ae177b3bac083c8b5c1abf5b4ed4",
+  "enabled_oborokage_jars": [
+    "oborokage-tachi-0.2.0.jar"
+  ],
+  "other_mod_jars_unchanged": 35,
+  "protected_files_unchanged": 279,
+  "protected_manifest": "/Users/mac/Documents/Codex/2026-10-14/bilibili-mod-bilibili-copy/OborokageTachi/backups/release-20261016/protected-before-install.json",
+  "user_worlds_opened": 0,
+  "final_checks_passed": 117,
+  "final_checks_failed": 0,
+  "water_bucket_bow_sha256": "150b47b434f6b51fcba64d9ba4ce0436c531279c234d2d78126156d6436640a2"
+}
