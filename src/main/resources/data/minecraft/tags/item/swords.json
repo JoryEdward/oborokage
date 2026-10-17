@@ -2,6 +2,9 @@
   "replace": false,
   "values": [
     "oborokage:tachi",
-    "oborokage:wakizashi"
+    "oborokage:wakizashi",
+    "oborokage:raikiri",
+    "oborokage:frostmoon",
+    "oborokage:voidstring"
   ]
 }

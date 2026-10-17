@@ -1,0 +1,28 @@
+{
+  "parent": "oborokage:first_moon",
+  "display": {
+    "icon": {
+      "id": "oborokage:voidstring"
+    },
+    "title": {
+      "translate": "advancement.oborokage.far_bank.title"
+    },
+    "description": {
+      "translate": "advancement.oborokage.far_bank.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "complete": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "complete"
+    ]
+  ]
+}

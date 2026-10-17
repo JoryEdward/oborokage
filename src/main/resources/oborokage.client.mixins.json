@@ -1,7 +1,8 @@
 {
   "required": true,
-  "package": "dev.codex.oborokage.client.mixin",
+  "package": "oborokage.client.mixin",
   "compatibilityLevel": "JAVA_25",
+  "plugin": "oborokage.client.mixin.OborokageClientMixinPlugin",
   "client": [
     "HandsMixin",
     "CameraMixin",

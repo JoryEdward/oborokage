@@ -1,0 +1,4 @@
+PASS Observer receives ordered remote combo and ultimate actions
+PASS Observer renders remote dual arm animation
+PASS Observer camera is never taken over
+PASS Client remains connected after dual actions

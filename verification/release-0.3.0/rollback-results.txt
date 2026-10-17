@@ -1,0 +1,3 @@
+seed 1 oborokage:tachi | 1 oborokage:wakizashi | 1 oborokage:raikiri
+old 1 oborokage:tachi | 0 minecraft:air | 0 minecraft:air
+new 1 oborokage:tachi | 0 minecraft:air | 0 minecraft:air

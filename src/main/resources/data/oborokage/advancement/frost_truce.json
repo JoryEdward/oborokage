@@ -1,0 +1,28 @@
+{
+  "parent": "oborokage:first_moon",
+  "display": {
+    "icon": {
+      "id": "oborokage:frostmoon"
+    },
+    "title": {
+      "translate": "advancement.oborokage.frost_truce.title"
+    },
+    "description": {
+      "translate": "advancement.oborokage.frost_truce.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "complete": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "complete"
+    ]
+  ]
+}

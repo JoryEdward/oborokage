@@ -1,11 +1,14 @@
 """Focused real-client check of native recipe-book unlocks; no personal worlds used."""
 from pathlib import Path
-import json, shutil, subprocess, zipfile, uuid
+import json, shutil, subprocess, zipfile, uuid, os
 
 ROOT = Path(__file__).resolve().parents[1]
 MC = Path.home() / 'Library/Application Support/minecraft'
 INSTANCE = MC / 'versions/26.3-Fabric'
 JAVA = Path.home() / 'Library/Application Support/hmcl/java/macos-arm64/mojang-java-runtime-epsilon/jre.bundle/Contents/Home/bin'
+MC=Path(os.environ.get('MINECRAFT_HOME',str(MC)))
+INSTANCE=Path(os.environ.get('MINECRAFT_INSTANCE',str(INSTANCE)))
+JAVA=Path(os.environ.get('JAVA_HOME',str(JAVA.parent)))/'bin'
 BUILD = ROOT / 'build'
 RUN = BUILD / 'verification-recipebook'
 MODS = RUN / 'mods'
@@ -13,8 +16,8 @@ CLASSES = BUILD / 'checks-recipebook'
 MODS.mkdir(parents=True, exist_ok=True)
 CLASSES.mkdir(exist_ok=True)
 cp = (BUILD / 'verification-classpath.txt').read_text()
-jar = BUILD / 'libs/oborokage-tachi-0.2.0.jar'
-source = ROOT / 'verification/src/dev/codex/oborokage/check/RecipeBookChecks.java'
+jar = BUILD / 'libs/oborokage-tachi-0.3.0.jar'
+source = ROOT / 'verification/src/oborokage/check/RecipeBookChecks.java'
 subprocess.run([str(JAVA / 'javac'), '-proc:none', '--release', '25', '-cp', cp + ':' + str(jar), '-d', str(CLASSES), str(source)], check=True)
 for old in MODS.glob('*.jar'):
     old.unlink()
@@ -27,7 +30,7 @@ shutil.copy2(jar, MODS / jar.name)
 with zipfile.ZipFile(MODS / 'oborokage-recipebook-checks.jar', 'w') as z:
     for p in CLASSES.rglob('*.class'):
         z.write(p, p.relative_to(CLASSES))
-    z.writestr('fabric.mod.json', json.dumps({'schemaVersion': 1, 'id': 'oborokage_recipebook_checks', 'version': '1', 'environment': 'client', 'entrypoints': {'client': ['dev.codex.oborokage.check.RecipeBookChecks']}}))
+    z.writestr('fabric.mod.json', json.dumps({'schemaVersion': 1, 'id': 'oborokage_recipebook_checks', 'version': '1', 'environment': 'client', 'entrypoints': {'client': ['oborokage.check.RecipeBookChecks']}}))
 world = RUN / 'saves/temporary-recipebook-world'
 # Singleplayer level.dat can restore the previous local player's inventory even
 # with a new UUID. Recreate only this generated test world for a clean inventory.

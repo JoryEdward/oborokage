@@ -47,3 +47,16 @@ java {
 tasks.named('jar') {
     from('LICENSE')
 }
+
+// Pinned formatter, kept outside the release JAR. Java 25 is the supported toolchain.
+['formatJava', 'formatJavaCheck'].each { taskName ->
+    tasks.register(taskName, JavaExec) {
+        javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
+        classpath = files('tools/google-java-format-1.29.0-all-deps.jar')
+        mainClass = 'com.google.googlejavaformat.java.Main'
+        jvmArgs = ['api','file','parser','tree','util','code'].collect { '--add-exports=jdk.compiler/com.sun.tools.javac.' + it + '=ALL-UNNAMED' }
+        args = (taskName == 'formatJava' ? ['--replace'] : ['--dry-run', '--set-exit-if-changed']) +
+               fileTree('src') { include '**/*.java' }.files.collect { it.path } +
+               fileTree('verification/src') { include '**/*.java' }.files.collect { it.path }
+    }
+}

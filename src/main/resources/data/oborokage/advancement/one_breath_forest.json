@@ -1,0 +1,28 @@
+{
+  "parent": "oborokage:first_moon",
+  "display": {
+    "icon": {
+      "id": "oborokage:tachi"
+    },
+    "title": {
+      "translate": "advancement.oborokage.one_breath_forest.title"
+    },
+    "description": {
+      "translate": "advancement.oborokage.one_breath_forest.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "complete": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "complete"
+    ]
+  ]
+}

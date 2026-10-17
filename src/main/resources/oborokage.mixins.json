@@ -1,1 +1,15 @@
-{"required":true,"package":"dev.codex.oborokage.mixin","compatibilityLevel":"JAVA_25","mixins":["GuardDamageMixin"],"injectors":{"defaultRequire":1}}
+{
+  "required": true,
+  "package": "oborokage.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+    "GuardDamageMixin",
+    "LivingDamageAccess",
+    "ArrowGuardMixin",
+    "AdvancementChatMixin",
+    "TerrainToolMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

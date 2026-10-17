@@ -1,0 +1,28 @@
+{
+  "parent": "oborokage:first_moon",
+  "display": {
+    "icon": {
+      "id": "oborokage:raikiri"
+    },
+    "title": {
+      "translate": "advancement.oborokage.five_paths.title"
+    },
+    "description": {
+      "translate": "advancement.oborokage.five_paths.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "complete": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "complete"
+    ]
+  ]
+}

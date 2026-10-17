@@ -1,0 +1,30 @@
+{
+  "sha256": "64e8c1430624ece2ed4dcb43a6520566df9cabba7c29cbffcd66651c8f3f507e",
+  "tested_artifact_sha256": {
+    "server": "64e8c1430624ece2ed4dcb43a6520566df9cabba7c29cbffcd66651c8f3f507e",
+    "client-shader-low-budget": "64e8c1430624ece2ed4dcb43a6520566df9cabba7c29cbffcd66651c8f3f507e",
+    "recipebook": "64e8c1430624ece2ed4dcb43a6520566df9cabba7c29cbffcd66651c8f3f507e",
+    "network-server": "64e8c1430624ece2ed4dcb43a6520566df9cabba7c29cbffcd66651c8f3f507e",
+    "network-actor": "64e8c1430624ece2ed4dcb43a6520566df9cabba7c29cbffcd66651c8f3f507e",
+    "network-observer": "64e8c1430624ece2ed4dcb43a6520566df9cabba7c29cbffcd66651c8f3f507e",
+    "native-gametest": "64e8c1430624ece2ed4dcb43a6520566df9cabba7c29cbffcd66651c8f3f507e"
+  },
+  "recorded_pass_counts": {
+    "server": 105,
+    "client-shader-low-budget": 30,
+    "recipebook": 6,
+    "network-server": 2,
+    "network-actor": 6,
+    "network-observer": 4,
+    "rollback": 0,
+    "native-gametest": 2
+  },
+  "native_game_tests_exclude_minecraft_always_pass": true,
+  "release_jar_has_no_test_classes": true,
+  "finisher_exempt_default_empty": true,
+  "shaderpack": "ComplementaryReimagined_r5.9.3.zip",
+  "shader_budget": 512,
+  "injected_network_one_way_ms": 100,
+  "manual_human_acceptance": false,
+  "long_duration_large_multiplayer_test": false
+}
