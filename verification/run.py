@@ -6,7 +6,9 @@ mode=sys.argv[1] if len(sys.argv)>1 else 'server'
 shader='--shader' in sys.argv
 lowfx='--lowfx' in sys.argv
 fullpack='--fullpack' in sys.argv or shader
-client_class='FocusedClientChecks' if '--focused' in sys.argv else 'ClientChecks'
+baseline='--baseline' in sys.argv
+maintenance='--maintenance' in sys.argv
+client_class='BaselineAuditChecks' if baseline else 'MaintenanceClientChecks' if maintenance else 'FocusedClientChecks' if '--focused' in sys.argv else 'ClientChecks'
 b=ROOT/'build';deps=b/'verification-deps';deps.mkdir(exist_ok=True)
 cp=[str(INSTANCE/'26.3-Fabric.jar')]
 meta=json.loads((INSTANCE/'26.3-Fabric.json').read_text())
@@ -24,15 +26,16 @@ with zipfile.ZipFile(api) as z:
    if not p.exists():p.write_bytes(z.read(name))
    cp.append(str(p))
 cp=':'.join(dict.fromkeys(cp));(b/'verification-classpath.txt').write_text(cp)
-jar=ROOT/'build/libs/oborokage-tachi-0.3.0.jar';run=b/('verification-expansion-'+mode+('-fullpack' if fullpack else '')+('-shader' if shader else '')+('-lowfx' if lowfx else ''));run.mkdir(exist_ok=True);mods=run/'mods';mods.mkdir(exist_ok=True)
+jar=ROOT/('backups/gemini-baseline/oborokage-tachi-0.3.0.jar' if baseline else 'build/libs/oborokage-tachi-0.3.1.jar');run=b/('verification-expansion-'+mode+('-fullpack' if fullpack else '')+('-shader' if shader else '')+('-lowfx' if lowfx else '')+('-baseline' if baseline else '')+('-maintenance' if maintenance else ''));run.mkdir(exist_ok=True);mods=run/'mods';mods.mkdir(exist_ok=True)
+(run/(mode+'-results.txt')).unlink(missing_ok=True)
 classes=b/('checks-'+mode);shutil.rmtree(classes,ignore_errors=True);classes.mkdir(exist_ok=True)
 source=ROOT/'verification/src/oborokage/check'/('ServerChecks.java' if mode=='server' else client_class+'.java')
-subprocess.run([str(JAVA/'javac'),'-proc:none','--release','25','-cp',cp+':'+str(jar),'-d',str(classes),str(source)]+([str(source.parent/'ReviewChecks.java')] if mode=='server' else [])+([str(source.parent/'ClientChecks.java'),str(source.parent/'FocusedChecks.java'),str(source.parent/'RenderObservations.java')]+[str(p) for p in (source.parent/'mixin').glob('*.java')] if mode=='client' else []),check=True)
+subprocess.run([str(JAVA/'javac'),'-proc:none','--release','25','-cp',cp+':'+str(jar),'-d',str(classes),str(source)]+([str(source.parent/'ReviewChecks.java')] if mode=='server' else [])+([str(source.parent/'ClientChecks.java'),str(source.parent/'FocusedChecks.java'),str(source.parent/'RenderObservations.java')]+[str(p) for p in (source.parent/'mixin').glob('*.java') if maintenance or p.stem in ['ObservedPose','ObservedEvent','ObservedCut','ObservedTerrain']] + ([str(source.parent/'MaintenanceObservations.java')] if maintenance else []) if mode=='client' else []),check=True)
 with zipfile.ZipFile(mods/'oborokage-checks.jar','w') as z:
  for p in classes.rglob('*.class'):z.write(p,p.relative_to(classes))
  z.writestr('fabric.mod.json',json.dumps({'schemaVersion':1,'id':'oborokage_checks','version':'1','environment':mode,'mixins':(['observations.mixins.json'] if mode=='client' else []),'entrypoints':{'main' if mode=='server' else 'client':['oborokage.check.'+('ServerChecks' if mode=='server' else client_class)]}}))
  if mode=='server':z.writestr('data/oborokage/tags/entity_type/finisher_exempt.json',json.dumps({'replace':False,'values':['minecraft:armor_stand']}))
- if mode=='client':z.writestr('observations.mixins.json',json.dumps({'required':True,'package':'oborokage.check.mixin','compatibilityLevel':'JAVA_25','client':['ObservedPose','ObservedEvent'],'mixins':['ObservedCut','ObservedTerrain']}))
+ if mode=='client':z.writestr('observations.mixins.json',json.dumps({'required':True,'package':'oborokage.check.mixin','compatibilityLevel':'JAVA_25','client':['ObservedPose','ObservedEvent']+(['ObservedMaintenance','ObservedCharge','ObservedHud','ObservedChat','ObservedSinglePose'] if maintenance else []),'mixins':['ObservedCut','ObservedTerrain']+(['ObservedSound','ObservedBroadcast'] if maintenance else [])}))
 if fullpack:
  for p in (INSTANCE/'mods').glob('*.jar'):
   if not p.name.startswith('oborokage-tachi-'):shutil.copy2(p,mods/p.name)
@@ -52,6 +55,11 @@ else:
  if lowfx:
   config=run/'config';config.mkdir(exist_ok=True);(config/'oborokage-client.properties').write_text('trailSegments=64\ntrailVertexBudget=512\ntrailMaxPlayers=1\ntrailDistance=16\n')
  (run/'options.txt').write_text('lang:zh_cn\nguiScale:2\nrenderDistance:6\nsimulationDistance:5\nmaxFps:60\nenableVsync:true\npauseOnLostFocus:false\nshowAutosaveIndicator:false\n')
- cmd=[str(JAVA/'java'),'-XstartOnFirstThread','-Xmx2200M','--enable-native-access=ALL-UNNAMED','--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED','-cp',cp,'net.fabricmc.loader.impl.launch.knot.KnotClient','--username','TachiArtist','--version','26.3','--gameDir',str(run),'--assetsDir',str(MC/'assets'),'--assetIndex','34','--uuid','10eae1ce-0d44-443e-9842-ea6420126711','--accessToken','0','--userType','legacy','--width','1280','--height','800','--quickPlaySingleplayer','temporary-tachi-world']
+ cmd=[str(JAVA/'java'),'-Doborokage.qa.start='+next((a.split('=',1)[1] for a in sys.argv if a.startswith('--from=')),'0'),'-XstartOnFirstThread','-Xmx2200M','--enable-native-access=ALL-UNNAMED','--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED','-cp',cp,'net.fabricmc.loader.impl.launch.knot.KnotClient','--username','TachiArtist','--version','26.3','--gameDir',str(run),'--assetsDir',str(MC/'assets'),'--assetIndex','34','--uuid','10eae1ce-0d44-443e-9842-ea6420126711','--accessToken','0','--userType','legacy','--width','1280','--height','800','--quickPlaySingleplayer','temporary-tachi-world']
 print('Isolated run:',run,flush=True)
-subprocess.run(cmd,cwd=run)
+result=subprocess.run(cmd,cwd=run)
+result_file=run/(mode+'-results.txt')
+assert result.returncode == 0, f'Game process exited {result.returncode}'
+assert result_file.exists(), f'Results missing: {result_file}'
+assert 'FAIL ' not in result_file.read_text(), result_file.read_text()
+print('Verified result records:', result_file.read_text().count('PASS '), flush=True)

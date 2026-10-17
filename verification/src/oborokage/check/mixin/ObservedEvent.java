@@ -12,5 +12,6 @@ public class ObservedEvent {
   @Inject(method = "receive", at = @At("HEAD"))
   private static void receive(oborokage.ActionEvent e, CallbackInfo ci) {
     RenderObservations.events++;
+    if (e.kind() == oborokage.ActionEvent.CANCEL) RenderObservations.cancels++;
   }
 }

@@ -1,0 +1,10 @@
+{
+  "LegacyIaido.java": {
+    "sha256": "1f67a5aec2ca0000aaedea526f9d2f5424c957af3dbe707878207fe4ad58e6ee",
+    "same_as_actual_gemini_source": true
+  },
+  "TachiItem.java": {
+    "sha256": "564bb48fc7b803c80e31c855bb8b8eeadad8501df1f585cae765ae6f1e3ef6ce",
+    "same_as_actual_gemini_source": true
+  }
+}

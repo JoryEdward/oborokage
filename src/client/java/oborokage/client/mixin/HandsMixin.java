@@ -34,7 +34,7 @@ public class HandsMixin {
     oborokage.client.DualClient.itemPose(pose, hand, pt);
     var p = Minecraft.getInstance().player;
     if (p != null && p.isUsingItem() && p.getUsedItemHand() == hand) {
-      float q = Math.min(1, p.getTicksUsingItem() / 40f);
+      float q = Math.min(1, p.getTicksUsingItem() / (float) OborokageClient.fullChargeTicks(p));
       pose.translate(-.18 * q, -.13 * q, .08 * q);
       pose.rotate(Axis.ZP.rotationDegrees(-12 * q));
     }

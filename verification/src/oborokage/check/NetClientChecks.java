@@ -10,7 +10,8 @@ import oborokage.client.*;
 
 public final class NetClientChecks implements ClientModInitializer {
   int ticks, ready;
-  boolean joined, finished, sawMain, sawUltimate;
+  boolean joined, finished, sawMain, sawUltimate, sawCounter;
+  int idleCancels;
   List<String> results = new ArrayList<>();
   boolean actor = Boolean.getBoolean("oborokage.qa.actor");
 
@@ -24,6 +25,8 @@ public final class NetClientChecks implements ClientModInitializer {
   }
 
   public void onInitializeClient() {
+    net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.serverboundPlay()
+        .register(NetSignal.TYPE, NetSignal.CODEC);
     ClientTickEvents.END_CLIENT_TICK.register(
         c -> {
           if (finished) return;
@@ -48,6 +51,7 @@ public final class NetClientChecks implements ClientModInitializer {
     for (var scene : DualClient.scenes.values())
       if (scene.event.actor() != c.player.getId()) {
         if (scene.event.move() == Move.MAIN) sawMain = true;
+        if (scene.event.move() == Move.COUNTER) sawCounter = true;
         if (scene.event.move() == Move.ULTIMATE) sawUltimate = true;
       }
     if (actor) {
@@ -82,7 +86,40 @@ public final class NetClientChecks implements ClientModInitializer {
             "Observer camera is never taken over");
       }
     }
-    if (ready == 180) {
+    if (ready == 185) idleCancels = RenderObservations.cancels;
+    if (actor && ready == 190) {
+      c.options.keyUse.setDown(true);
+      c.gameMode.useItem(c.player, net.minecraft.world.InteractionHand.MAIN_HAND);
+    }
+    if (actor && ready == 191) {
+      c.options.keyUse.setDown(false);
+      c.gameMode.releaseUsingItem(c.player);
+    }
+    if (ready == 202)
+      check(
+          RenderObservations.cancels == idleCancels,
+          "Idle right-click sends no stale cancel to " + (actor ? "owner" : "observer"));
+    if (actor && ready == 210) {
+      DualClient.request(1);
+      net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new NetSignal(1));
+    }
+    if (actor && ready == 217) {
+      DualClient.request(0);
+      var scene = DualClient.scene(c.player.getId());
+      check(
+          scene != null && scene.predicted && scene.event.move() == Move.COUNTER,
+          "Delayed parry predicts counter immediately before acknowledgement");
+    }
+    if (actor && ready == 224) {
+      var scene = DualClient.scene(c.player.getId());
+      check(
+          scene != null && !scene.predicted && scene.event.move() == Move.COUNTER,
+          "Server acknowledgement preserves the predicted counter");
+      shot(c, "network-owner-counter");
+    }
+    if (!actor && ready == 240)
+      check(sawCounter, "Observer receives and renders the real counter after idle cancel");
+    if (ready == 250) {
       check(c.getConnection() != null, "Client remains connected after dual actions");
       finish(c);
     }

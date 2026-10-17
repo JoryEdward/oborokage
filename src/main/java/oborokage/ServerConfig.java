@@ -10,6 +10,7 @@ public final class ServerConfig {
     public double terrainReach = 5, terrainMaxHardness = 5;
     public boolean allowPlayerDamage = false;
     public boolean protectPets = true;
+    public boolean protectOthersPets = false;
     public boolean protectAllies = true;
     public boolean protectVillagers = true;
     public boolean protectGolems = true;
@@ -49,6 +50,7 @@ public final class ServerConfig {
             "# Oborokage settings. Server: /reload applies changes. Client: restart client.\n"
                 + "allowPlayerDamage=false\n"
                 + "protectPets=true\n"
+                + "protectOthersPets=false\n"
                 + "protectAllies=true\n"
                 + "protectVillagers=true\n"
                 + "protectGolems=true\n"
@@ -81,6 +83,7 @@ public final class ServerConfig {
     Values next = new Values();
     next.allowPlayerDamage = ConfigIO.bool(p, "allowPlayerDamage", next.allowPlayerDamage);
     next.protectPets = ConfigIO.bool(p, "protectPets", next.protectPets);
+    next.protectOthersPets = ConfigIO.bool(p, "protectOthersPets", next.protectOthersPets);
     next.protectAllies = ConfigIO.bool(p, "protectAllies", next.protectAllies);
     next.protectVillagers = ConfigIO.bool(p, "protectVillagers", next.protectVillagers);
     next.protectGolems = ConfigIO.bool(p, "protectGolems", next.protectGolems);

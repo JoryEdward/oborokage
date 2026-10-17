@@ -1,2 +1,0 @@
-PASS Two independent clients connected to local dedicated server
-PASS Networked dual ultimate executes 1024 HP hostile

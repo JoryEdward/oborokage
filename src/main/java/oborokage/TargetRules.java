@@ -18,10 +18,10 @@ public final class TargetRules {
       return Oborokage.allowPlayerDamage && !q.getAbilities().instabuild && p.canHarmPlayer(q);
     var c = ServerConfig.get();
     if (c.protectAllies && p.isAlliedTo(e)) return false;
-    if (c.protectPets
-        && e instanceof OwnableEntity pet
-        && pet.getOwnerReference() != null
-        && pet.getOwnerReference().getUUID().equals(p.getUUID())) return false;
+    if (e instanceof OwnableEntity pet && pet.getOwnerReference() != null) {
+      boolean own = pet.getOwnerReference().getUUID().equals(p.getUUID());
+      if (own ? c.protectPets : c.protectOthersPets) return false;
+    }
     if (c.protectVillagers && e instanceof AbstractVillager) return false;
     return !c.protectGolems || !(e instanceof IronGolem);
   }

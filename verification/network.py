@@ -2,7 +2,7 @@ from pathlib import Path
 import subprocess,json,zipfile,shutil,socket,time,uuid,os,sys
 R=Path(__file__).resolve().parents[1]; B=R/'build'; MC=Path.home()/'Library/Application Support/minecraft'; J=Path.home()/'Library/Application Support/hmcl/java/macos-arm64/mojang-java-runtime-epsilon/jre.bundle/Contents/Home/bin'
 MC=Path(os.environ.get('MINECRAFT_HOME',str(MC)));J=Path(os.environ.get('JAVA_HOME',str(J.parent)))/'bin'
-CP=(B/'verification-classpath.txt').read_text(); MOD=B/'libs/oborokage-tachi-0.3.0.jar'; API=MC/'versions/26.3-Fabric/mods/fabric-api-0.162.0+26.3.jar'
+CP=(B/'verification-classpath.txt').read_text(); MOD=B/'libs/oborokage-tachi-0.3.1.jar'; API=MC/'versions/26.3-Fabric/mods/fabric-api-0.162.0+26.3.jar'
 with socket.socket() as sock:sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
 delayed='--latency' in sys.argv
 BASE=B/('verification-network-latency' if delayed else 'verification-network');BASE.mkdir(exist_ok=True)
@@ -12,7 +12,7 @@ def prepare(role,source,env):
  if run.exists():shutil.rmtree(run)
  mods=run/'mods';mods.mkdir(parents=True)
  classes=B/('net-checks-'+role);classes.mkdir(exist_ok=True)
- subprocess.run([str(J/'javac'),'-proc:none','--release','25','-cp',CP+':'+str(MOD),'-d',str(classes),str(R/'verification/src/oborokage/check'/source)]+([str(R/'verification/src/oborokage/check/RenderObservations.java')]+[str(p) for p in (R/'verification/src/oborokage/check/mixin').glob('*.java')] if env=='client' else []),check=True)
+ subprocess.run([str(J/'javac'),'-proc:none','--release','25','-cp',CP+':'+str(MOD),'-d',str(classes),str(R/'verification/src/oborokage/check'/source),str(R/'verification/src/oborokage/check/NetSignal.java')]+([str(R/'verification/src/oborokage/check/RenderObservations.java')]+[str(p) for p in (R/'verification/src/oborokage/check/mixin').glob('*.java') if p.stem in ['ObservedPose','ObservedEvent']] if env=='client' else []),check=True)
  with zipfile.ZipFile(mods/'network-checks.jar','w') as z:
   for p in classes.rglob('*.class'):z.write(p,p.relative_to(classes))
   cls=source.removesuffix('.java');z.writestr('fabric.mod.json',json.dumps({'schemaVersion':1,'id':'oborokage_net_checks','version':'1','environment':env,'mixins':(['observations.mixins.json'] if env=='client' else []),'entrypoints':{'main' if env=='server' else 'client':['oborokage.check.'+cls]}}))

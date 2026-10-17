@@ -170,13 +170,18 @@ public final class TerrainCut {
       if (p.isRemoved()
           || !p.isAlive()
           || p.level() != j.level
-          || p.getItemInHand(j.hand) != j.blade
+          || !validBlade(j)
           || !ServerConfig.get().terrainCutEnabled
           || p.distanceToSqr(Vec3.atCenterOf(j.origin)) > 144) {
         it.remove();
         continue;
       }
       for (int n = 0; n < ServerConfig.get().terrainBlocksPerTick && !j.queue.isEmpty(); n++) {
+        // Native mining may empty the same ItemStack object midway through this batch.
+        if (!validBlade(j)) {
+          j.queue.clear();
+          break;
+        }
         BlockPos pos = j.queue.removeFirst();
         if (!eligible(p, j.level, pos, j.hardness)) continue;
         // Fabric BEFORE/AFTER break callbacks, adventure rules and actual drops run here.
@@ -197,6 +202,12 @@ public final class TerrainCut {
       }
       if (j.queue.isEmpty()) it.remove();
     }
+  }
+
+  private static boolean validBlade(Job job) {
+    return !job.blade.isEmpty()
+        && Oborokage.mainBlade(job.blade)
+        && job.owner.getItemInHand(job.hand) == job.blade;
   }
 
   public static void clear() {

@@ -39,7 +39,7 @@ public final class StyleBladeItem extends TachiItem {
 
   @Override
   public void onUseTick(Level l, LivingEntity e, ItemStack s, int remaining) {
-    if (style != Style.STORM) {
+    if (style != Style.STORM || e.isShiftKeyDown()) {
       super.onUseTick(l, e, s, remaining);
       return;
     }

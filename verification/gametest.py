@@ -2,7 +2,7 @@ from pathlib import Path
 import os,json,subprocess,zipfile,shutil
 R=Path(__file__).resolve().parents[1];B=R/'build';MC=Path(os.environ.get('MINECRAFT_HOME',str(Path.home()/'Library/Application Support/minecraft')));J=Path(os.environ.get('JAVA_HOME',str(Path.home()/'Library/Application Support/hmcl/java/macos-arm64/mojang-java-runtime-epsilon/jre.bundle/Contents/Home')))/'bin'
 module=next((Path.home()/'.gradle/caches/modules-2/files-2.1/net.fabricmc.fabric-api/fabric-gametest-api-v1').rglob('*.jar'))
-cp=(B/'verification-classpath.txt').read_text()+':'+str(module);jar=B/'libs/oborokage-tachi-0.3.0.jar';run=B/'verification-gametest';mods=run/'mods';mods.mkdir(parents=True,exist_ok=True);classes=B/'gametest-classes';classes.mkdir(exist_ok=True)
+cp=(B/'verification-classpath.txt').read_text()+':'+str(module);jar=B/'libs/oborokage-tachi-0.3.1.jar';run=B/'verification-gametest';mods=run/'mods';mods.mkdir(parents=True,exist_ok=True);classes=B/'gametest-classes';classes.mkdir(exist_ok=True)
 subprocess.run([str(J/'javac'),'-proc:none','--release','25','-cp',cp+':'+str(jar),'-d',str(classes),str(R/'verification/src/oborokage/check/NativeGameTests.java')],check=True)
 with zipfile.ZipFile(mods/'oborokage-native-tests.jar','w') as z:
  for p in classes.rglob('*.class'):z.write(p,p.relative_to(classes))

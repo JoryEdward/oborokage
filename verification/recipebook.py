@@ -16,7 +16,7 @@ CLASSES = BUILD / 'checks-recipebook'
 MODS.mkdir(parents=True, exist_ok=True)
 CLASSES.mkdir(exist_ok=True)
 cp = (BUILD / 'verification-classpath.txt').read_text()
-jar = BUILD / 'libs/oborokage-tachi-0.3.0.jar'
+jar = BUILD / 'libs/oborokage-tachi-0.3.1.jar'
 source = ROOT / 'verification/src/oborokage/check/RecipeBookChecks.java'
 subprocess.run([str(JAVA / 'javac'), '-proc:none', '--release', '25', '-cp', cp + ':' + str(jar), '-d', str(CLASSES), str(source)], check=True)
 for old in MODS.glob('*.jar'):

@@ -2,13 +2,13 @@
   "required": true,
   "package": "oborokage.client.mixin",
   "compatibilityLevel": "JAVA_25",
-  "plugin": "oborokage.client.mixin.OborokageClientMixinPlugin",
   "client": [
     "HandsMixin",
     "CameraMixin",
     "IaidoPoseMixin",
     "SheathModelMixin",
-    "DualAttackMixin"
+    "DualAttackMixin",
+    "ChargeModelMixin"
   ],
   "injectors": {
     "defaultRequire": 1

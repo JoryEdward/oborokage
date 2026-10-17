@@ -1,0 +1,647 @@
+[19:55:05] [main/INFO]: Loading Minecraft 26.3 with Fabric Loader 0.19.5
+[19:55:05] [main/INFO]: Mappings not present!
+[19:55:05] [main/INFO]: Loading 107 mods:
+	- appleskin 3.0.10+mc26.3
+	- asyncparticles 26.3.2.0-alpha.3
+	   \-- mixinsquared 0.3.7-beta.3
+	- badoptimizations 2.4.1
+	- betterblockentities 1.3.9+mc26.3
+	- entityculling 1.11.3
+	   |-- transition 1.0.26
+	   \-- trender 1.0.17
+	- experienceguard 0.1.0+26.3
+	- fabric-api 0.162.0+26.3
+	   |-- fabric-advancement-api-v1 1.0.0+38c7a2d55d
+	   |-- fabric-api-base 2.0.6+fcdff87f5d
+	   |-- fabric-api-lookup-api-v1 2.0.24+3434d6d95d
+	   |-- fabric-biome-api-v1 20.1.0+c6aa69a85d
+	   |-- fabric-block-api-v1 3.1.0+0ae6f9115d
+	   |-- fabric-block-getter-api-v2 2.0.9+3434d6d95d
+	   |-- fabric-command-api-v2 3.1.2+fcdff87f5d
+	   |-- fabric-content-registries-v0 15.0.4+74ed1ea55d
+	   |-- fabric-convention-tags-v2 4.10.3+6b5b47fd5d
+	   |-- fabric-crash-report-info-v1 1.0.7+fcdff87f5d
+	   |-- fabric-creative-tab-api-v1 5.0.21+fcdff87f5d
+	   |-- fabric-data-attachment-api-v1 2.2.31+b9b88df45d
+	   |-- fabric-data-generation-api-v1 27.3.0+5be2453c5d
+	   |-- fabric-debug-api-v1 1.0.4+3434d6d95d
+	   |-- fabric-dimensions-v1 5.1.19+47f74c985d
+	   |-- fabric-entity-events-v1 6.0.4+3434d6d95d
+	   |-- fabric-events-interaction-v0 5.3.7+b9b88df45d
+	   |-- fabric-game-rule-api-v1 4.0.10+3434d6d95d
+	   |-- fabric-item-api-v1 14.7.0+cf6bc2db5d
+	   |-- fabric-key-mapping-api-v1 2.0.8+3434d6d95d
+	   |-- fabric-lifecycle-events-v1 4.1.9+ffef5f675d
+	   |-- fabric-loot-api-v3 4.0.8+4068fd645d
+	   |-- fabric-menu-api-v1 2.0.28+ed66f0a35d
+	   |-- fabric-message-api-v1 7.0.10+3434d6d95d
+	   |-- fabric-model-loading-api-v1 8.0.35+fcdff87f5d
+	   |-- fabric-networking-api-v1 6.3.9+b9b88df45d
+	   |-- fabric-object-builder-api-v1 24.1.10+3434d6d95d
+	   |-- fabric-particles-v1 5.0.25+3434d6d95d
+	   |-- fabric-permission-api-v1 1.0.8+fcdff87f5d
+	   |-- fabric-recipe-api-v1 10.0.9+b9b88df45d
+	   |-- fabric-registry-sync-v0 8.0.2+1ca9f6365d
+	   |-- fabric-renderer-api-v1 17.0.15+79385d0b5d
+	   |-- fabric-renderer-indigo 9.1.23+b9d63e335d
+	   |-- fabric-rendering-fluids-v1 6.0.6+3434d6d95d
+	   |-- fabric-rendering-v1 27.0.14+901a437c5d
+	   |-- fabric-resource-conditions-api-v1 6.2.0+0d124ae85d
+	   |-- fabric-resource-loader-v0 3.3.26+4fc5413f5d
+	   |-- fabric-resource-loader-v1 3.0.4+ba0d6c0d5d
+	   |-- fabric-screen-api-v1 5.2.4+48607d035d
+	   |-- fabric-serialization-api-v1 2.0.7+74ed1ea55d
+	   |-- fabric-sound-api-v1 2.0.7+3434d6d95d
+	   |-- fabric-tag-api-v1 2.1.10+fcdff87f5d
+	   |-- fabric-transfer-api-v1 8.0.25+fcdff87f5d
+	   \-- fabric-transitive-access-wideners-v1 8.1.16+52268a0e5d
+	- fabricloader 0.19.5
+	   \-- mixinextras 0.5.5
+	- fadeless 2.0.9-26.3
+	   \-- midnightlib 1.9.3
+	- ferritecore 9.0.0
+	- fusion 1.3.16
+	- immediatelyfast 1.17.1+26.3
+	- iris 1.11.7+mc26.3
+	   |-- io_github_douira_glsl-transformer 3.0.0-pre3
+	   |-- org_anarres_jcpp 1.4.14
+	   \-- org_antlr_antlr4-runtime 4.13.1
+	- jade 26.3.5+fabric
+	- java 25
+	- jei 31.9.0.58
+	- jeresources 1.11.0.46
+	- krypton 0.3.2
+	   \-- com_velocitypowered_velocity-native 3.4.0-SNAPSHOT
+	- lambdynlights 4.13.0+26.3
+	   |-- lambdynlights_api 4.13.0+26.3
+	   |    |-- yumi_commons_collections 2.0.0
+	   |    |-- yumi_commons_core 2.0.0
+	   |    \-- yumi_commons_event 2.0.0
+	   |-- pride 1.8.0+26.3
+	   |-- spruceui 12.0.0+26.3
+	   \-- yumi_mc_core 1.1.3+26.2
+	        |-- yumi_commons_collections 2.0.0
+	        |-- yumi_commons_core 2.0.0
+	        \-- yumi_commons_event 2.0.0
+	- lithium 0.26.2+mc26.3
+	- macfix2 1.0-SNAPSHOT
+	- mezz_config 0.6.8
+	- minecraft 26.3
+	- modernfix 5.27.20-build.2
+	- modmenu 21.0.0
+	   \-- placeholder-api 3.2.0+26.3
+	- moreculling 1.9.0
+	   \-- conditional-mixin 0.6.3
+	- mousetweaks 2.31
+	- oborokage 0.3.1
+	- oborokage_recipebook_checks 1
+	- offline-skins 2.7.0+local-player-only
+	- optileaves 2.0.1
+	- pocketvilla 1.1.1+26.3
+	- sodium 0.9.2+mc26.3
+	- sodium-extra 0.9.4+mc26.3
+	   \-- me_flashyreese_mods_greenlight-api 0.1.0+mc26.3
+	- spark 1.10.187
+	   \-- fabric-permissions-api-v0 0.7.0
+	- torohealth 1.5.2
+	   \-- cloth-config 26.3.158
+	        \-- cloth-basic-math 0.6.1
+	- waterbucketbow 0.4.0
+	- xaerominimap 26.6.0
+	   \-- xaerolib 1.7.17
+	- xaeroworldmap 1.47.0
+	   \-- xaerolib 1.7.17
+	- xray 26.3.0.4
+[19:55:05] [main/INFO]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=file:/Users/mac/Library/Application%20Support/minecraft/libraries/net/fabricmc/sponge-mixin/0.17.4+mixin.0.8.7/sponge-mixin-0.17.4+mixin.0.8.7.jar Service=Knot/Fabric Env=CLIENT
+[19:55:06] [main/INFO]: Config version: 6
+[19:55:06] [main/INFO]: BadOptimizations is generating the config with default values
+[19:55:06] [main/INFO]: Generating config file version 6
+[19:55:06] [main/WARN]: Reference map 'entityculling.refmap.mixins.json' for entityculling.mixins.json could not be read. If this is a development environment you can ignore this message
+[19:55:06] [main/WARN]: Reference map 'iris.refmap.json' for mixins.iris.json could not be read. If this is a development environment you can ignore this message
+[19:55:06] [main/WARN]: Reference map 'iris-fabric.refmap.json' for mixins.iris.fabric.json could not be read. If this is a development environment you can ignore this message
+[19:55:06] [main/WARN]: Reference map 'iris.refmap.json' for mixins.iris.vertexformat.json could not be read. If this is a development environment you can ignore this message
+[19:55:06] [main/WARN]: Reference map 'iris.refmap.json' for mixins.iris.bettermipmaps.json could not be read. If this is a development environment you can ignore this message
+[19:55:06] [main/WARN]: Reference map 'iris.refmap.json' for mixins.iris.compat.sodium.json could not be read. If this is a development environment you can ignore this message
+[19:55:06] [main/WARN]: Reference map 'iris.refmap.json' for mixins.iris.fixes.maxfpscrash.json could not be read. If this is a development environment you can ignore this message
+[19:55:06] [main/INFO]: Loaded configuration file for Lithium: 170 options available, 0 override(s) found.
+[19:55:06] [main/INFO]: Loaded configuration file for ModernFix 5.27.20-build.2: 67 options available, 0 override(s) found
+[19:55:06] [main/INFO]: Applying Nashorn fix
+[19:55:06] [main/INFO]: Configuring Minecraft's max.bg.threads option with 7 threads
+[19:55:06] [main/WARN]: Reference map 'modernfix.refmap.json' for modernfix-fabric.mixins.json could not be read. If this is a development environment you can ignore this message
+[19:55:06] [main/WARN]: Reference map 'modernfix.refmap.json' for modernfix-common.mixins.json could not be read. If this is a development environment you can ignore this message
+[19:55:06] [main/WARN]: Reference map 'mixins.offline_skins.refmap.json' for mixins.offline_skins.json could not be read. If this is a development environment you can ignore this message
+[19:55:06] [main/INFO]: Loaded configuration file for Sodium: 37 options available, 1 override(s) found
+[19:55:06] [main/INFO]: Loaded configuration file for Sodium Extra: 26 options available, 0 override(s) found
+[19:55:06] [main/WARN]: Reference map 'xaerolib.refmap.json' for xaerolib.mixins.json could not be read. If this is a development environment you can ignore this message
+[19:55:06] [main/WARN]: Reference map 'xaeroworldmap.refmap.json' for xaeroworldmap.mixins.json could not be read. If this is a development environment you can ignore this message
+[19:55:07] [main/WARN]: Force-disabling mixin 'features.render.world.sky.LevelRendererMixin' as rule 'mixin.features.render.world.sky' (added by mods [iris]) disables it and children
+[19:55:07] [main/INFO]: Wrapping mixin service for asyncparticles.target-modifier.mixins.json so that we can modify target classes.
+[19:55:07] [main/INFO]: Redirecting IClassBytecodeProvider#getClassNode for fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster.mixin.AsyncParticlesGenerated$fun$_qu_an$_minecraft$_asyncparticles$_client$_mixin$_conditional$_MixinParticles_LockRequired_Tick
+[19:55:07] [main/INFO]: Redirecting IClassBytecodeProvider#getClassNode for fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster.mixin.AsyncParticlesGenerated$fun$_qu_an$_minecraft$_asyncparticles$_client$_mixin$_conditional$_Mixin_ReplaceRandom
+[19:55:07] [main/INFO]: Redirecting IClassBytecodeProvider#getClassNode for fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster.mixin.AsyncParticlesGenerated$fun$_qu_an$_minecraft$_asyncparticles$_client$_mixin$_conditional$_MixinParticles_LockRequired_Extract
+[19:55:07] [main/INFO]: Redirecting IClassBytecodeProvider#getClassNode for fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster.mixin.AsyncParticlesGenerated$fun$_qu_an$_minecraft$_asyncparticles$_client$_mixin$_conditional$_MixinParticles_LockProvider
+[19:55:07] [main/INFO]: Redirecting IClassBytecodeProvider#getClassNode for fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster.mixin.AsyncParticlesGenerated$fun$_qu_an$_minecraft$_asyncparticles$_client$_mixin$_conditional$_MixinParticles_LightCacheNoRefresh
+[19:55:07] [main/INFO]: Redirecting IClassBytecodeProvider#getClassNode for fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster.mixin.AsyncParticlesGenerated$fun$_qu_an$_minecraft$_asyncparticles$_client$_mixin$_conditional$_MixinAsyncTick_AsyncTickableParticleGroup
+[19:55:07] [main/INFO]: Searching for graphics cards...
+[19:55:07] [main/INFO]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.5).
+[19:55:09] [Datafixer Bootstrap #0/INFO]: 307 Datafixer optimizations took 390 milliseconds
+[19:55:10] [main/INFO]: ModernFix reached bootstrap stage (5.440 s after launch)
+[19:55:12] [main/WARN]: Method overwrite conflict for getTemperature in modernfix-common.mixins.json:perf.remove_biome_temperature_cache.BiomeMixin from mod modernfix, previously written by net.caffeinemc.mods.lithium.mixin.world.temperature_cache.BiomeMixin. Skipping method.
+[19:55:14] [main/INFO]: Vanilla bootstrap took 3958 milliseconds
+[19:55:14] [main/INFO]: Completely ignored arguments: [--userType, legacy]
+[19:55:14] [Render thread/INFO]: Environment: Environment[discoveryUrl=https://discovery.minecraftservices.com/minecraft/client, name=PROD]
+[19:55:14] [Render thread/INFO]: Setting user: RecipeBookTest
+[19:55:14] [Render thread/INFO]: Loading Fadeless Fabric
+[19:55:15] [Render thread/INFO]: Compression will use libdeflate (macOS ARM64 / Apple Silicon), encryption will use native (macOS ARM64 / Apple Silicon)
+[19:55:15] [Render thread/INFO]: Pocket Villa 1.1.1 initialized for Minecraft 26.3; durable collection system, no render mixins.
+[19:55:15] [Render thread/INFO]: 水桶弓已就绪。
+[19:55:16] [Render thread/INFO]: Building config cache from user defined config file...
+[19:55:16] [Render thread/INFO]: Collecting API Entrypoint's...
+[19:55:16] [Render thread/INFO]: Registering alt renderers via each collected entrypoint...
+[19:55:16] [Render thread/INFO]: ExperienceGuard initialized; local bounded diagnostics and PocketVilla capability protection enabled
+[19:55:16] [Render thread/INFO]: [Indigo] Different rendering plugin detected; not applying Indigo.
+[19:55:16] [Render thread/INFO]: Sending ConfigManager...
+[19:55:16] [Render thread/INFO]: Sending ConfigManager took 458.6 microseconds
+[19:55:16] [Render thread/INFO]: Loaded
+[19:55:16] [Render thread/ERROR]: /Users/mac/Documents/ChatGPT/Mods/Oborokage-0.3.1/build/verification-recipebook/config/jeresources.json (No such file or directory)
+[19:55:16] [Render thread/INFO]: Krypton is now accelerating your Minecraft client's networking stack 🚀
+[19:55:16] [Render thread/INFO]: Note that Krypton is most effective on servers, not the client.
+[19:55:16] [Render thread/INFO]: Checking mod updates...
+[19:55:16] [Render thread/INFO]: [STDOUT]: [Mouse Tweaks] Main.initialize()
+[19:55:16] [Render thread/INFO]: [STDOUT]: [Mouse Tweaks] Generating the config file at: /Users/mac/Documents/ChatGPT/Mods/Oborokage-0.3.1/build/verification-recipebook/config/MouseTweaks.cfg
+[19:55:16] [Render thread/INFO]: [STDOUT]: [Mouse Tweaks] Created the config file.
+[19:55:16] [Render thread/INFO]: [STDOUT]: [Mouse Tweaks] Initialized.
+[19:55:16] [Render thread/WARN]: Cancelled mixin fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinParticles_LockProvider. Check debug logs for more information.
+[19:55:16] [Render thread/WARN]: Cancelled mixin fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinParticles_LockRequired_Tick. Check debug logs for more information.
+[19:55:16] [Render thread/WARN]: Cancelled mixin fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.Mixin_ReplaceRandom. Check debug logs for more information.
+[19:55:16] [Render thread/WARN]: Cancelled mixin fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinParticles_LockRequired_Extract. Check debug logs for more information.
+[19:55:16] [Render thread/INFO]: Offline Skins initialized.
+[19:55:16] [Render thread/INFO]: OptiLeaves 2.0 ready: enabled=true, depth=2
+[19:55:16] [Render thread/INFO]: [STDOUT]: [TRender] Initializing Client...
+[19:55:16] [Download-2/ERROR]: Failed to fetch user properties
+com.mojang.authlib.exceptions.InvalidCredentialsException: Status: 401
+	at knot//com.mojang.authlib.exceptions.MinecraftClientHttpException.toAuthenticationException(MinecraftClientHttpException.java:70)
+	at knot//com.mojang.authlib.services.MinecraftServicesUserApiService.fetchProperties(MinecraftServicesUserApiService.java:168)
+	at knot//net.minecraft.client.Minecraft.lambda$new$1(Minecraft.java:451)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1789)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1090)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:614)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+Caused by: MinecraftClientHttpException[type=HTTP_ERROR, status=401, response=ErrorResponse[path=/player/attributes, error=null, errorMessage=null, details=null]]
+	at knot//com.mojang.authlib.minecraft.client.MinecraftClient.buildHttpException(MinecraftClient.java:170)
+	at knot//com.mojang.authlib.minecraft.client.MinecraftClient.readServiceResponse(MinecraftClient.java:147)
+	at knot//com.mojang.authlib.minecraft.client.MinecraftClient.getWithEtag(MinecraftClient.java:81)
+	at knot//com.mojang.authlib.minecraft.client.MinecraftClient.get(MinecraftClient.java:65)
+	at knot//com.mojang.authlib.services.MinecraftServicesUserApiService.fetchProperties(MinecraftServicesUserApiService.java:118)
+	... 5 more
+[19:55:16] [Render thread/INFO]: Registering common data for channel xaerolib:main!
+[19:55:16] [Render thread/INFO]: Registering client data for channel xaerolib:main!
+[19:55:16] [Render thread/INFO]: Loading primary common config for channel xaerolib:main!
+[19:55:16] [Render thread/INFO]: Loading server config profiles for channel xaerolib:main!
+[19:55:16] [Render thread/INFO]: Loading primary client config for channel xaerolib:main!
+[19:55:16] [Render thread/INFO]: Loading client config profiles for channel xaerolib:main!
+[19:55:16] [Render thread/INFO]: Loading XaeroLib common 1/2!
+[19:55:16] [Render thread/INFO]: Loading XaeroLib client 1/3!
+[19:55:17] [Download-3/INFO]: Update available for 'betterblockentities@1.3.9+mc26.3', (-> 1.4.0+mc26.3)
+[19:55:17] [Download-3/INFO]: Update available for 'fabric-api@0.162.0+26.3', (-> 0.163.0+26.3)
+[19:55:17] [Render thread/WARN]: io exception while checking patreon: Read timed out
+[19:55:17] [Render thread/INFO]: Xaero's Minimap: World Map found!
+[19:55:17] [Render thread/INFO]: No Optifine!
+[19:55:17] [Render thread/INFO]: Xaero's Minimap: No Vivecraft!
+[19:55:17] [Render thread/INFO]: Xaero's Minimap: Iris found!
+[19:55:17] [Render thread/INFO]: Registering common data for channel xaerominimap:main!
+[19:55:17] [Render thread/INFO]: Registering client data for channel xaerominimap:main!
+[19:55:17] [Render thread/INFO]: Loading primary common config for channel xaerominimap:main!
+[19:55:17] [Render thread/INFO]: Loading server config profiles for channel xaerominimap:main!
+[19:55:17] [Render thread/INFO]: Loading primary client config for channel xaerominimap:main!
+[19:55:17] [Render thread/INFO]: Loading client config profiles for channel xaerominimap:main!
+[19:55:17] [Render thread/INFO]: Loading Xaero's Minimap - Stage 1/3
+[19:55:17] [Render thread/INFO]: Registering common data for channel xaeroworldmap:main!
+[19:55:17] [Render thread/INFO]: Registering client data for channel xaeroworldmap:main!
+[19:55:17] [Render thread/INFO]: Loading primary common config for channel xaeroworldmap:main!
+[19:55:17] [Render thread/INFO]: Loading server config profiles for channel xaeroworldmap:main!
+[19:55:17] [Render thread/INFO]: Loading primary client config for channel xaeroworldmap:main!
+[19:55:17] [Render thread/INFO]: Loading client config profiles for channel xaeroworldmap:main!
+[19:55:17] [Render thread/INFO]: Loading Xaero's World Map - Stage 1/3
+[19:55:17] [Render thread/INFO]: Initializing mods (entrypoint yumi:init)...
+[19:55:17] [Render thread/INFO]: [LambDynLights] Initializing LambDynamicLights...
+[19:55:17] [Render thread/INFO]: [LambDynLights] Copied default configuration file.
+[19:55:17] [Render thread/INFO]: [LambDynLights] Configuration loaded.
+[19:55:17] [Render thread/ERROR]: Error parsing option value 4 for option Simulation Distance: Value 4 outside of range [5:33]
+[19:55:17] [Render thread/WARN]: Error reading pack metadata, attempting fallback type
+com.google.gson.JsonParseException: Not a number: [97,1]
+	at knot//com.mojang.serialization.DataResult$Error.getOrThrow(DataResult.java:287)
+	at knot//net.minecraft.server.packs.resources.ResourceMetadata$2.getSection(ResourceMetadata.java:40)
+	at knot//net.fabricmc.fabric.impl.resource.pack.ModNioPackResources.getMetadataSection(ModNioPackResources.java:286)
+	at knot//net.minecraft.server.packs.repository.Pack.readPackMetadata(Pack.java:58)
+	at knot//net.minecraft.server.packs.repository.Pack.readMetaAndCreate(Pack.java:43)
+	at knot//net.fabricmc.fabric.impl.resource.pack.ModResourcePackCreator.registerModPack(ModResourcePackCreator.java:122)
+	at knot//net.fabricmc.fabric.impl.resource.pack.ModResourcePackCreator.loadPacks(ModResourcePackCreator.java:106)
+	at knot//net.fabricmc.fabric.impl.resource.client.DefaultResourcePackStorage.process(DefaultResourcePackStorage.java:84)
+	at knot//net.minecraft.client.Options.handler$bja000$fabric-resource-loader-v1$onLoad(Options.java:2893)
+	at knot//net.minecraft.client.Options.load(Options.java:2047)
+	at knot//net.minecraft.client.Options.<init>(Options.java:1776)
+	at knot//net.minecraft.client.Minecraft.<init>(Minecraft.java:471)
+	at knot//net.minecraft.client.main.Main.main(Main.java:278)
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:517)
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:72)
+	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23)
+[19:55:17] [Render thread/INFO]: Setting exclusive fullscreen to true by default, as the user is not on Windows and the language cannot be guessed.
+[19:55:17] [Render thread/INFO]: Backend library: LWJGL version 3.4.3-snapshot
+[19:55:17] [Render thread/INFO]: SDL [SYSTEM]: App name: Minecraft
+[19:55:17] [Render thread/INFO]: SDL [SYSTEM]: App version: 26.3
+[19:55:17] [Render thread/INFO]: SDL [SYSTEM]: App ID: com.mojang.minecraft
+[19:55:17] [Render thread/INFO]: SDL [SYSTEM]: SDL revision: SDL-3.4.14-62f10da
+[19:55:18] [Render thread/WARN]: Device [Apple M4] supports all extensions from FeatureSet [Vulkan Portability Subset], making required
+[19:55:18] [Render thread/INFO]: [STDOUT]: MacFix2 Mixin 注入成功！
+[19:55:18] [Render thread/INFO]: [STDOUT]: MacFix2 Mixin 注入成功！
+[19:55:18] [Render thread/INFO]: Debug functionality is disabled.
+[19:55:18] [Render thread/INFO]: DSA support not detected.
+[19:55:18] [Render thread/INFO]: Shaders are disabled because no valid shaderpack is selected
+[19:55:18] [Render thread/INFO]: AsyncParticles will cancel some of its mixins to achieve specific functions, so you can ignore the related Mixinsquared-canceller warnings below.
+[19:55:18] [Render thread/INFO]: Initializing ImmediatelyFast 1.17.1+26.3 on Apple M4 (Apple) with OpenGL 4.1 Metal - 90.5
+[19:55:18] [Render thread/INFO]: Using graphics backend OpenGL, using drivers: 4.1 Metal - 90.5
+[19:55:18] [Render thread/INFO]: Using graphics device: Apple M4 (Apple)
+[19:55:18] [Render thread/INFO]: Using graphics device extensions: GL_ARB_draw_indirect, GL_EXT_texture_filter_anisotropic
+[19:55:18] [Render thread/INFO]: [STDOUT]: MacFix2 Mixin 注入成功！
+[19:55:18] [Render thread/INFO]: Created window using SDL video driver: cocoa
+[19:55:18] [Render thread/WARN]: Error reading pack metadata, attempting fallback type
+com.google.gson.JsonParseException: Not a number: [97,1]
+	at knot//com.mojang.serialization.DataResult$Error.getOrThrow(DataResult.java:287)
+	at knot//net.minecraft.server.packs.resources.ResourceMetadata$2.getSection(ResourceMetadata.java:40)
+	at knot//net.fabricmc.fabric.impl.resource.pack.ModNioPackResources.getMetadataSection(ModNioPackResources.java:286)
+	at knot//net.minecraft.server.packs.repository.Pack.readPackMetadata(Pack.java:58)
+	at knot//net.minecraft.server.packs.repository.Pack.readMetaAndCreate(Pack.java:43)
+	at knot//net.fabricmc.fabric.impl.resource.pack.ModResourcePackCreator.registerModPack(ModResourcePackCreator.java:122)
+	at knot//net.fabricmc.fabric.impl.resource.pack.ModResourcePackCreator.loadPacks(ModResourcePackCreator.java:106)
+	at knot//net.minecraft.server.packs.repository.BuiltInPackSource.handler$bik000$fabric-resource-loader-v1$addBuiltinResourcePacks(BuiltInPackSource.java:539)
+	at knot//net.minecraft.server.packs.repository.BuiltInPackSource.loadPacks(BuiltInPackSource.java:49)
+	at knot//net.minecraft.server.packs.repository.PackRepository.discoverAvailable(PackRepository.java:43)
+	at knot//net.minecraft.server.packs.repository.PackRepository.reload(PackRepository.java:36)
+	at knot//net.minecraft.client.Minecraft.<init>(Minecraft.java:605)
+	at knot//net.minecraft.client.main.Main.main(Main.java:278)
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:517)
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:72)
+	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23)
+[19:55:19] [Render thread/WARN]: Cancelled mixin fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.Mixin_ReplaceRandom. Check debug logs for more information.
+[19:55:19] [Render thread/WARN]: Cancelled mixin fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinParticles_LightCacheNoRefresh. Check debug logs for more information.
+[19:55:19] [Render thread/WARN]: Cancelled mixin fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinParticles_LightCacheNoRefresh. Check debug logs for more information.
+[19:55:19] [Render thread/WARN]: Cancelled mixin fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinParticles_LightCacheNoRefresh. Check debug logs for more information.
+[19:55:19] [Render thread/WARN]: Cancelled mixin fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinParticles_LightCacheNoRefresh. Check debug logs for more information.
+[19:55:19] [Render thread/WARN]: Cancelled mixin fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinParticles_LightCacheNoRefresh. Check debug logs for more information.
+[19:55:19] [Render thread/WARN]: Cancelled mixin fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinParticles_LightCacheNoRefresh. Check debug logs for more information.
+[19:55:19] [Render thread/WARN]: Cancelled mixin fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.Mixin_ReplaceRandom. Check debug logs for more information.
+[19:55:19] [Render thread/WARN]: Cancelled mixin fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinAsyncTick_AsyncTickableParticleGroup. Check debug logs for more information.
+[19:55:19] [Render thread/WARN]: Cancelled mixin fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinAsyncTick_AsyncTickableParticleGroup. Check debug logs for more information.
+[19:55:19] [Render thread/WARN]: Cancelled mixin fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinAsyncTick_AsyncTickableParticleGroup. Check debug logs for more information.
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::putFloat has been called by net.caffeinemc.mods.sodium.api.memory.MemoryIntrinsics (file:/Users/mac/Documents/ChatGPT/Mods/Oborokage-0.3.1/build/verification-recipebook/mods/sodium-fabric-0.9.2+mc26.3.jar)
+WARNING: Please consider reporting this to the maintainers of class net.caffeinemc.mods.sodium.api.memory.MemoryIntrinsics
+WARNING: sun.misc.Unsafe::putFloat will be removed in a future release
+[19:55:19] [Render thread/INFO]: Hardware information:
+[19:55:19] [Render thread/INFO]: CPU: 10x Apple M4
+[19:55:19] [Render thread/INFO]: GPU: Apple M4 (Supports OpenGL 4.1 Metal - 90.5)
+[19:55:19] [Render thread/INFO]: OS: Mac OS X (26.3.1)
+[19:55:20] [Download-3/INFO]: Could not authorize you against Realms server: java.lang.RuntimeException: Failed to parse into SignedJWT: 0
+[19:55:20] [Download-3/ERROR]: Failed to fetch Realms feature flags
+com.mojang.realmsclient.exception.RealmsServiceException: Realms authentication error with message 'java.lang.RuntimeException: Failed to parse into SignedJWT: 0'
+	at knot//com.mojang.realmsclient.client.RealmsClient.execute(RealmsClient.java:625)
+	at knot//com.mojang.realmsclient.client.RealmsClient.fetchFeatureFlags(RealmsClient.java:204)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1789)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1090)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:614)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+[19:55:20] [Render thread/INFO]: Reloading ResourceManager: vanilla, vanilla, appleskin, asyncparticles, badoptimizations, betterblockentities, cloth-config, conditional-mixin, entityculling, fabric-advancement-api-v1, fabric-api, fabric-api-base, fabric-api-lookup-api-v1, fabric-biome-api-v1, fabric-block-api-v1, fabric-block-getter-api-v2, fabric-command-api-v2, fabric-content-registries-v0, fabric-convention-tags-v2, fabric-crash-report-info-v1, fabric-creative-tab-api-v1, fabric-data-attachment-api-v1, fabric-data-generation-api-v1, fabric-debug-api-v1, fabric-dimensions-v1, fabric-entity-events-v1, fabric-events-interaction-v0, fabric-game-rule-api-v1, fabric-item-api-v1, fabric-key-mapping-api-v1, fabric-lifecycle-events-v1, fabric-loot-api-v3, fabric-menu-api-v1, fabric-message-api-v1, fabric-model-loading-api-v1, fabric-networking-api-v1, fabric-object-builder-api-v1, fabric-particles-v1, fabric-permission-api-v1, fabric-recipe-api-v1, fabric-registry-sync-v0, fabric-renderer-api-v1, fabric-renderer-indigo, fabric-rendering-fluids-v1, fabric-rendering-v1, fabric-resource-conditions-api-v1, fabric-resource-loader-v0, fabric-resource-loader-v1, fabric-screen-api-v1, fabric-serialization-api-v1, fabric-sound-api-v1, fabric-tag-api-v1, fabric-transfer-api-v1, fabric-transitive-access-wideners-v1, fabricloader, fadeless, fusion, immediatelyfast, iris, jade, jei, jeresources, krypton, lambdynlights, lambdynlights_api, lithium, macfix2, mezz_config, midnightlib, modernfix, modmenu, moreculling, oborokage, offline-skins, placeholder-api, pocketvilla, pride, sodium, sodium-extra, spark, spruceui, torohealth, trender, waterbucketbow, xaerolib, xaerominimap, xaeroworldmap, xray
+UNSUPPORTED (log once): gldCopyBufferSubData: NEEDS IMPLEMENTATION
+[19:55:20] [Render thread/INFO]: Thread[#3,Render thread,5,main]
+[19:55:20] [Render thread/INFO]: OpenGL Vendor: Apple
+[19:55:20] [Render thread/INFO]: OpenGL Renderer: Apple M4
+[19:55:20] [Render thread/INFO]: OpenGL Version: 4.1 Metal - 90.5
+[19:55:20] [Render thread/INFO]: Cached all modded block culling states
+[19:55:20] [Render thread/INFO]: Start loading plugin from Jade: snownee.jade.addon.core.CorePlugin
+[19:55:20] [Render thread/INFO]: Start loading plugin from Jade: snownee.jade.addon.vanilla.VanillaPlugin
+[19:55:20] [Render thread/INFO]: Start loading plugin from Jade: snownee.jade.addon.universal.UniversalPlugin
+[19:55:20] [Render thread/INFO]: Start loading plugin from Jade: snownee.jade.addon.access.AccessibilityPlugin
+[19:55:20] [Render thread/INFO]: Start loading plugin from Jade: snownee.jade.addon.debug.DebugPlugin
+[19:55:20] [Render thread/ERROR]: Failed to load scan store from file: /Users/mac/Documents/ChatGPT/Mods/Oborokage-0.3.1/build/verification-recipebook/config/xray/scan-store.json
+[19:55:20] [Render thread/INFO]: Loading Xaero's World Map - Stage 2/3
+[19:55:20] [Worker-ResourceReload-3/INFO]: Found unifont_all_no_pua-17.0.01.hex, loading
+[19:55:20] [Worker-ResourceReload-6/INFO]: Found unifont_pua-17.0.01.hex, loading
+[19:55:21] [Worker-ResourceReload-5/INFO]: Found unifont_jp_patch-17.0.01.hex, loading
+[19:55:21] [ForkJoinPool.commonPool-worker-1/WARN]: [Iris Update Check] This version doesn't have an update index, skipping.
+[19:55:21] [Render thread/ERROR]: io exception while checking versions: Read timed out
+[19:55:21] [Render thread/INFO]: Registered player tracker system: map_synced
+[19:55:21] [Render thread/INFO]: Xaero's WorldMap Mod: Xaero's minimap found!
+[19:55:21] [Render thread/INFO]: Registered player tracker system: minimap_synced
+[19:55:21] [Render thread/INFO]: No Optifine!
+[19:55:21] [Render thread/INFO]: Xaero's World Map: No Vivecraft!
+[19:55:21] [Render thread/INFO]: Xaero's World Map: Iris found!
+[19:55:21] [Render thread/INFO]: Loading Xaero's World Map - Stage 3/3
+[19:55:21] [Render thread/INFO]: New world map region cache hash code: 403255075
+[19:55:21] [Render thread/INFO]: Loading Xaero's Minimap - Stage 2/3
+[19:55:22] [Render thread/WARN]: io exception while checking versions: Read timed out
+[19:55:22] [Render thread/INFO]: Registered player tracker system: minimap_synced
+[19:55:22] [Render thread/INFO]: Loading Xaero's Minimap - Stage 3/3
+[19:55:22] [Render thread/INFO]: Loading XaeroLib common 2/2!
+[19:55:22] [Render thread/INFO]: Loading XaeroLib client 2/3!
+[19:55:22] [Render thread/INFO]: Loading XaeroLib client 3/3!
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/rendertype_crumbling, FRAGMENT minecraft:core/rendertype_crumbling. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/entity, FRAGMENT minecraft:core/entity. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/terrain, FRAGMENT minecraft:core/terrain. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_04' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/rendertype_lines, FRAGMENT minecraft:core/rendertype_lines. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/entity, FRAGMENT minecraft:core/entity. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/text, FRAGMENT minecraft:core/text. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/text, FRAGMENT minecraft:core/text. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/block, FRAGMENT minecraft:core/block. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/entity, FRAGMENT minecraft:core/entity. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/terrain, FRAGMENT minecraft:core/terrain. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_04' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/rendertype_entity_shadow, FRAGMENT minecraft:core/rendertype_entity_shadow. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/particle, FRAGMENT minecraft:core/particle. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/screenquad, FRAGMENT minecraft:core/oit_composite. Log output: WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/screenquad, FRAGMENT minecraft:core/integrate_depth. Log output: WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/terrain, FRAGMENT minecraft:core/terrain. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_04' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/entity, FRAGMENT minecraft:core/entity. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/animate_sprite, FRAGMENT minecraft:core/animate_sprite_blit. Log output: WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/entity, FRAGMENT minecraft:core/entity. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/entity, FRAGMENT minecraft:core/entity. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/particle, FRAGMENT minecraft:core/particle. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/clouds, FRAGMENT minecraft:core/clouds. Log output: WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/entity, FRAGMENT minecraft:core/entity. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/block, FRAGMENT minecraft:core/block. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/text, FRAGMENT minecraft:core/text. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/screenquad, FRAGMENT minecraft:core/oit_depth_bounds_cull. Log output: WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/text, FRAGMENT minecraft:core/text. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/entity, FRAGMENT minecraft:core/entity. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/text, FRAGMENT minecraft:core/text. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/text, FRAGMENT minecraft:core/text. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/terrain, FRAGMENT minecraft:core/terrain. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_04' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/clouds, FRAGMENT minecraft:core/clouds. Log output: WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/rendertype_lines, FRAGMENT minecraft:core/rendertype_lines. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/rendertype_entity_shadow, FRAGMENT minecraft:core/rendertype_entity_shadow. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/entity, FRAGMENT minecraft:core/entity. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/particle, FRAGMENT minecraft:core/particle. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/entity, FRAGMENT minecraft:core/entity. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/text, FRAGMENT minecraft:core/text. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/particle, FRAGMENT minecraft:core/particle. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/entity, FRAGMENT minecraft:core/entity. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/rendertype_crumbling, FRAGMENT minecraft:core/rendertype_crumbling. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/entity, FRAGMENT minecraft:core/entity. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:22] [Render thread/INFO]: Info log when linking program containing VERTEX minecraft:core/text, FRAGMENT minecraft:core/text. Log output: WARNING: Output of vertex shader '_interface_variable_01' not read by fragment shader
+WARNING: Output of vertex shader '_interface_variable_00' not read by fragment shader
+
+[19:55:23] [Render thread/INFO]: OpenAL initialized on device MacBook Air Speakers
+[19:55:23] [Render thread/INFO]: Sound engine started
+[19:55:23] [Render thread/INFO]: Created: 1024x1024x0 minecraft:textures/atlas/particles.png-atlas
+[19:55:23] [Render thread/INFO]: Created: 256x128x0 minecraft:textures/atlas/celestials.png-atlas
+[19:55:23] [Render thread/INFO]: Created: 128x128x0 minecraft:textures/atlas/decorated_pot.png-atlas
+[19:55:23] [Render thread/INFO]: Created: 512x256x0 minecraft:textures/atlas/paintings.png-atlas
+[19:55:23] [Render thread/INFO]: Created: 1024x512x0 minecraft:textures/atlas/shield_patterns.png-atlas
+[19:55:23] [Render thread/INFO]: Created: 1024x512x0 minecraft:textures/atlas/banner_patterns.png-atlas
+[19:55:23] [Render thread/INFO]: Created: 2048x2048x4 minecraft:textures/atlas/blocks.png-atlas
+[19:55:23] [Render thread/INFO]: Created: 1024x512x0 minecraft:textures/atlas/items.png-atlas
+[19:55:23] [Render thread/INFO]: Created: 1024x1024x0 minecraft:textures/atlas/gui.png-atlas
+[19:55:23] [Render thread/INFO]: Created: 128x64x0 minecraft:textures/atlas/map_decorations.png-atlas
+[19:55:23] [Render thread/INFO]: Created: 512x512x0 minecraft:textures/atlas/chest.png-atlas
+[19:55:23] [Render thread/INFO]: Created: 512x512x0 minecraft:textures/atlas/shulker_boxes.png-atlas
+[19:55:23] [Render thread/INFO]: 35727 cache(s) were cleared!
+[19:55:23] [Render thread/INFO]: Geometry registry populated! Task successfully completed
+[19:55:23] [Render thread/WARN]: Missing data pack oborokage_checks
+[19:55:23] [Render thread/INFO]: Found new data pack pocketvilla, loading it automatically
+[19:55:23] [Render thread/INFO]: Found new data pack waterbucketbow, loading it automatically
+[19:55:24] [Worker-ResourceReload-1/INFO]: Loaded 1885 advancements
+[19:55:24] [Render thread/WARN]: Initial datapack load took 757.3 ms
+[19:55:24] [Render thread/INFO]: Applied 0 biome modifications to 0 of 67 new biomes in 576.5 μs
+[19:55:24] [Server thread/INFO]: Starting background profiler...
+[19:55:27] [Server thread/INFO]: Starting integrated minecraft server version 26.3
+[19:55:27] [Server thread/INFO]: Generating keypair
+[19:55:27] [Server thread/INFO]: Loading 81 persistent chunks...
+[19:55:27] [Server thread/INFO]: 准备生成区域中：7%
+[19:55:27] [Server thread/INFO]: Saving chunks for level 'ServerLevel[temporary-tachi-world]'/minecraft:overworld
+[19:55:27] [Server thread/INFO]: Saving chunks for level 'ServerLevel[temporary-tachi-world]'/minecraft:the_nether
+[19:55:27] [Server thread/INFO]: Saving chunks for level 'ServerLevel[temporary-tachi-world]'/minecraft:the_end
+[19:55:28] [Server thread/INFO]: Loading 0 chunks for player spawn...
+[19:55:28] [Server thread/INFO]: 准备生成区域中：65%
+[19:55:28] [Server thread/INFO]: Time elapsed: 728 ms
+[19:55:28] [Server thread/INFO]: RecipeBookTest[local:E:928168fb] logged in with entity id 133 at (-7.5, -60.0, 1.5)
+[19:55:28] [Server thread/INFO]: System chat: RecipeBookTest加入了游戏
+[19:55:28] [Render thread/INFO]: Minimap required item set to nothing.
+[19:55:28] [Render thread/INFO]: New Xaero hud session initialized!
+[19:55:28] [Render thread/INFO]: Fullscreen map required item set to nothing.
+[19:55:28] [Render thread/INFO]: New world map session initialized!
+[19:55:28] [Render thread/INFO]: Reloading pipeline on dimension change: null => minecraft:overworld
+[19:55:28] [Render thread/INFO]: Creating pipeline for dimension minecraft:overworld
+[19:55:28] [Render thread/INFO]: Started 4 worker threads
+[19:55:28] [Render thread/INFO]: Starting JEI...
+[19:55:28] [Render thread/INFO]: Configuring JEI...
+[19:55:28] [Render thread/INFO]: Configuring JEI took 409.5 microseconds
+[19:55:28] [Render thread/INFO]: Registering item subtypes...
+[19:55:28] [Render thread/INFO]: Registering item subtypes took 757.5 microseconds
+[19:55:28] [Render thread/INFO]: Registering fluid subtypes...
+[19:55:28] [Render thread/INFO]: Registering fluid subtypes took 76.88 microseconds
+[19:55:28] [Render thread/INFO]: Registering ingredients...
+[19:55:28] [Server thread/INFO]: Changing view distance to 4, from 10
+[19:55:28] [Server thread/INFO]: Changing simulation distance to 12, from 0
+[19:55:28] [Render thread/INFO]: Registering ingredients: jei:minecraft took 136.1 milliseconds
+[19:55:28] [Render thread/INFO]: Registering ingredients took 136.4 milliseconds
+[19:55:28] [Render thread/INFO]: Registering extra ingredients...
+[19:55:28] [Render thread/INFO]: Registering extra ingredients took 129.0 microseconds
+[19:55:28] [Render thread/INFO]: Registering search ingredient aliases...
+[19:55:28] [Render thread/INFO]: Registering search ingredient aliases took 81.46 microseconds
+[19:55:28] [Render thread/INFO]: Registering slot display interpreters...
+[19:55:28] [Render thread/INFO]: Registering slot display interpreters took 2.048 milliseconds
+[19:55:28] [Render thread/INFO]: Registering Mod Info...
+[19:55:28] [Render thread/INFO]: Registering Mod Info took 240.3 microseconds
+[19:55:28] [Render thread/INFO]: Registering advanced search...
+[19:55:28] [Render thread/INFO]: Registering advanced search took 158.0 microseconds
+[19:55:28] [Render thread/INFO]: Registering categories...
+[19:55:29] [Render thread/WARN]: Error during loading of villager trades
+java.lang.IllegalStateException: Missing registry: ResourceKey[minecraft:root / minecraft:trade_set]
+	at knot//net.minecraft.core.RegistryAccess.lambda$lookupOrThrow$0(RegistryAccess.java:22)
+	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
+	at knot//net.minecraft.core.RegistryAccess.lookupOrThrow(RegistryAccess.java:22)
+	at knot//jeresources.util.VillagersHelper.initRegistry(VillagersHelper.java:24)
+	at knot//jeresources.compatibility.Compatibility.init(Compatibility.java:39)
+	at knot//jeresources.proxy.CommonProxy.initCompatibility(CommonProxy.java:14)
+	at knot//jeresources.jei.JEIConfig.registerCategories(JEIConfig.java:90)
+	at knot//mezz.jei.library.load.PluginLoader.lambda$createRecipeCategories$0(PluginLoader.java:178)
+	at knot//mezz.jei.library.load.PluginCaller.callOnPlugins(PluginCaller.java:26)
+	at knot//mezz.jei.library.load.PluginLoader.createRecipeCategories(PluginLoader.java:178)
+	at knot//mezz.jei.library.load.PluginLoader.createRecipeManager(PluginLoader.java:233)
+	at knot//mezz.jei.library.startup.JeiStarter.start(JeiStarter.java:163)
+	at knot//mezz.jei.fabric.startup.ClientLifecycleHandler.startJei(ClientLifecycleHandler.java:112)
+	at knot//mezz.jei.fabric.startup.ClientLifecycleHandler.lambda$registerEvents$0(ClientLifecycleHandler.java:60)
+	at knot//mezz.jei.fabric.events.JeiLifecycleEvents.lambda$createRunnableInvoker$0(JeiLifecycleEvents.java:24)
+	at knot//net.minecraft.client.multiplayer.ClientPacketListener.handler$cgf000$jei$handleUpdateRecipes(ClientPacketListener.java:7480)
+	at knot//net.minecraft.client.multiplayer.ClientPacketListener.handleUpdateRecipes(ClientPacketListener.java:1721)
+	at knot//net.minecraft.network.protocol.game.ClientboundUpdateRecipesPacket.handle(ClientboundUpdateRecipesPacket.java:34)
+	at knot//net.minecraft.network.protocol.game.ClientboundUpdateRecipesPacket.handle(ClientboundUpdateRecipesPacket.java:17)
+	at knot//net.minecraft.network.PacketProcessor$ListenerAndPacket.handle(PacketProcessor.java:55)
+	at knot//net.minecraft.network.PacketProcessor.processQueuedPackets(PacketProcessor.java:38)
+	at knot//net.minecraft.client.Minecraft.runTick(Minecraft.java:1238)
+	at knot//net.minecraft.client.Minecraft.run(Minecraft.java:967)
+	at knot//net.minecraft.client.main.Main.main(Main.java:292)
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:517)
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:72)
+	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23)
+[19:55:29] [Render thread/INFO]: Registering categories: jeresources:minecraft took 217.7 milliseconds
+[19:55:29] [Render thread/INFO]: Registering categories took 231.1 milliseconds
+[19:55:29] [Render thread/INFO]: Registering vanilla category extensions...
+[19:55:29] [Render thread/INFO]: Registering vanilla category extensions took 1.907 milliseconds
+[19:55:29] [Render thread/INFO]: Registering recipe catalysts...
+[19:55:29] [Render thread/INFO]: Registering recipe catalysts took 1.108 milliseconds
+[19:55:29] [Render thread/INFO]: Building recipe registry...
+[19:55:29] [Render thread/INFO]: Building recipe registry took 10.27 milliseconds
+[19:55:29] [Render thread/INFO]: Registering advanced plugins...
+[19:55:29] [Render thread/INFO]: Added typed recipe manager plugin: class mezz.jei.library.plugins.vanilla.crafting.FireworkStarRecipeManagerPlugin
+[19:55:29] [Render thread/INFO]: Registering advanced plugins took 9.515 milliseconds
+[19:55:29] [Render thread/INFO]: Registering recipes...
+[19:55:29] [Render thread/INFO]: Registering recipes: jei:minecraft took 513.5 milliseconds
+[19:55:29] [Render thread/INFO]: Registering recipes: jeresources:minecraft took 49.67 milliseconds
+[19:55:29] [Render thread/INFO]: Registering recipes: jei:internal took 64.01 milliseconds
+[19:55:29] [Render thread/INFO]: Registering recipes took 628.1 milliseconds
+[19:55:29] [Render thread/INFO]: Registering recipes transfer handlers...
+[19:55:29] [Render thread/INFO]: Registering recipes transfer handlers took 4.475 milliseconds
+[19:55:29] [Render thread/INFO]: Building runtime...
+[19:55:29] [Render thread/INFO]: Registering gui handlers...
+[19:55:29] [Render thread/INFO]: Registering gui handlers took 11.26 milliseconds
+[19:55:29] [Render thread/INFO]: Registering Runtime...
+[19:55:29] [Render thread/INFO]: Starting JEI GUI
+[19:55:29] [Render thread/INFO]: Building ingredient list...
+[19:55:29] [Render thread/INFO]: Building ingredient list took 21.45 milliseconds
+[19:55:29] [Render thread/INFO]: Building ingredient filter...
+[19:55:29] [Render thread/INFO]: Adding 2027 ingredients
+[19:55:29] [Render thread/INFO]: Added 2027 ingredients
+[19:55:29] [Render thread/INFO]: Building ingredient filter took 155.2 milliseconds
+[19:55:30] [Render thread/INFO]: Registering Runtime: jei:fabric_gui took 267.8 milliseconds
+[19:55:30] [Render thread/INFO]: Registering Runtime took 272.8 milliseconds
+[19:55:30] [Render thread/INFO]: Building runtime took 293.5 milliseconds
+[19:55:30] [Render thread/INFO]: Sending Runtime...
+[19:55:30] [Render thread/INFO]: Sending Runtime took 154.8 microseconds
+[19:55:30] [Render thread/INFO]: Starting JEI took 1.362 seconds
+[19:55:30] [Render thread/INFO]: Minimap updated server level id: 1187159519 for world ResourceKey[minecraft:dimension / minecraft:overworld]
+[19:55:30] [Render thread/INFO]: Loaded 2 advancements
+[19:55:30] [Render thread/INFO]: Received config from the server: {}
+[19:55:30] [Render thread/INFO]: Stopping worker threads
+[19:55:30] [Render thread/INFO]: Started 4 worker threads
+[19:55:30] [Render thread/WARN]: Requested post effect does not exist: minecraft:end_of_frame
+[19:55:30] [Render thread/INFO]: Resizing Dynamic Transforms UBO, capacity limit of 2 reached during a single frame. New capacity will be 4.
+[19:55:30] [Render thread/WARN]: Time from main menu to in-game was 5.99492 seconds
+[19:55:30] [Render thread/WARN]: Total time to load game and open world was 4.99492 seconds
+[19:55:30] [Render thread/INFO]: Resizing Dynamic Transforms UBO, capacity limit of 4 reached during a single frame. New capacity will be 8.
+[19:55:30] [Render thread/WARN]: Game took 25.644 seconds to start
+[19:55:30] [Render thread/INFO]: Reloading radar icon resources...
+[19:55:30] [Render thread/INFO]: Reloaded radar icon resources!
+[19:55:30] [Render thread/INFO]: Resized a dynamic immediate buffer to 160!
+[19:55:30] [Render thread/INFO]: Resized a dynamic immediate buffer to 320!
+[19:55:30] [Render thread/INFO]: Resizing Dynamic Transforms UBO, capacity limit of 8 reached during a single frame. New capacity will be 16.
+[19:55:30] [Render thread/INFO]: Resized a dynamic immediate buffer to 2928!
+[19:55:30] [Render thread/INFO]: Resized a dynamic immediate buffer to 5856!
+[19:55:30] [Render thread/INFO]: [STDOUT]: TACHI_RECIPEBOOK PASS Current installed mod combination loads in isolated recipe-book world
+[19:55:30] [Render thread/INFO]: Resized a dynamic immediate buffer to 640!
+[19:55:30] [Render thread/INFO]: Loaded 8 advancements
+[19:55:31] [Render thread/INFO]: Resized a dynamic immediate buffer to 1280!
+[19:55:32] [Render thread/INFO]: Resized a dynamic immediate buffer to 11712!
+[19:55:33] [Render thread/INFO]: [STDOUT]: TACHI_RECIPEBOOK PASS Both recipes start locked for fresh test player
+[19:55:33] [Render thread/INFO]: [STDOUT]: TACHI_RECIPEBOOK PASS Obtaining amethyst normally unlocks tachi recipe and advancement
+[19:55:33] [Render thread/INFO]: [STDOUT]: TACHI_RECIPEBOOK PASS Obtaining amethyst normally unlocks wakizashi recipe and advancement
+[19:55:33] [Render thread/INFO]: [STDOUT]: TACHI_RECIPEBOOK PASS Client recipe book receives tachi display
+[19:55:33] [Render thread/INFO]: [STDOUT]: TACHI_RECIPEBOOK PASS Client recipe book receives wakizashi display
+[19:55:33] [Render thread/INFO]: Xaero hud session finalized.
+[19:55:33] [Render thread/INFO]: Finalizing world map session...
+[19:55:33] [Thread-4/INFO]: World map force-cleaned!
+[19:55:33] [Render thread/INFO]: World map session finalized.
+[19:55:33] [Server thread/INFO]: Stopping server
+[19:55:33] [Server thread/INFO]: Saving players
+[19:55:33] [Server thread/INFO]: Saving worlds
+[19:55:33] [ExperienceGuard-Reports/INFO]: Local diagnostic report saved: report-1792205733857-14e7e64e-2859-4b1c-93f9-182d92fde9ae.json
+[19:55:34] [Server thread/INFO]: Saving chunks for level 'ServerLevel[temporary-tachi-world]'/minecraft:overworld
+[19:55:34] [Server thread/INFO]: Saving chunks for level 'ServerLevel[temporary-tachi-world]'/minecraft:the_nether
+[19:55:34] [Server thread/INFO]: Saving chunks for level 'ServerLevel[temporary-tachi-world]'/minecraft:the_end
+[19:55:34] [Render thread/INFO]: Stopping JEI
+[19:55:34] [Render thread/INFO]: Stopping JEI
+[19:55:34] [Render thread/INFO]: Sending Runtime Unavailable...
+[19:55:34] [Render thread/INFO]: Stopping JEI GUI
+[19:55:34] [Render thread/INFO]: Sending Runtime Unavailable took 238.8 microseconds
+[19:55:34] [Render thread/INFO]: Stopping worker threads
+[19:55:34] [CullThread/INFO]: [STDOUT]: Shutting down culling task!
+[19:55:34] [Render thread/INFO]: Stopping!

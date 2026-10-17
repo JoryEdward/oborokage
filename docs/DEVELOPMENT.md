@@ -17,7 +17,8 @@ JDK25下：
 ```sh
 python3 verification/run.py server
 python3 verification/run.py client --fullpack
-python3 verification/run.py client --shader --focused
+python3 verification/run.py client --maintenance --fullpack
+python3 verification/run.py client --shader --lowfx
 python3 verification/network.py --latency
 python3 verification/recipebook.py
 python3 verification/gametest.py
@@ -28,12 +29,15 @@ python3 verification/rollback.py
 
 - server：原版强度、碰撞、双刀窗口、成就、属性/附魔、保护、配置和节流的受控服务器回归。
 - client：真实integrated server、本机完整模组组合、真实use/release/attack包、原版iframe、箭实体碰撞、原木掉落、权限、/reload和截图。
+- maintenance：0.3.1的HUD实际绘制、光环、原生音效、单手姿势、原版左键挖掘路径、刀碎边界、拒绝heartbeat与真实成就广播。左键场景直接调用Minecraft原生startAttack/continueAttack入口，避免自动化窗口失焦丢键；不以直接调用拦截函数代替挖掘结果。
 - shader：隔离目录启用ComplementaryReimagined_r5.9.3，复制光影文件，保留正式实例光影选项。
-- network：独立服务端与两个客户端；`--latency`对每个方向注入100ms有序延迟。不是互联网WAN质量或长时间多人性能结论。
+- network：独立服务端与两个客户端；`--latency`对每个方向注入100ms有序延迟。含空闲取消、精准格挡和反切预测；不是互联网WAN质量或长时间多人性能结论。
 - gametest：Fabric GameTest原生运行终结和配方测试，JUnit结果位于对应reports目录。API模块从本机Gradle缓存发现。
-- rollback：仅生成的箱子世界，验证0.3→0.1→0.3新增物品丢失；可用`OBOROKAGE_LEGACY_JAR`指定旧版JAR。
+- rollback：仅生成的箱子世界，验证0.3.1→0.1→0.3.1新增物品丢失；可用`OBOROKAGE_LEGACY_JAR`指定旧版JAR。
 
 测试中为排除持续格挡击退对箭矢瞄准的影响，会先将测试玩家稳定在平台上，再发射箭矢。测试的“输入立即预测”只验证呈现与确认，命中仍由服务端处理。不得把脚本操作称为真人手感验收。
+
+源码交付使用`python3 tools/package_release.py`；COPYFILE_DISABLE和显式排除规则去除AppleDouble、Python缓存和内部WORK_LOG。截图另打evidence.zip，解压到源码根目录恢复验证文档图片。
 
 ## 真人手测清单
 

@@ -1,0 +1,4 @@
+PASS Two independent clients connected to local dedicated server
+PASS Networked dual ultimate executes 1024 HP hostile
+PASS Delayed native attack is precisely guarded before counter
+PASS Networked counter damages the actual parried source

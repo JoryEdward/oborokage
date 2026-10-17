@@ -25,7 +25,8 @@ public final class DualClient {
   private static long comboUntil, stepUntil, ultimateUntil, counterUntil;
   private static boolean guided;
   private static Object level;
-  private static boolean guardHeld;
+  private static boolean guardHeld, guardPredictionRejected;
+  private static final Set<Integer> guardRequests = new HashSet<>();
   private static int heartbeat;
   private static KeyMapping guard, step, ultimate;
 
@@ -132,8 +133,20 @@ public final class DualClient {
   }
 
   public static void request(int action) {
+    request(action, true);
+  }
+
+  private static void request(int action, boolean freshPress) {
     if (!ClientPlayNetworking.canSend(ActionRequest.TYPE)) return;
     int seq = ++sequence;
+    if (action == 1) {
+      if (freshPress) {
+        guardPredictionRejected = false;
+        guardRequests.clear();
+      }
+      guardRequests.add(seq);
+      guardRequests.removeIf(id -> id < seq - 64);
+    }
     var c = Minecraft.getInstance();
     if (ClientConfig.get().localPrediction
         && c.player != null
@@ -147,7 +160,7 @@ public final class DualClient {
       int move =
           switch (action) {
             case 0 -> now < counterUntil ? Move.COUNTER : now > comboUntil ? Move.MAIN : nextCombo;
-            case 1 -> Move.GUARD;
+            case 1 -> guardPredictionRejected ? 0 : Move.GUARD;
             case 3 -> now >= stepUntil ? Move.DODGE : 0;
             case 4 -> intent >= 100 && now >= ultimateUntil ? Move.ULTIMATE : 0;
             default -> 0;
@@ -195,7 +208,7 @@ public final class DualClient {
         c.level.getEntitiesOfClass(
             net.minecraft.world.entity.LivingEntity.class,
             c.player.getBoundingBox().inflate(3.8, 2.0, 3.8),
-            e -> e != c.player && e.isAlive() && !e.isSpectator())) {
+            e -> e != c.player && e.isAlive() && !e.isSpectator() && Feats.enemy(e))) {
       Vec3 d = entity.getBoundingBox().getCenter().subtract(eye);
       if (d.lengthSqr() <= 3.8 * 3.8 && (d.lengthSqr() < 1.0 || d.normalize().dot(look) > 0.1)) {
         return true;
@@ -228,6 +241,7 @@ public final class DualClient {
     var previous = scenes.get(e.actor());
     if (e.kind() < 0 || e.kind() > ActionEvent.REJECT || !Move.known(e.move())) return;
     if (e.kind() == ActionEvent.REJECT) {
+      if (local && guardRequests.remove(e.sequence())) guardPredictionRejected = true;
       if (local && pendingAttack == e.sequence()) pendingAttack = -1;
       if (local
           && previous != null
@@ -298,6 +312,8 @@ public final class DualClient {
     if (level != c.level) {
       scenes.clear();
       guardHeld = false;
+      guardPredictionRejected = false;
+      guardRequests.clear();
       intent = 0;
       stamina = 100;
       level = c.level;
@@ -335,7 +351,8 @@ public final class DualClient {
       heartbeat = 0;
     }
     if (pressed && ++heartbeat >= 20) {
-      request(1);
+      // Keep server retries alive after rejection, without repeatedly flashing a local pose.
+      request(1, false);
       heartbeat = 0;
     }
     while (step.consumeClick())
@@ -429,6 +446,10 @@ public final class DualClient {
       model.body.xRot = .1f;
       return true;
     }
+    if (move >= Move.STORM) {
+      singleBladePose(model, main, off, sign, move, a);
+      return true;
+    }
     main.xRot = -.9f + .72f * a;
     main.yRot = sign * (-1.35f + 2.75f * a);
     main.zRot = sign * (-.35f + .45f * a);
@@ -444,6 +465,41 @@ public final class DualClient {
     model.rightLeg.zRot = .07f;
     model.leftLeg.zRot = -.07f;
     return true;
+  }
+
+  private static void singleBladePose(
+      HumanoidModel<?> model,
+      net.minecraft.client.model.geom.ModelPart main,
+      net.minecraft.client.model.geom.ModelPart off,
+      float sign,
+      int move,
+      float cut) {
+    // The free arm balances the body instead of holding an imaginary second sword.
+    off.xRot = -.12f + .16f * cut;
+    off.yRot = 0;
+    off.zRot = sign * (.10f + .12f * cut);
+    main.xRot = -.95f + .65f * cut;
+    main.yRot = sign * (-1.15f + 2.6f * cut);
+    main.zRot = sign * (-.42f + .85f * cut);
+    model.body.xRot = .08f;
+    model.body.yRot = sign * (-.25f + .65f * cut);
+    if (move == Move.FROST) {
+      main.xRot = -1.3f + .2f * cut;
+      main.zRot = sign * (-.8f + .2f * cut);
+      model.body.yRot = sign * (-.5f + 1.1f * cut);
+    } else if (move == Move.VOID) {
+      main.xRot = -1.55f + .25f * cut;
+      main.yRot = sign * (-.8f + .95f * cut);
+      model.body.xRot = .12f + .1f * cut;
+    } else if (move == Move.TERRAIN) {
+      main.xRot = -2.15f + 2.4f * cut;
+      main.yRot = sign * (-.45f + .8f * cut);
+      model.body.xRot = .12f + .18f * cut;
+    }
+    model.rightLeg.xRot = -.22f;
+    model.leftLeg.xRot = .27f;
+    model.rightLeg.zRot = .07f;
+    model.leftLeg.zRot = -.07f;
   }
 
   public static void itemPose(PoseStack pose, InteractionHand hand, float partial) {

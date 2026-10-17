@@ -16,7 +16,8 @@ import oborokage.*;
 
 public final class NetServerChecks implements ModInitializer {
   private boolean two, kill;
-  private LivingEntity victim;
+  private LivingEntity victim, counterTarget;
+  private boolean counterRecorded;
 
   private void record(String text) {
     System.out.println("NETQA " + text);
@@ -32,6 +33,35 @@ public final class NetServerChecks implements ModInitializer {
   }
 
   public void onInitialize() {
+    net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.serverboundPlay()
+        .register(NetSignal.TYPE, NetSignal.CODEC);
+    net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(
+        NetSignal.TYPE,
+        (signal, context) ->
+            context
+                .server()
+                .execute(
+                    () -> {
+                      var p = context.player();
+                      var mob = EntityTypes.HUSK.create(p.level(), EntitySpawnReason.COMMAND);
+                      mob.setNoAi(true);
+                      mob.setNoGravity(true);
+                      mob.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1024);
+                      mob.setHealth(1024);
+                      mob.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(1);
+                      mob.setPos(
+                          p.position()
+                              .add(p.getLookAngle().multiply(1, 0, 1).normalize().scale(2)));
+                      p.level().addFreshEntity(mob);
+                      counterTarget = mob;
+                      p.damageCooldownTime = 0;
+                      float health = p.getHealth();
+                      p.hurtServer(p.level(), p.level().damageSources().mobAttack(mob), 6);
+                      record(
+                          p.getHealth() == health
+                              ? "PASS Delayed native attack is precisely guarded before counter"
+                              : "FAIL Native guard did not protect counter setup");
+                    }));
     ServerPlayConnectionEvents.JOIN.register(
         (handler, sender, server) -> {
           var p = handler.player;
@@ -74,6 +104,10 @@ public final class NetServerChecks implements ModInitializer {
           if (!two && s.getPlayerList().getPlayers().size() == 2) {
             two = true;
             record("PASS Two independent clients connected to local dedicated server");
+          }
+          if (counterTarget != null && counterTarget.getHealth() < 1024 && !counterRecorded) {
+            counterRecorded = true;
+            record("PASS Networked counter damages the actual parried source");
           }
           if (victim != null && !victim.isAlive() && !kill) {
             kill = true;

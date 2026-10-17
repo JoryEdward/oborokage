@@ -100,6 +100,7 @@ public final class DualCombat {
   public static void cancel(ServerPlayer p) {
     State s = states.get(p.getUUID());
     if (s != null) {
+      boolean active = s.move != null || s.guarding || s.buffered || s.motionActive;
       stopMotion(s);
       releaseGuard(s);
       s.move = null;
@@ -107,7 +108,7 @@ public final class DualCombat {
       s.guarding = false;
       s.nextCombo = Move.MAIN;
       s.chainHands = 0;
-      send(s, ActionEvent.CANCEL, p.position());
+      if (active) send(s, ActionEvent.CANCEL, p.position());
     }
   }
 

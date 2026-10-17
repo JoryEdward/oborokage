@@ -10,7 +10,7 @@ with zipfile.ZipFile(mods/'rollback-checks.jar','w') as z:
  z.writestr('fabric.mod.json',json.dumps({'schemaVersion':1,'id':'oborokage_rollback_checks','version':'1','environment':'server','entrypoints':{'main':['oborokage.check.RollbackChecks']}}))
 shutil.copy2(mc/'versions/26.3-Fabric/mods/fabric-api-0.162.0+26.3.jar',mods/'fabric-api.jar')
 (run/'eula.txt').write_text('eula=true\n');(run/'server.properties').write_text('server-ip=127.0.0.1\nserver-port=0\nonline-mode=false\nlevel-name=rollback-sandbox\nlevel-type=minecraft:flat\nview-distance=2\nsimulation-distance=2\ngenerate-structures=false\n')
-for phase,jar in [('seed',B/'libs/oborokage-tachi-0.3.0.jar'),('old',legacy),('new',B/'libs/oborokage-tachi-0.3.0.jar')]:
+for phase,jar in [('seed',B/'libs/oborokage-tachi-0.3.1.jar'),('old',legacy),('new',B/'libs/oborokage-tachi-0.3.1.jar')]:
  shutil.copy2(jar,mods/'oborokage.jar')
  with (run/(phase+'.log')).open('w') as log:subprocess.run([str(j/'java'),'-Xmx1200M','-Doborokage.qa.rollback='+phase,'-cp',cp,'net.fabricmc.loader.impl.launch.knot.KnotServer','nogui'],cwd=run,stdout=log,stderr=subprocess.STDOUT,timeout=90,check=True)
  print(phase,'done',flush=True)

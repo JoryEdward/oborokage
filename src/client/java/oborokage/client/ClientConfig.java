@@ -32,7 +32,7 @@ public final class ClientConfig {
     Properties p =
         ConfigIO.read(
             FabricLoader.getInstance().getConfigDir().resolve("oborokage-client.properties"),
-            "# Oborokage settings. Server: /reload applies changes. Client: restart client.\n"
+            "# Oborokage client settings. Restart the client after changing.\n"
                 + "cinematic=true\n"
                 + "screenShake=true\n"
                 + "thirdPersonUltimate=true\n"

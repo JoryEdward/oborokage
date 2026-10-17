@@ -10,6 +10,7 @@
 |---|---:|---|
 | allowPlayerDamage | false | 模组斩击是否伤玩家 |
 | protectPets / protectAllies / protectVillagers / protectGolems | true | 分别保护自己拥有的实体、队友、村民、铁傀儡 |
+| protectOthersPets | false | 保护其他主人拥有的宠物；不改变 protectPets 对自己的宠物的独立设置，缺省保持现有行为 |
 | finisherRetry | true | 标准死亡未成立时仅重试一次 |
 | announceAdvancements | false | 本模组成就在聊天广播；不影响个人toast |
 | reflectArrows | true | 精准架刀反射正面箭矢；反射箭遵守本模组友方保护 |

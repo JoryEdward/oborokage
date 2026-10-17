@@ -121,6 +121,23 @@ public final class ReviewChecks {
     ServerConfig.get().protectPets = false;
     t.check(TargetRules.allowed(p, pet), "Pet protection is configurable");
     ServerConfig.get().protectPets = true;
+    var otherOwner = new ServerChecks.Fake(t.server, level);
+    var otherPet = EntityTypes.WOLF.create(level, EntitySpawnReason.COMMAND);
+    otherPet.setOwner(otherOwner);
+    t.check(!ServerConfig.get().protectOthersPets, "Others-pet protection defaults to false");
+    t.check(
+        TargetRules.allowed(p, otherPet),
+        "Other owner's pet retains existing target behavior by default");
+    ServerConfig.get().protectOthersPets = true;
+    t.check(!TargetRules.allowed(p, otherPet), "protectOthersPets protects another owner's pet");
+    Combat.strikeTarget(level, p, otherPet, 1);
+    t.check(otherPet.isAlive(), "Original full-power iaido respects enabled others-pet protection");
+    ServerConfig.get().protectPets = false;
+    t.check(
+        TargetRules.allowed(p, pet) && !TargetRules.allowed(p, otherPet),
+        "Own and others-pet protection are independent");
+    ServerConfig.get().protectPets = true;
+    ServerConfig.get().protectOthersPets = false;
     var allied = t.probe(2);
     var scoreboard = level.getScoreboard();
     var team = scoreboard.getPlayerTeam("oboro_qa");

@@ -66,6 +66,11 @@ public final class OborokageClient implements ClientModInitializer {
     return 0;
   }
 
+  /** Storm combat charges in 20 ticks; every terrain charge takes 40. */
+  public static int fullChargeTicks(net.minecraft.world.entity.player.Player p) {
+    return p.getUseItem().is(Oborokage.RAIKIRI) && !p.isShiftKeyDown() ? 20 : 40;
+  }
+
   public static int sceneAge(int entityId) {
     for (Scene s : scenes) if (s.p.owner() == entityId) return s.age;
     return -1;
@@ -99,8 +104,7 @@ public final class OborokageClient implements ClientModInitializer {
           if (c.player == null) return;
           int w = g.guiWidth(), h = g.guiHeight();
           if (c.player.isUsingItem() && Oborokage.mainBlade(c.player.getUseItem())) {
-            float maxTicks = c.player.getUseItem().is(Oborokage.RAIKIRI) ? 20f : 40f;
-            float q = Math.min(1, c.player.getTicksUsingItem() / maxTicks);
+            float q = Math.min(1, c.player.getTicksUsingItem() / (float) fullChargeTicks(c.player));
             int y = h - 64;
             g.fill(w / 2 - 51, y - 2, w / 2 + 51, y + 5, 0xb5100e1e);
             g.fill(
@@ -213,9 +217,9 @@ public final class OborokageClient implements ClientModInitializer {
     }
     for (var player : c.level.players()) {
       if (!player.isUsingItem()
-          || !player.getUseItem().is(Oborokage.TACHI)
+          || !Oborokage.mainBlade(player.getUseItem())
           || player.distanceToSqr(c.player) > 2304) continue;
-      float q = Math.min(1, player.getTicksUsingItem() / 40f);
+      float q = Math.min(1, player.getTicksUsingItem() / (float) fullChargeTicks(player));
       double phase = player.tickCount * .28;
       Vec3 base = player.position().add(0, .9, 0);
       for (int i = 0; i < 4; i++) {

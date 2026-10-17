@@ -1,0 +1,9 @@
+{
+  "requested_name": "1.26.2",
+  "actual_local_game": "26.1.2",
+  "artifact": "/Users/mac/Documents/ChatGPT/Mods/Oborokage-0.3.1/backups/gemini-baseline/oborokage-tachi-0.3.0.jar",
+  "artifact_sha256": "352bddc726d3ee58f836dadb0c6bd166eb535a8d806e16cb9aaf71d17dcda34c",
+  "exit_code": 0,
+  "server_started": true,
+  "scope": "Isolated bootstrap only; no personal world or target-instance file modified"
+}

@@ -50,23 +50,13 @@ public abstract class SheathModelMixin {
       ci.cancel();
       return;
     }
-    if (item.is(Oborokage.WAKIZASHI)) return;
+    // SlashPayload describes the original iaido only. Style techniques use DualClient scenes.
+    if (!item.is(Oborokage.TACHI)) return;
     int age = OborokageClient.sceneAge(owner.getId());
     int delay = OborokageClient.sceneDelay(owner.getId());
     if (age >= 0 && (age < delay || age >= 34)) {
       ItemStack render = item.copy();
-      String prefix =
-          item.is(Oborokage.TACHI)
-              ? ""
-              : net.minecraft.core.registries.BuiltInRegistries.ITEM
-                      .getKey(item.getItem())
-                      .getPath()
-                  + "_";
-      String model =
-          age < delay
-              ? (prefix.isEmpty() ? "charged15" : prefix + "charged15")
-              : (prefix.isEmpty() ? "sheathed" : prefix + "sheathed");
-      render.set(DataComponents.ITEM_MODEL, Oborokage.id(model));
+      render.set(DataComponents.ITEM_MODEL, Oborokage.id(age < delay ? "charged15" : "sheathed"));
       updateForTopItem(
           state, render, context, owner.level(), owner, owner.getId() + context.ordinal());
       ci.cancel();
