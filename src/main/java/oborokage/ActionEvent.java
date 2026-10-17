@@ -18,7 +18,13 @@ public record ActionEvent(
     int stamina,
     int sequence)
     implements CustomPacketPayload {
-  public static final int START = 0, CANCEL = 1, STATUS = 2, IMPACT = 3, PARRY = 4, REJECT = 5;
+  public static final int START = 0,
+      CANCEL = 1,
+      STATUS = 2,
+      IMPACT = 3,
+      PARRY = 4,
+      REJECT = 5,
+      EVADE = 6;
   public static final Type<ActionEvent> TYPE = new Type<>(Oborokage.id("action_event_v2"));
   public static final StreamCodec<RegistryFriendlyByteBuf, ActionEvent> CODEC =
       StreamCodec.of(

@@ -1,0 +1,72 @@
+{
+  "26.1": {
+    "jar": "oborokage-tachi-0.4.0+26.1.jar",
+    "sha256": "1f85cd980725eb6faeb9e79faa027c8ba0e9b6da58b1f69ac183bf4f8e071cfc",
+    "server": {
+      "exit": 0,
+      "pass": 129,
+      "log": "matrix-26.1-server.log"
+    },
+    "client": {
+      "exit": 0,
+      "pass": 17,
+      "log": "matrix-26.1-client.log"
+    }
+  },
+  "26.1.1": {
+    "jar": "oborokage-tachi-0.4.0+26.1.jar",
+    "sha256": "1f85cd980725eb6faeb9e79faa027c8ba0e9b6da58b1f69ac183bf4f8e071cfc",
+    "server": {
+      "exit": 0,
+      "pass": 129,
+      "log": "matrix-26.1.1-server.log"
+    },
+    "client": {
+      "exit": 0,
+      "pass": 17,
+      "log": "matrix-26.1.1-client.log"
+    }
+  },
+  "26.1.2": {
+    "jar": "oborokage-tachi-0.4.0+26.1.jar",
+    "sha256": "1f85cd980725eb6faeb9e79faa027c8ba0e9b6da58b1f69ac183bf4f8e071cfc",
+    "server": {
+      "exit": 0,
+      "pass": 129,
+      "log": "matrix-26.1.2-server.log"
+    },
+    "client": {
+      "exit": 0,
+      "pass": 17,
+      "log": "matrix-26.1.2-client.log"
+    }
+  },
+  "26.2": {
+    "jar": "oborokage-tachi-0.4.0+26.2.jar",
+    "sha256": "8ec5e9754c2f1c13d36533fb3681b47f7e1023d7321363ffd738552d801d40b2",
+    "server": {
+      "exit": 0,
+      "pass": 129,
+      "log": "matrix-26.2-server.log"
+    },
+    "client": {
+      "exit": 0,
+      "pass": 17,
+      "log": "matrix-26.2-client.log"
+    }
+  },
+  "26.3": {
+    "jar": "oborokage-tachi-0.4.0+26.3.jar",
+    "sha256": "93144aa207b62c895c3dc2d8d7c33f34cbcc9d8d7976e81775adac6a0f17eda5",
+    "server": {
+      "exit": 0,
+      "pass": 129,
+      "log": "matrix-26.3-server.log"
+    },
+    "client": {
+      "exit": 0,
+      "pass": 17,
+      "log": "matrix-26.3-client.log"
+    }
+  }
+}

@@ -13,7 +13,7 @@ final class BladeTrails {
     var c = Minecraft.getInstance();
     if (c.level == null) return;
     var camera = context.levelState().cameraRenderState.pos;
-    float partial = context.levelState().worldPartialTicks;
+    float partial = oborokage.client.compat.ClientCompat.partialTick(context);
     int n = 0, vertices = 0;
     var cfg = ClientConfig.get();
     for (var scene : ListCopy.scenes()) {
@@ -135,13 +135,7 @@ final class BladeTrails {
   }
 
   private static void vertex(PoseStack.Pose p, VertexConsumer v, Vec3 a, int color) {
-    v.addVertex(p, (float) a.x, (float) a.y, (float) a.z)
-        .setColor(color)
-        .setUv(.5f, .5f)
-        .setLight(0x00f000f0)
-        .setOverlay(0)
-        .setUv3(0, 0)
-        .setNormal(p, 0, 1, 0);
+    oborokage.client.compat.ClientCompat.vertex(v, p, (float) a.x, (float) a.y, (float) a.z, color);
   }
 
   private static final class ListCopy {

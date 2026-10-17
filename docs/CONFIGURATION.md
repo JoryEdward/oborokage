@@ -30,6 +30,12 @@
 | terrainCutEnabled | true | 显式下蹲斩物总开关 |
 | terrainMaxBlocks / terrainBlocksPerTick | 32 / 4 | 1–128；1–8，每次总量和每tick处理量 |
 | terrainReach / terrainMaxHardness | 5 / 5 | 2–6格起手选点；1–50硬度，不允许不可破坏方块 |
+| bladeArts | true | 0.4.0 流派终式总开关：月蚀/雷链/霜蚀/虚刃、虚印、回霜、雷返 |
+| guardProjectiles | true | 交叉架刀同样防御正面投射物：精准窗口内抵消，持续格挡减至35% |
+| perfectDodgeTicks | 3 | 0–5；影步起手的见切帧，0为关闭 |
+| perfectDodgeIntent | 10 | 0–100；见切奖励剑意，每20 tick最多一次 |
+| riposteWindowTicks / riposteMultiplier | 20 / 1.5 | 0–60 tick；1–3倍。见切后影步结束起算的影返窗口及下一击倍率 |
+| voidMarkTicks / voidMarkBonus / voidMarkIntent | 100 / 1.25 / 8 | 20–400 tick；1–3倍；0–100。空弦满蓄力虚印的时长、双刀引爆倍率与剑意 |
 
 斩物数量=`floor(1+(terrainMaxBlocks-1)×charge²)`；起始硬度以2为基准，并随蓄力增长到配置上限。主刀普通战斗不触发斩物。方块原生事件、冒险规则、世界边界、正确工具掉落仍有效。默认5硬度不能斩黑曜石。
 

@@ -144,8 +144,7 @@ public final class TerrainCut {
             count,
             queue));
     TechniqueEvent.send(player, 3, eye, hit.getLocation(), charge);
-    player.swing(
-        player.getUsedItemHand(), net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+    oborokage.compat.Compat.swing(player, player.getUsedItemHand());
     return true;
   }
 

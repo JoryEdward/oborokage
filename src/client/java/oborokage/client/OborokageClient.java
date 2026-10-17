@@ -210,7 +210,7 @@ public final class OborokageClient implements ClientModInitializer {
     }
     if (cameraActive()
         && (!c.player.isAlive()
-            || c.gui.screen() != null
+            || oborokage.client.compat.ClientCompat.screenOpen(c)
             || c.options.getCameraType() != CameraType.THIRD_PERSON_BACK)) {
       restoreCamera(c);
       localAge = -1;

@@ -6,7 +6,7 @@ RELEASE = ROOT / 'release'
 RELEASE.mkdir(exist_ok=True)
 version = next(line.split('=', 1)[1].strip() for line in (ROOT/'gradle.properties').read_text().splitlines() if line.startswith('mod_version='))
 archive = RELEASE / f'oborokage-{version}-source.tar.gz'
-include = ['src', 'tools', 'gradle', 'gradlew', 'gradlew.bat', 'build.gradle', 'settings.gradle', 'gradle.properties', 'LICENSE', 'THIRD_PARTY_NOTICES.md', 'README.md', 'VERIFICATION.md', 'CHANGELOG.md', 'docs', 'config-examples', 'verification']
+include = ['src', 'versions', 'tools', 'gradle', 'gradlew', 'gradlew.bat', 'build.gradle', 'settings.gradle', 'gradle.properties', 'LICENSE', 'THIRD_PARTY_NOTICES.md', 'README.md', 'VERIFICATION.md', 'CHANGELOG.md', 'docs', 'config-examples', 'verification']
 include = [name for name in include if (ROOT / name).exists()]
 evidence = RELEASE / f'oborokage-{version}-evidence.zip'
 with zipfile.ZipFile(evidence, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as z:
@@ -26,7 +26,12 @@ with tarfile.open(archive) as tar:
     for m in production_files:
         source = ROOT / Path(m.name).relative_to(ROOT.name)
         assert tar.extractfile(m).read() == source.read_bytes(), m.name
-names = [f'oborokage-tachi-{version}.jar', f'oborokage-tachi-{version}-sources.jar', archive.name, evidence.name]
+# One JAR (and sources JAR) per Minecraft line, as produced by verification/matrix.py into dist/.
+jars = sorted(p for p in (ROOT / 'dist').glob(f'oborokage-tachi-{version}+*.jar'))
+assert len([p for p in jars if not p.name.endswith('-sources.jar')]) == 3, jars
+for jar in jars:
+    (RELEASE / jar.name).write_bytes(jar.read_bytes())
+names = [p.name for p in jars] + [archive.name, evidence.name]
 checks = {name: hashlib.sha256((RELEASE/name).read_bytes()).hexdigest() for name in names}
 (RELEASE/'SHA256SUMS.txt').write_text(''.join(f'{digest}  {name}\n' for name, digest in checks.items()))
 report = {'archive_members':len(members), 'verified_production_files':len(production_files), 'appledouble':0, 'python_cache':0, 'work_log':0, 'screenshots_separate_evidence_zip':True, 'copyfile_disable':'1', 'artifacts':checks}

@@ -25,14 +25,14 @@ public final class TechniqueFx {
                 .execute(
                     () -> {
                       if (e.style() < 0
-                          || e.style() > 3
+                          || e.style() > TechniqueEvent.RING
                           || !Double.isFinite(e.origin().lengthSqr())
                           || !Double.isFinite(e.end().lengthSqr())
                           || e.origin().distanceToSqr(e.end()) > 32 * 32) return;
                       if (effects.size() >= ClientConfig.get().trailMaxPlayers)
                         effects.removeFirst();
                       effects.add(new Fx(e, 0));
-                      DualClient.technique(e);
+                      if (e.style() != TechniqueEvent.RING) DualClient.technique(e);
                     }));
     ClientTickEvents.END_CLIENT_TICK.register(
         c -> {
@@ -60,7 +60,7 @@ public final class TechniqueFx {
             if (segments < 8) break;
             int cost = segments * 16;
             budget += cost;
-            float age = f.age + context.levelState().worldPartialTicks,
+            float age = f.age + oborokage.client.compat.ClientCompat.partialTick(context),
                 fade = Math.max(0, 1 - age / 12);
             var pose = context.poseStack();
             pose.pushPose();
@@ -75,7 +75,7 @@ public final class TechniqueFx {
                         : RenderTypes.beaconBeam(Oborokage.id("textures/fx/white.png"), true),
                     (p, v) -> {
                       Vec3 direction = f.event.end().subtract(f.event.origin());
-                      if (f.event.style() == 1) {
+                      if (f.event.style() == 1 || f.event.style() == TechniqueEvent.RING) {
                         double radius = direction.length() * (.65 + .35 * Math.min(1, age / 5));
                         ring(p, v, radius, .10, fade * .6f, 0x79dfea, segments);
                         ring(p, v, radius + .14, .018, fade, 0xf3fbff, segments);
@@ -138,13 +138,8 @@ public final class TechniqueFx {
       PoseStack.Pose pose, VertexConsumer v, Vec3 a, Vec3 b, Vec3 c, Vec3 d, float alpha, int rgb) {
     int color = (int) (255 * Math.clamp(alpha, 0, 1)) << 24 | rgb;
     for (Vec3 point : new Vec3[] {a, b, c, d, d, c, b, a})
-      v.addVertex(pose, (float) point.x, (float) point.y, (float) point.z)
-          .setColor(color)
-          .setUv(.5f, .5f)
-          .setLight(0xf000f0)
-          .setOverlay(0)
-          .setUv3(0, 0)
-          .setNormal(pose, 0, 1, 0);
+      oborokage.client.compat.ClientCompat.vertex(
+          v, pose, (float) point.x, (float) point.y, (float) point.z, color);
   }
 
   private TechniqueFx() {}

@@ -1,0 +1,262 @@
+Isolated run: /Users/mac/Documents/ChatGPT/Mods/Oborokage-0.4.0/build/verification-26.3-server
+[03:23:29] [main/INFO]: Loading Minecraft 26.3 with Fabric Loader 0.19.5
+[03:23:29] [main/INFO]: Mappings not present!
+[03:23:29] [main/INFO]: Loading 44 mods:
+	- fabric-api 0.162.0+26.3
+	   |-- fabric-advancement-api-v1 1.0.0+38c7a2d55d
+	   |-- fabric-api-base 2.0.6+fcdff87f5d
+	   |-- fabric-api-lookup-api-v1 2.0.24+3434d6d95d
+	   |-- fabric-biome-api-v1 20.1.0+c6aa69a85d
+	   |-- fabric-block-api-v1 3.1.0+0ae6f9115d
+	   |-- fabric-block-getter-api-v2 2.0.9+3434d6d95d
+	   |-- fabric-command-api-v2 3.1.2+fcdff87f5d
+	   |-- fabric-content-registries-v0 15.0.4+74ed1ea55d
+	   |-- fabric-convention-tags-v2 4.10.3+6b5b47fd5d
+	   |-- fabric-crash-report-info-v1 1.0.7+fcdff87f5d
+	   |-- fabric-creative-tab-api-v1 5.0.21+fcdff87f5d
+	   |-- fabric-data-attachment-api-v1 2.2.31+b9b88df45d
+	   |-- fabric-data-generation-api-v1 27.3.0+5be2453c5d
+	   |-- fabric-debug-api-v1 1.0.4+3434d6d95d
+	   |-- fabric-dimensions-v1 5.1.19+47f74c985d
+	   |-- fabric-entity-events-v1 6.0.4+3434d6d95d
+	   |-- fabric-events-interaction-v0 5.3.7+b9b88df45d
+	   |-- fabric-game-rule-api-v1 4.0.10+3434d6d95d
+	   |-- fabric-item-api-v1 14.7.0+cf6bc2db5d
+	   |-- fabric-lifecycle-events-v1 4.1.9+ffef5f675d
+	   |-- fabric-loot-api-v3 4.0.8+4068fd645d
+	   |-- fabric-menu-api-v1 2.0.28+ed66f0a35d
+	   |-- fabric-message-api-v1 7.0.10+3434d6d95d
+	   |-- fabric-networking-api-v1 6.3.9+b9b88df45d
+	   |-- fabric-object-builder-api-v1 24.1.10+3434d6d95d
+	   |-- fabric-particles-v1 5.0.25+3434d6d95d
+	   |-- fabric-permission-api-v1 1.0.8+fcdff87f5d
+	   |-- fabric-recipe-api-v1 10.0.9+b9b88df45d
+	   |-- fabric-registry-sync-v0 8.0.2+1ca9f6365d
+	   |-- fabric-rendering-fluids-v1 6.0.6+3434d6d95d
+	   |-- fabric-resource-conditions-api-v1 6.2.0+0d124ae85d
+	   |-- fabric-resource-loader-v0 3.3.26+4fc5413f5d
+	   |-- fabric-resource-loader-v1 3.0.4+ba0d6c0d5d
+	   |-- fabric-serialization-api-v1 2.0.7+74ed1ea55d
+	   |-- fabric-tag-api-v1 2.1.10+fcdff87f5d
+	   |-- fabric-transfer-api-v1 8.0.25+fcdff87f5d
+	   \-- fabric-transitive-access-wideners-v1 8.1.16+52268a0e5d
+	- fabricloader 0.19.5
+	   \-- mixinextras 0.5.5
+	- java 25
+	- minecraft 26.3
+	- oborokage 0.4.0+26.3
+	- oborokage_checks 1
+[03:23:29] [main/INFO]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=file:/Users/mac/Library/Application%20Support/minecraft/libraries/net/fabricmc/sponge-mixin/0.17.4+mixin.0.8.7/sponge-mixin-0.17.4+mixin.0.8.7.jar Service=Knot/Fabric Env=SERVER
+[03:23:29] [main/INFO]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.5).
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by com.sun.jna.Native in an unnamed module (file:/Users/mac/Library/Application%20Support/minecraft/libraries/net/java/dev/jna/jna/5.17.0/jna-5.17.0.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.joml.MemUtil$MemUtilUnsafe (file:/Users/mac/Library/Application%20Support/minecraft/libraries/org/joml/joml/1.10.9/joml-1.10.9.jar)
+WARNING: Please consider reporting this to the maintainers of class org.joml.MemUtil$MemUtilUnsafe
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[03:23:33] [main/INFO]: Oborokage 0.4.0+26.3 built for Minecraft 26.3
+[03:23:33] [main/INFO]: Environment: Environment[discoveryUrl=https://discovery.minecraftservices.com/minecraft/client, name=PROD]
+[03:23:33] [Worker-Main-1/INFO]: No existing world data, creating new world
+[03:23:33] [Worker-Main-1/ERROR]: No key layers in MapLike[{}]
+[03:23:33] [Worker-Main-5/INFO]: Loaded 1887 advancements
+[03:23:33] [main/INFO]: Applied 0 biome modifications to 0 of 67 new biomes in 575.1 μs
+[03:23:33] [Server thread/INFO]: Starting minecraft server version 26.3
+[03:23:33] [Server thread/INFO]: Loading properties
+[03:23:33] [Server thread/INFO]: Default game type: CREATIVE
+[03:23:33] [Server thread/INFO]: Generating keypair
+[03:23:33] [Server thread/INFO]: Starting Minecraft server on 127.0.0.1:0
+[03:23:34] [Server thread/WARN]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+[03:23:34] [Server thread/WARN]: The server will make no attempt to authenticate usernames. Beware.
+[03:23:34] [Server thread/WARN]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+[03:23:34] [Server thread/WARN]: To change this, set "online-mode" to "true" in the server.properties file.
+[03:23:34] [Server thread/INFO]: Preparing level "temporary-tachi-world"
+[03:23:34] [Server thread/INFO]: Selecting global world spawn...
+[03:23:34] [Server thread/INFO]: Loading 0 persistent chunks...
+[03:23:34] [Server thread/INFO]: Preparing spawn area: 100%
+[03:23:34] [Server thread/INFO]: Time elapsed: 167 ms
+[03:23:34] [Server thread/INFO]: Done (0.243s)! For help, type "help"
+[03:23:34] [Server thread/INFO]: Saving chunks for level 'ServerLevel[temporary-tachi-world]'/minecraft:overworld
+[03:23:34] [Server thread/INFO]: Saving chunks for level 'ServerLevel[temporary-tachi-world]'/minecraft:the_nether
+[03:23:34] [Server thread/INFO]: Saving chunks for level 'ServerLevel[temporary-tachi-world]'/minecraft:the_end
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS 26.3 temporary world and dynamic registries load
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Exactly five weapons
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Independent Oborokage tab begins with tachi
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Creative search includes tachi
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Independent tab contains five blades
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS No duplicate tachi in vanilla Combat tab
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Original 4096 durability retained
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Advancement loads: first_moon
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Advancement loads: twin_moons
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Advancement loads: alternating_finish
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Advancement loads: borrowed_blade
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Advancement loads: decisive_step
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Advancement loads: three_breaths
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Advancement loads: break_and_cut
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Advancement loads: twin_moon_ultimate
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Advancement loads: flawless_night
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Advancement loads: moon_still_hangs
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Overworld workbench recipe matches tachi
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Recipe outputs original full-durability weapon
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Overworld workbench recipe matches wakizashi
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Recipe outputs original full-durability weapon
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Blade supports mending oborokage:tachi
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Blade supports unbreaking oborokage:tachi
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Blade supports sharpness oborokage:tachi
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Blade supports mending oborokage:wakizashi
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Blade supports unbreaking oborokage:wakizashi
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Blade supports sharpness oborokage:wakizashi
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Full-charge nominal damage exactly 1000
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Server PvP defaults off
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=1000.0 healthBefore=1024.0 armor=2
+[03:23:34] [Server thread/INFO]: System chat: TachiTest has made the advancement [Monster Hunter]
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS 1024 HP + absorption + resistance + armor + invulnerable + totem killed with one death callback
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Full charge kills entity.minecraft.wither
+[03:23:34] [Server thread/INFO]: System chat: TachiTest has made the advancement [Free the End]
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Full charge kills entity.minecraft.ender_dragon
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Full charge kills entity.minecraft.warden
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS PvP off protects another player
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Owner immune to own strike
+[03:23:34] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=261.25 healthBefore=1024.0 armor=2
+[03:23:36] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Partial dash damages the same target exactly once
+[03:23:36] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Partial charge scales actual damage, input=261.25 health=765.93 max=1024.0
+[03:23:36] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=1000.0 healthBefore=1023.0 armor=2
+[03:23:37] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Swept player collision stops before solid wall: z=4.699999988079071
+[03:23:37] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Wall blocks damage to a target behind it
+[03:23:37] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Full dash kills visible target once
+[03:23:37] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS 26.3 challenge advancement JSON loads
+[03:23:38] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=1000.0 healthBefore=1024.0 armor=2
+[03:23:38] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=1000.0 healthBefore=1023.0 armor=2
+[03:23:38] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=1000.0 healthBefore=1024.0 armor=2
+[03:23:38] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=1000.0 healthBefore=1024.0 armor=2
+[03:23:39] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Three flawless full-charge kills award challenge after recovery
+[03:23:40] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=1000.0 healthBefore=1024.0 armor=2
+[03:23:40] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=1000.0 healthBefore=1023.0 armor=2
+[03:23:40] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=1000.0 healthBefore=1023.0 armor=2
+[03:23:41] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Taking damage prevents flawless challenge award
+[03:23:41] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=18.0 healthBefore=75.0 armor=2
+[03:23:42] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=14.0 healthBefore=57.288002 armor=2
+[03:23:42] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=26.0 healthBefore=43.512 armor=2
+[03:23:43] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=33.8 healthBefore=17.928 armor=2
+[03:23:43] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Dual chain has exactly four independent hit windows: hits=4 health=0.0 pos=(0.5, 100.0, 3.0) move=0
+[03:23:43] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Dual chain spends durability on the correct two blades: main=2 off=2 creative=false
+[03:23:43] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Alternating cross finisher awards feat
+[03:23:43] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Cross cut in broken-posture window awards feat
+[03:23:43] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Weapon possession and 20 tick dual stance award roots
+[03:23:43] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Front melee perfect guard is cancelled before health damage
+[03:23:43] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Perfect guard does not need health refunds
+[03:23:46] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Distinct precise guard event 45
+[03:23:48] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Distinct precise guard event 89
+[03:23:50] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Distinct precise guard event 133
+[03:23:50] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Three independent guards within window award challenge
+[03:23:50] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Confirmed hits and guards fill intent
+[03:23:50] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=42.0 healthBefore=20.0 armor=2
+[03:23:51] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Counter kills its own parried attacker and awards feat
+[03:23:51] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=65.0 healthBefore=1023.0 armor=2
+[03:23:52] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=84.5 healthBefore=959.04 armor=2
+[03:23:52] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=1000.0 healthBefore=875.89197 armor=2
+[03:23:54] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Dual ultimate final window retains 1000 plus execution
+[03:23:54] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Confirmed ultimate final kill awards feat
+[03:23:54] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Collision-aware backward shadow step travels at least two blocks
+[03:23:54] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=14.0 healthBefore=1024.0 armor=2
+[03:23:55] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Step followed by offhand hit awards feat
+[03:23:55] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=18.0 healthBefore=1010.224 armor=2
+[03:23:55] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=18.0 healthBefore=5.0 armor=2
+[03:23:55] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=18.0 healthBefore=5.0 armor=2
+[03:23:56] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Five distinct enemy kills across actions award flawless night
+[03:23:56] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Old full iaido accepts immediately regardless of dual resources
+[03:23:56] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Old iaido consumes no new intent
+[03:23:56] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Original sub-four-tick release remains invalid and free
+[03:23:56] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Original four-tick minimum and two durability retained
+[03:23:56] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Original partial cooldown lasts at least 18 ticks
+[03:23:56] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Original partial cooldown ends at 18 ticks
+[03:23:56] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Original 40 tick full release spends eight durability
+[03:23:56] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Original full cooldown lasts at least 45 ticks
+[03:23:56] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Original full cooldown ends at 45 ticks
+[03:23:56] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=18.0 healthBefore=991.512 armor=2
+[03:23:57] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS New dual cut is blocked by solid wall
+[03:23:57] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS New shadow step cannot cross a solid wall
+[03:23:58] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Switching offhand cancels pending new hit windows
+[03:23:58] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=18.0 healthBefore=972.80005 armor=2
+[03:23:58] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=18.0 healthBefore=1024.0 armor=2
+[03:23:59] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Replayed request sequence cannot execute a second attack
+[03:23:59] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Shadow step follows strafe input: left=(1.0, 0.0, 0.0) right=(-1.0, 0.0, 0.0)
+[03:23:59] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Perfect step slips an attack, grants intent and opens a riposte
+[03:23:59] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Slipped attack deals no damage
+[03:23:59] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Late step frames do not evade
+[03:24:00] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=21.0 healthBefore=1024.0 armor=2
+[03:24:00] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Riposte empowers the next cut: damage=21.0 expected=21.0
+[03:24:00] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Riposte is spent by the cut that lands
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Missed chain swing spends no durability
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Precise guard parries a frontal projectile hit
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Sustained guard reduces a frontal projectile to 35%
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Projectiles from behind are not guarded
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Drawn blades still break end crystals; living targets stay on the dual chain
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Void mark glows and is consumed exactly once by its owner
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Third frost stack freezes
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Freeze applies heavy slowness
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=8.0 healthBefore=1024.0 armor=2
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=8.0 healthBefore=1024.0 armor=2
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Thunder chain arcs to two enemies
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=8.0 healthBefore=1024.0 armor=2
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=8.0 healthBefore=1024.0 armor=2
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Void edge reaches the second rank
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=6.0 healthBefore=1024.0 armor=2
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Delayed frost echo strikes after its delay
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=112.0 healthBefore=1.0 armor=2
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Storm technique reports its kill
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Idle unequipped dual state is released
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Expired hand hit cannot survive through earlier kill records
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Fresh main and offhand hits restore valid sixty-second challenge window
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS 200ms RTT adds two ticks of guard allowance
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Guard latency compensation is capped at three ticks
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Move profiles cached; unknown move safely ignored
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Strength and Weakness affect new technique damage
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS External attack attribute affects offhand technique
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=20.0 healthBefore=1024.0 armor=2
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=23.0 healthBefore=1004.32 armor=2
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Offhand Sharpness modifies actual attack damage
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=32.5 healthBefore=981.688 armor=2
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Smite applies to undead from the correct blade
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=20.0 healthBefore=949.708 armor=2
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Offhand Fire Aspect executes native post-attack effect
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=23.75 healthBefore=930.028 armor=2
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Sweeping Edge improves area technique damage
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Bane of Arthropods executes native slowdown effect
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_PROBE damage=1.0 healthBefore=1024.0 armor=2
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Knockback enchantment affects new strikes
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Original and dual rules protect owned pets
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Pet protection is configurable
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Others-pet protection defaults to false
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Other owner's pet retains existing target behavior by default
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS protectOthersPets protects another owner's pet
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Original full-power iaido respects enabled others-pet protection
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Own and others-pet protection are independent
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Same-team entities are protected
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Finisher exemption tag loads from a datapack
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Exempt invulnerable target is not forced through execution
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Default original and dual target rules protect villagers and golems
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Friendly protection can be explicitly disabled
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS New main blade pairs with wakizashi: oborokage:raikiri
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS New main blade pairs with wakizashi: oborokage:frostmoon
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS New main blade pairs with wakizashi: oborokage:voidstring
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS New Overworld recipe assembles correct blade: oborokage:raikiri
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS New Overworld recipe assembles correct blade: oborokage:frostmoon
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS New Overworld recipe assembles correct blade: oborokage:voidstring
+[03:24:01] [Server thread/WARN]: Invalid allowPlayerDamage=wat, using false
+[03:24:01] [Server thread/WARN]: Invalid intentGainMultiplier, using 1.0
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Config clamps bounds and handles invalid numbers/booleans
+[03:24:01] [Server thread/WARN]: Cannot read ./config/oborokage-server.properties; using safe defaults: java.lang.IllegalArgumentException: Malformed \uxxxx encoding.
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Malformed config falls back without crashing
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Immediate guard rearm is rejected and grants no stamina
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Precise guard reflects approaching arrow with new ownership
+[03:24:01] [Server thread/INFO]: [STDOUT]: TACHI_CHECK PASS Same-source parries cannot repeatedly reward intent
+[03:24:01] [Server thread/INFO]: Stopping server
+[03:24:01] [Server thread/INFO]: Saving players
+[03:24:01] [Server thread/INFO]: Saving worlds
+[03:24:01] [Server thread/INFO]: Saving chunks for level 'ServerLevel[temporary-tachi-world]'/minecraft:overworld
+[03:24:01] [Server thread/INFO]: Saving chunks for level 'ServerLevel[temporary-tachi-world]'/minecraft:the_nether
+[03:24:01] [Server thread/INFO]: Saving chunks for level 'ServerLevel[temporary-tachi-world]'/minecraft:the_end
+Verified result records: 129

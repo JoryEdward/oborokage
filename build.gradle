@@ -3,10 +3,24 @@ plugins {
 	id 'maven-publish'
 }
 
-version = project.mod_version
+// One shared source tree, one JAR per Minecraft line. Version-specific classes live only in
+// versions/<target>/{main,client}/{java,resources}; a class must never exist in both places.
+def target = project.findProperty('mc_target') ?: '26.3'
+def targetProps = new Properties()
+file("versions/${target}.properties").withInputStream { targetProps.load(it) }
+targetProps.each { k, v -> project.ext.set(k, v) }
+
+version = "${project.mod_version}+${target}"
 group = project.maven_group
 base {
 	archivesName = project.archives_base_name
+}
+
+sourceSets {
+	main {
+		java.srcDir "versions/${target}/main/java"
+		resources.srcDir "versions/${target}/main/resources"
+	}
 }
 
 loom {
@@ -20,6 +34,13 @@ loom {
 	}
 }
 
+sourceSets {
+	client {
+		java.srcDir "versions/${target}/client/java"
+		resources.srcDir "versions/${target}/client/resources"
+	}
+}
+
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
@@ -27,9 +48,15 @@ dependencies {
 }
 
 processResources {
-	inputs.property "version", project.version
+	def expansion = [
+		"version": project.version,
+		"mc_dependency": project.mc_dependency,
+		"api_dependency": project.api_dependency,
+		"loader_dependency": project.loader_dependency
+	]
+	inputs.properties expansion
 	filesMatching("fabric.mod.json") {
-		expand "version": project.version
+		expand expansion
 	}
 }
 
@@ -57,6 +84,7 @@ tasks.named('jar') {
         jvmArgs = ['api','file','parser','tree','util','code'].collect { '--add-exports=jdk.compiler/com.sun.tools.javac.' + it + '=ALL-UNNAMED' }
         args = (taskName == 'formatJava' ? ['--replace'] : ['--dry-run', '--set-exit-if-changed']) +
                fileTree('src') { include '**/*.java' }.files.collect { it.path } +
+               fileTree('versions') { include '**/*.java' }.files.collect { it.path } +
                fileTree('verification/src') { include '**/*.java' }.files.collect { it.path }
     }
 }

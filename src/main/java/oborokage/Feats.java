@@ -12,18 +12,20 @@ public final class Feats {
   private static final class Record {
     int equipped;
     long nextRootCheck;
-    long noHurtSince, mainHit = -1000000, offHit = -1000000;
+    long mainHit = -1000000, offHit = -1000000;
     final Deque<Long> parries = new ArrayDeque<>();
     final Deque<Kill> kills = new ArrayDeque<>();
   }
 
   private record Kill(long tick, UUID target, long action, int hands) {}
 
+  private static final net.minecraft.tags.TagKey<net.minecraft.world.entity.EntityType<?>>
+      HOSTILES =
+          net.minecraft.tags.TagKey.create(
+              net.minecraft.core.registries.Registries.ENTITY_TYPE, Oborokage.id("hostiles"));
+
   public static boolean enemy(LivingEntity t) {
-    return t instanceof Enemy
-        || t.is(
-            net.minecraft.tags.TagKey.create(
-                net.minecraft.core.registries.Registries.ENTITY_TYPE, Oborokage.id("hostiles")));
+    return t instanceof Enemy || t.is(HOSTILES);
   }
 
   public static void clear() {
@@ -81,7 +83,6 @@ public final class Feats {
     r.parries.clear();
     r.kills.clear();
     r.mainHit = r.offHit = -1000000;
-    r.noHurtSince = p.level().getGameTime();
   }
 
   public static void parry(ServerPlayer p) {

@@ -41,7 +41,7 @@ public final class FocusedChecks {
     p.closeContainer();
     p.setGameMode(mode);
     p.setHealth(20);
-    p.damageCooldownTime = 0;
+    oborokage.compat.Compat.resetHurtCooldown(p);
     for (int x = 55; x <= 66; x++)
       for (int z = -3; z <= 10; z++) {
         l.getChunkAt(new BlockPos(x, 99, z));

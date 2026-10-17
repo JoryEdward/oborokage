@@ -1,0 +1,28 @@
+{
+  "parent": "oborokage:twin_moons",
+  "display": {
+    "icon": {
+      "id": "oborokage:wakizashi"
+    },
+    "title": {
+      "translate": "advancement.oborokage.afterimage.title"
+    },
+    "description": {
+      "translate": "advancement.oborokage.afterimage.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "complete": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "complete"
+    ]
+  ]
+}

@@ -2,13 +2,26 @@
 
 主代码包`oborokage`，Mod ID仍是`oborokage`。原创模型/图标/材质由tools中的参数建模脚本生成，声音使用原版事件；不含视频资源、其他作者模型或代码。格式工具是第三方[Google Java Format](https://github.com/google/google-java-format)1.29.0，只用于开发，不打入发布JAR。
 
-JDK25下：
+JDK25下，按版本线分别构建（默认 26.3）：
 
 ```sh
-./gradlew formatJavaCheck build --offline
+./gradlew formatJavaCheck build -Pmc_target=26.1
+./gradlew build -Pmc_target=26.2
+./gradlew build -Pmc_target=26.3
 ```
 
-首次机器没有依赖缓存时移除`--offline`。Loom固定1.18.4，Minecraft26.3，Loader0.19.5，Fabric API0.162.0+26.3。使用`./gradlew formatJava`统一格式。
+产物为 `build/libs/oborokage-tachi-<版本>+<线>.jar`。首次构建某条线需要联网下载对应 Minecraft 与 Fabric API。Loom 固定 1.18.4，Loader 0.19.5 编译；运行时依赖下限见 `versions/<线>.properties`。使用 `./gradlew formatJava` 统一格式（含 `versions/` 下的版本差异代码）。
+
+**版本差异只能放在 `versions/<线>/`**：公共源码通过 `oborokage.compat.Compat`（服务端）与 `oborokage.client.compat.ClientCompat`（客户端）调用有差异的接口；每条线各有一份同名实现。同一个类不能同时出现在公共源码和覆盖目录。
+
+## 全版本矩阵
+
+```sh
+python3 verification/matrix.py            # 构建三条线，并在 26.1/26.1.1/26.1.2/26.2/26.3 各跑服务端回归与客户端冒烟
+python3 verification/matrix.py --skip-build --server-only
+```
+
+本机已有的启动器实例（26.1.2、26.3）直接使用；其他版本由 `verification/make_instance.py` 从 Mojang 与 Fabric 官方源下载到 `build/mc-home`（SHA-1 校验，启动器资源缓存只读链接）。结果汇总在 `build/matrix.json`。注意 `./gradlew clean` 会删除整个 `build/`，包括这些隔离实例。
 
 ## 验证环境参数
 
@@ -16,6 +29,7 @@ JDK25下：
 
 ```sh
 python3 verification/run.py server
+python3 verification/run.py client --smoke
 python3 verification/run.py client --fullpack
 python3 verification/run.py client --maintenance --fullpack
 python3 verification/run.py client --shader --lowfx

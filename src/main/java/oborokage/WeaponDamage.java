@@ -62,7 +62,8 @@ public final class WeaponDamage {
       EnchantmentHelper.doPostAttackEffectsWithItemSource(level, target, source, blade);
       float kb = EnchantmentHelper.modifyKnockback(level, blade, target, source, 0);
       if (kb > 0)
-        target.knockback(
+        oborokage.compat.Compat.knockback(
+            target,
             kb * .5,
             Math.sin(Math.toRadians(p.getYRot())),
             -Math.cos(Math.toRadians(p.getYRot())),

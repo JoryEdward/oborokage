@@ -1,6 +1,0 @@
-PASS New skill does not create legacy SlashPayload scene: oborokage:raikiri
-PASS New skill uses DualClient scene: oborokage:raikiri
-PASS New skill does not create legacy SlashPayload scene: oborokage:frostmoon
-PASS New skill uses DualClient scene: oborokage:frostmoon
-PASS New skill does not create legacy SlashPayload scene: oborokage:voidstring
-PASS New skill uses DualClient scene: oborokage:voidstring

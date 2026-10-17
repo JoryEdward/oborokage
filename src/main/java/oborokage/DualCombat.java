@@ -56,6 +56,7 @@ public final class DualCombat {
     boolean buffered, guarding, blocked;
     double dodgeDistance;
     long stepFollowUntil;
+    long riposteUntil, lastEvadeTick = -99, evadeRewardAfter;
     float beforeDamageTotal = Float.NaN;
     ItemStack main, off;
     final Set<String> hits = new HashSet<>();
@@ -223,7 +224,8 @@ public final class DualCombat {
       var input = s.p.getLastClientInput();
       double z = (input.forward() ? 1 : 0) - (input.backward() ? 1 : 0),
           x = (input.left() ? 1 : 0) - (input.right() ? 1 : 0);
-      s.direction = forward.scale(z).add(forward.cross(new Vec3(0, 1, 0)).scale(x));
+      // up × forward is the player's left (yaw 0 faces +Z, so left is +X), matching vanilla input.
+      s.direction = forward.scale(z).add(new Vec3(0, 1, 0).cross(forward).scale(x));
       if (s.direction.lengthSqr() < .1) s.direction = forward.scale(-1);
       else s.direction = s.direction.normalize();
     } else s.direction = forward;
@@ -305,6 +307,13 @@ public final class DualCombat {
         }
       }
       if (p.connection != null && now - s.lastStatus >= 2) ownerStatus(s);
+      // Idle, fully recovered states of players who put the blades away carry no information.
+      if (!equipped(p)
+          && !s.wasEquipped
+          && s.move == null
+          && !s.guarding
+          && s.intent == 0
+          && s.stamina >= 100) it.remove();
     }
     Feats.retain(live);
   }
@@ -339,16 +348,22 @@ public final class DualCombat {
   private static void hit(State s, int window) {
     Move m = s.move;
     long now = s.level.getGameTime();
+    var cfg = ServerConfig.get();
     boolean execute = m.id() == Move.ULTIMATE && window == 2;
+    boolean finalCross = m.id() == Move.CROSS && window == m.hits().length - 1;
+    boolean riposte = m.id() != Move.ULTIMATE && now <= s.riposteUntil;
     int hand = m.hands()[window];
     ItemStack blade = hand == 0 ? s.main : s.off;
-    float reach = m.id() == Move.ULTIMATE ? (float) ServerConfig.get().ultimateReach : m.reach();
+    Item style = s.main.getItem();
+    boolean arts = BladeArts.enabled();
+    float reach = m.id() == Move.ULTIMATE ? (float) cfg.ultimateReach : m.reach();
     float baseDamage = WeaponDamage.scaled(s.p, blade, m.damage());
+    if (riposte) baseDamage *= (float) cfg.riposteMultiplier;
     int targets = 0;
-    s.p.swing(
-        hand == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND,
-        net.minecraft.world.item.component.SwingAnimation.DEFAULT,
-        true);
+    List<LivingEntity> struck = new ArrayList<>();
+    Set<UUID> struckIds = new HashSet<>();
+    oborokage.compat.Compat.swing(
+        s.p, hand == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
     s.level.playSound(
         null,
         s.p.blockPosition(),
@@ -361,7 +376,7 @@ public final class DualCombat {
             LivingEntity.class,
             s.p.getBoundingBox().inflate(reach, 2.0, reach),
             t -> allowed(s.p, t))) {
-      if (targets >= ServerConfig.get().maxTargetsPerWindow) break;
+      if (targets >= cfg.maxTargetsPerWindow) break;
       AABB b = target.getBoundingBox();
       Vec3 anchor = s.p.getEyePosition().add(0, -.35, 0);
       Vec3 point =
@@ -383,45 +398,46 @@ public final class DualCombat {
           != HitResult.Type.MISS) continue;
       if (!s.hits.add(window + ":" + target.getUUID())) continue;
       targets++;
+      struckIds.add(target.getUUID());
       float before = target.getHealth() + target.getAbsorptionAmount();
       Pressure pressure = s.pressure.get(target.getUUID());
       boolean broken = pressure != null && pressure.brokenUntil >= now;
-      target.damageCooldownTime = 0;
+      boolean marked = !execute && arts && BladeArts.consumeMark(s.p, target);
+      oborokage.compat.Compat.resetHurtCooldown(target);
       if (execute) LegacyIaido.strikeTarget(s.level, s.p, target, 1);
       else {
         WeaponDamage.apply(
             s.p,
             target,
             blade,
-            baseDamage * (broken ? 1.3f : 1),
+            baseDamage * (broken ? 1.3f : 1) * (marked ? (float) cfg.voidMarkBonus : 1),
             m.id() == Move.CROSS || m.id() == Move.ULTIMATE);
       }
       boolean useful =
           before > target.getHealth() + target.getAbsorptionAmount() || !target.isAlive();
       if (!useful) continue;
       if (Feats.enemy(target)) {
+        struck.add(target);
         s.chainHands |= hand == 0 ? 1 : 2;
         Feats.hit(s.p, hand);
         Long previous = s.rewarded.put(target.getUUID(), now);
         if (previous == null || now - previous >= 8) {
-          s.intent =
-              Math.min(
-                  100,
-                  s.intent
-                      + (int)
-                          Math.round(
-                              ServerConfig.get().hitIntent
-                                  * ServerConfig.get().intentGainMultiplier));
+          gainIntent(s, cfg.hitIntent);
           s.lastUsefulHit = now;
         }
+        if (marked) gainIntent(s, cfg.voidMarkIntent);
         int n = pressure == null || pressure.until < now ? 1 : pressure.count + 1;
+        // 胧影 · 月蚀: the original blade's cross presses posture one step harder.
+        if (arts && m.id() == Move.CROSS && style == Oborokage.TACHI) n++;
         if ((n >= 3 || m.id() == Move.ULTIMATE) && !broken) {
           s.pressure.put(
-              target.getUUID(),
-              new Pressure(0, now + 80, now + ServerConfig.get().postureDurationTicks));
+              target.getUUID(), new Pressure(0, now + 80, now + cfg.postureDurationTicks));
           if (target.getMaxHealth() < 100)
             target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 15, 2));
         } else if (!broken) s.pressure.put(target.getUUID(), new Pressure(n, now + 80, 0));
+        // 霜轮 · 霜蚀: every chain hit with the frost blade stacks frost; three stacks freeze.
+        if (arts && style == Oborokage.FROSTMOON && target.isAlive())
+          BladeArts.frostHit(s.p, target);
         if (broken && m.id() == Move.CROSS) Feats.award(s.p, "break_and_cut");
         if (hand == 1 && s.stepFollowUntil >= now) {
           Feats.award(s.p, "decisive_step");
@@ -437,10 +453,41 @@ public final class DualCombat {
       }
       send(s, ActionEvent.IMPACT, target.position().add(0, target.getBbHeight() * .5, 0));
     }
-    blade.hurtAndBreak(
-        execute ? 8 : m.id() == Move.ULTIMATE ? 2 : 1,
-        s.p,
-        hand == 0 ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
+    if (arts && finalCross) crossArt(s, style, baseDamage, struck, struckIds);
+    if (riposte && targets > 0) {
+      s.riposteUntil = 0;
+      s.level.playSound(
+          null, s.p.blockPosition(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1, 1.2f);
+    }
+    // Like a vanilla sword, an ordinary chain swing that meets nothing does not wear the blade.
+    if (targets > 0 || m.id() == Move.ULTIMATE)
+      blade.hurtAndBreak(
+          execute ? 8 : m.id() == Move.ULTIMATE ? 2 : 1,
+          s.p,
+          hand == 0 ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
+  }
+
+  /** The closing cross cut takes on the main blade's style. */
+  private static void crossArt(
+      State s, Item style, float baseDamage, List<LivingEntity> struck, Set<UUID> struckIds) {
+    if (style == Oborokage.RAIKIRI) {
+      // 赤霆 · 雷链: each struck enemy arcs to up to two others, at most four arcs per cross.
+      int arcs = 0;
+      for (LivingEntity from : struck) {
+        if (arcs >= 4) break;
+        arcs += BladeArts.thunderChain(s.p, s.main, from, baseDamage * .4f, struckIds);
+      }
+      if (arcs >= 2) Feats.award(s.p, "thunder_chain");
+    } else if (style == Oborokage.VOIDSTRING) {
+      // 空弦 · 虚刃: a short sword-qi line reaches the rank behind the first.
+      BladeArts.voidEdge(s.p, s.main, s.direction, baseDamage * .5f, struckIds);
+    }
+  }
+
+  private static void gainIntent(State s, int amount) {
+    s.intent =
+        Math.min(
+            100, s.intent + (int) Math.round(amount * ServerConfig.get().intentGainMultiplier));
   }
 
   public static boolean allowed(ServerPlayer p, LivingEntity e) {
@@ -451,30 +498,82 @@ public final class DualCombat {
     return new Vec3(-Math.sin(Math.toRadians(yaw)), 0, Math.cos(Math.toRadians(yaw)));
   }
 
+  /** The entity a guard faces: the melee attacker, or the projectile itself. */
+  private static Entity guardSource(DamageSource source) {
+    if (source.is(DamageTypes.MOB_ATTACK)
+        || source.is(DamageTypes.MOB_ATTACK_NO_AGGRO)
+        || source.is(DamageTypes.PLAYER_ATTACK))
+      return source.getEntity() instanceof LivingEntity attacker
+              && source.getDirectEntity() == attacker
+          ? attacker
+          : null;
+    if (ServerConfig.get().guardProjectiles
+        && source.is(net.minecraft.tags.DamageTypeTags.IS_PROJECTILE)
+        && source.getDirectEntity() != null) return source.getDirectEntity();
+    return null;
+  }
+
   private static boolean guardable(State s, DamageSource source) {
     if (!s.guarding || !equipped(s.p) || s.p.isUsingItem() || s.move != null) return false;
-    if (!source.is(DamageTypes.MOB_ATTACK)
-        && !source.is(DamageTypes.MOB_ATTACK_NO_AGGRO)
-        && !source.is(DamageTypes.PLAYER_ATTACK)) return false;
-    if (!(source.getEntity() instanceof LivingEntity attacker)
-        || source.getDirectEntity() != attacker) return false;
-    Vec3 v = attacker.position().subtract(s.p.position());
-    v = new Vec3(v.x, 0, v.z).normalize();
-    return forward(s.p.getYRot()).dot(v) > .2;
+    Entity from = guardSource(source);
+    if (from == null) return false;
+    Vec3 v = from.position().subtract(s.p.position());
+    if (!(from instanceof LivingEntity)) {
+      // A projectile is already touching the hitbox; its flight path tells where it came from.
+      Vec3 flight = from.getDeltaMovement().scale(-1);
+      if (flight.horizontalDistanceSqr() > 1e-4) v = flight;
+    }
+    v = new Vec3(v.x, 0, v.z);
+    if (v.lengthSqr() < 1e-6) return false;
+    return forward(s.p.getYRot()).dot(v.normalize()) > .2;
+  }
+
+  /** 见切: the first frames of a step slip any attack that comes from an entity. */
+  private static boolean evade(State s, DamageSource source) {
+    var cfg = ServerConfig.get();
+    if (cfg.perfectDodgeTicks <= 0 || s.move == null || s.move.id() != Move.DODGE) return false;
+    long now = s.level.getGameTime();
+    if (now - s.start > cfg.perfectDodgeTicks) return false;
+    Entity from = source.getEntity() != null ? source.getEntity() : source.getDirectEntity();
+    if (from == null
+        || from == s.p
+        || source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) return false;
+    if (s.lastEvadeTick != now) {
+      s.lastEvadeTick = now;
+      s.riposteUntil = s.start + s.move.length() + cfg.riposteWindowTicks;
+      if (now >= s.evadeRewardAfter) {
+        gainIntent(s, cfg.perfectDodgeIntent);
+        s.lastUsefulHit = now;
+        s.evadeRewardAfter = now + 20;
+      }
+      Feats.award(s.p, "afterimage");
+      send(s, ActionEvent.EVADE, s.p.position().add(0, 1, 0));
+      s.level.playSound(
+          null,
+          s.p.blockPosition(),
+          SoundEvents.ILLUSIONER_MIRROR_MOVE,
+          SoundSource.PLAYERS,
+          .7f,
+          1.4f);
+    }
+    return true;
   }
 
   public static boolean allowDamage(LivingEntity e, DamageSource source, float amount) {
     if (!(e instanceof ServerPlayer p) || amount <= 0) return true;
     if (p.isInvulnerableTo((ServerLevel) p.level(), source)
-        || p.damageCooldownTime > 10
+        || oborokage.compat.Compat.hurtCooldown(p) > 10
             && !source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_COOLDOWN)
             && amount <= ((oborokage.mixin.LivingDamageAccess) p).oborokage$lastHurt()) return true;
     State s = states.get(p.getUUID());
-    if (s == null || !guardable(s, source)) return true;
+    if (s == null) return true;
+    if (evade(s, source)) return false;
+    if (!guardable(s, source)) return true;
     long now = p.level().getGameTime();
     if (now - s.guardStart >= guardWindow(p) || s.stamina < ServerConfig.get().perfectGuardCost)
       return true;
-    var attacker = source.getEntity();
+    // Projectiles without an owner (dispensers) are credited to the projectile itself.
+    Entity attacker = source.getEntity() != null ? source.getEntity() : source.getDirectEntity();
     if (s.lastParryTick == now && Objects.equals(s.lastParrySource, attacker.getUUID()))
       return false;
     s.lastParryTick = now;
@@ -585,14 +684,7 @@ public final class DualCombat {
     if (prev == null || now - prev >= ServerConfig.get().parryRewardCooldownTicks) {
       if (s.parryRewards.size() > 128) s.parryRewards.clear();
       s.parryRewards.put(source, now);
-      s.intent =
-          Math.min(
-              100,
-              s.intent
-                  + (int)
-                      Math.round(
-                          ServerConfig.get().parryIntent
-                              * ServerConfig.get().intentGainMultiplier));
+      gainIntent(s, ServerConfig.get().parryIntent);
       s.lastUsefulHit = now;
     }
   }
@@ -613,12 +705,7 @@ public final class DualCombat {
     if (incoming.lengthSqr() < .01 || p.getLookAngle().dot(incoming.normalize().scale(-1)) < .2)
       return false;
     UUID source = arrow.getOwner() == null ? arrow.getUUID() : arrow.getOwner().getUUID();
-    if (!arrow.deflect(
-        net.minecraft.world.entity.projectile.ProjectileDeflection.AIM_DEFLECT,
-        p,
-        EntityReference.of(p),
-        true,
-        Math.max(.5, incoming.length()))) return false;
+    if (!oborokage.compat.Compat.deflect(arrow, p, Math.max(.5, incoming.length()))) return false;
     arrow.addTag("oborokage_reflected");
     arrow.setPos(p.getEyePosition().add(p.getLookAngle().scale(.65)));
     rewardParry(s, source);
@@ -647,8 +734,10 @@ public final class DualCombat {
     }
   }
 
+  /** Current action for a newly tracking viewer, or null when this player has no dual state. */
   public static ActionEvent snapshot(ServerPlayer p) {
-    State s = state(p);
+    State s = states.get(p.getUUID());
+    if (s == null) return null;
     return event(
         s,
         ActionEvent.START,

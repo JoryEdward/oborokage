@@ -1,6 +1,0 @@
-PASS Current installed mod combination loads in isolated recipe-book world
-PASS Both recipes start locked for fresh test player
-PASS Obtaining amethyst normally unlocks tachi recipe and advancement
-PASS Obtaining amethyst normally unlocks wakizashi recipe and advancement
-PASS Client recipe book receives tachi display
-PASS Client recipe book receives wakizashi display

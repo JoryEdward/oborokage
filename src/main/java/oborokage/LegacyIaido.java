@@ -72,10 +72,7 @@ public final class LegacyIaido {
       int delay = s.full ? FULL_WINDUP : 0;
       if (age < delay) continue;
       if (age == delay) {
-        p.swing(
-            InteractionHand.MAIN_HAND,
-            net.minecraft.world.item.component.SwingAnimation.DEFAULT,
-            true);
+        oborokage.compat.Compat.swing(p, InteractionHand.MAIN_HAND);
         s.level.playSound(
             null,
             p.blockPosition(),
@@ -164,8 +161,7 @@ public final class LegacyIaido {
             || p.getAbilities().instabuild
             || p.isSpectator()
             || !owner.canHarmPlayer(p))) return;
-    target.damageCooldownTime = 0;
-    target.setInvulnerableTime(0);
+    oborokage.compat.Compat.resetHurtCooldown(target);
     target.setLastHurtByPlayer(owner, 100);
     boolean execute = q >= 1 && !target.is(TargetRules.FINISHER_EXEMPT);
     DamageSource source =
@@ -183,7 +179,7 @@ public final class LegacyIaido {
       target.die(source);
     }
     if (execute && target.isAlive() && ServerConfig.get().finisherRetry) {
-      target.damageCooldownTime = 0;
+      oborokage.compat.Compat.resetHurtCooldown(target);
       target.hurtServer(
           level, source, Math.max(1000, target.getHealth() + target.getAbsorptionAmount()));
       if (target.isAlive()) {

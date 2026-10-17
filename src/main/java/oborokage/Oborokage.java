@@ -103,8 +103,10 @@ public final class Oborokage implements ModInitializer {
         (message, context) ->
             context.server().execute(() -> DualCombat.request(context.player(), message)));
     net.fabricmc.fabric.api.event.player.AttackEntityCallback.EVENT.register(
+        // Only living targets belong to the dual chain; crystals, frames, boats and minecarts keep
+        // the ordinary attack so they can still be broken with the blades drawn.
         (p, l, h, e, hit) ->
-            DualCombat.equipped(p)
+            DualCombat.equipped(p) && e instanceof net.minecraft.world.entity.LivingEntity
                 ? net.minecraft.world.InteractionResult.FAIL
                 : net.minecraft.world.InteractionResult.PASS);
     net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.ALLOW_DAMAGE.register(
@@ -117,12 +119,20 @@ public final class Oborokage implements ModInitializer {
           if (entity instanceof net.minecraft.server.level.ServerPlayer p
               && ServerPlayNetworking.canSend(viewer, ActionEvent.TYPE)) {
             var snapshot = DualCombat.snapshot(p);
-            if (snapshot.move() != 0) ServerPlayNetworking.send(viewer, snapshot);
+            if (snapshot != null && snapshot.move() != 0)
+              ServerPlayNetworking.send(viewer, snapshot);
           }
         });
     net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register(
         (handler, server) -> DualCombat.remove(handler.player));
     ServerConfig.load();
+    ConfigIO.LOG.info(
+        "Oborokage {} built for Minecraft {}",
+        net.fabricmc.loader.api.FabricLoader.getInstance()
+            .getModContainer(ID)
+            .map(c -> c.getMetadata().getVersion().getFriendlyString())
+            .orElse("?"),
+        oborokage.compat.Compat.TARGET);
     ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(
         (server, manager, success) -> {
           if (success) ServerConfig.load();

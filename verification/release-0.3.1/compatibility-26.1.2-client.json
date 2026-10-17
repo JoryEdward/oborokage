@@ -1,7 +1,0 @@
-{
-  "game": "26.1.2",
-  "artifact_sha256": "352bddc726d3ee58f836dadb0c6bd166eb535a8d806e16cb9aaf71d17dcda34c",
-  "exit_code": 255,
-  "client_world_loaded": false,
-  "scope": "Minecraft26.1.2 + FabricAPI0.155.3, isolated temporary world, no DH/fullpack or combat assertion"
-}

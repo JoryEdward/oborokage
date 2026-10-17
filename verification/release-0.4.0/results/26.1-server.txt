@@ -1,0 +1,129 @@
+PASS 26.1 temporary world and dynamic registries load
+PASS Exactly five weapons
+PASS Independent Oborokage tab begins with tachi
+PASS Creative search includes tachi
+PASS Independent tab contains five blades
+PASS No duplicate tachi in vanilla Combat tab
+PASS Original 4096 durability retained
+PASS Advancement loads: first_moon
+PASS Advancement loads: twin_moons
+PASS Advancement loads: alternating_finish
+PASS Advancement loads: borrowed_blade
+PASS Advancement loads: decisive_step
+PASS Advancement loads: three_breaths
+PASS Advancement loads: break_and_cut
+PASS Advancement loads: twin_moon_ultimate
+PASS Advancement loads: flawless_night
+PASS Advancement loads: moon_still_hangs
+PASS Overworld workbench recipe matches tachi
+PASS Recipe outputs original full-durability weapon
+PASS Overworld workbench recipe matches wakizashi
+PASS Recipe outputs original full-durability weapon
+PASS Blade supports mending oborokage:tachi
+PASS Blade supports unbreaking oborokage:tachi
+PASS Blade supports sharpness oborokage:tachi
+PASS Blade supports mending oborokage:wakizashi
+PASS Blade supports unbreaking oborokage:wakizashi
+PASS Blade supports sharpness oborokage:wakizashi
+PASS Full-charge nominal damage exactly 1000
+PASS Server PvP defaults off
+PASS 1024 HP + absorption + resistance + armor + invulnerable + totem killed with one death callback
+PASS Full charge kills entity.minecraft.wither
+PASS Full charge kills entity.minecraft.ender_dragon
+PASS Full charge kills entity.minecraft.warden
+PASS PvP off protects another player
+PASS Owner immune to own strike
+PASS Partial dash damages the same target exactly once
+PASS Partial charge scales actual damage, input=261.25 health=766.93 max=1024.0
+PASS Swept player collision stops before solid wall: z=4.699999988079071
+PASS Wall blocks damage to a target behind it
+PASS Full dash kills visible target once
+PASS 26.3 challenge advancement JSON loads
+PASS Three flawless full-charge kills award challenge after recovery
+PASS Taking damage prevents flawless challenge award
+PASS Dual chain has exactly four independent hit windows: hits=4 health=0.0 pos=(0.5, 100.0, 3.0) move=0
+PASS Dual chain spends durability on the correct two blades: main=2 off=2 creative=false
+PASS Alternating cross finisher awards feat
+PASS Cross cut in broken-posture window awards feat
+PASS Weapon possession and 20 tick dual stance award roots
+PASS Front melee perfect guard is cancelled before health damage
+PASS Perfect guard does not need health refunds
+PASS Distinct precise guard event 45
+PASS Distinct precise guard event 89
+PASS Distinct precise guard event 133
+PASS Three independent guards within window award challenge
+PASS Confirmed hits and guards fill intent
+PASS Counter kills its own parried attacker and awards feat
+PASS Dual ultimate final window retains 1000 plus execution
+PASS Confirmed ultimate final kill awards feat
+PASS Collision-aware backward shadow step travels at least two blocks
+PASS Step followed by offhand hit awards feat
+PASS Five distinct enemy kills across actions award flawless night
+PASS Old full iaido accepts immediately regardless of dual resources
+PASS Old iaido consumes no new intent
+PASS Original sub-four-tick release remains invalid and free
+PASS Original four-tick minimum and two durability retained
+PASS Original partial cooldown lasts at least 18 ticks
+PASS Original partial cooldown ends at 18 ticks
+PASS Original 40 tick full release spends eight durability
+PASS Original full cooldown lasts at least 45 ticks
+PASS Original full cooldown ends at 45 ticks
+PASS New dual cut is blocked by solid wall
+PASS New shadow step cannot cross a solid wall
+PASS Switching offhand cancels pending new hit windows
+PASS Replayed request sequence cannot execute a second attack
+PASS Shadow step follows strafe input: left=(1.0, 0.0, 0.0) right=(-1.0, 0.0, 0.0)
+PASS Perfect step slips an attack, grants intent and opens a riposte
+PASS Slipped attack deals no damage
+PASS Late step frames do not evade
+PASS Riposte empowers the next cut: damage=21.0 expected=21.0
+PASS Riposte is spent by the cut that lands
+PASS Missed chain swing spends no durability
+PASS Precise guard parries a frontal projectile hit
+PASS Sustained guard reduces a frontal projectile to 35%
+PASS Projectiles from behind are not guarded
+PASS Drawn blades still break end crystals; living targets stay on the dual chain
+PASS Void mark glows and is consumed exactly once by its owner
+PASS Third frost stack freezes
+PASS Freeze applies heavy slowness
+PASS Thunder chain arcs to two enemies
+PASS Void edge reaches the second rank
+PASS Delayed frost echo strikes after its delay
+PASS Storm technique reports its kill
+PASS Idle unequipped dual state is released
+PASS Expired hand hit cannot survive through earlier kill records
+PASS Fresh main and offhand hits restore valid sixty-second challenge window
+PASS 200ms RTT adds two ticks of guard allowance
+PASS Guard latency compensation is capped at three ticks
+PASS Move profiles cached; unknown move safely ignored
+PASS Strength and Weakness affect new technique damage
+PASS External attack attribute affects offhand technique
+PASS Offhand Sharpness modifies actual attack damage
+PASS Smite applies to undead from the correct blade
+PASS Offhand Fire Aspect executes native post-attack effect
+PASS Sweeping Edge improves area technique damage
+PASS Bane of Arthropods executes native slowdown effect
+PASS Knockback enchantment affects new strikes
+PASS Original and dual rules protect owned pets
+PASS Pet protection is configurable
+PASS Others-pet protection defaults to false
+PASS Other owner's pet retains existing target behavior by default
+PASS protectOthersPets protects another owner's pet
+PASS Original full-power iaido respects enabled others-pet protection
+PASS Own and others-pet protection are independent
+PASS Same-team entities are protected
+PASS Finisher exemption tag loads from a datapack
+PASS Exempt invulnerable target is not forced through execution
+PASS Default original and dual target rules protect villagers and golems
+PASS Friendly protection can be explicitly disabled
+PASS New main blade pairs with wakizashi: oborokage:raikiri
+PASS New main blade pairs with wakizashi: oborokage:frostmoon
+PASS New main blade pairs with wakizashi: oborokage:voidstring
+PASS New Overworld recipe assembles correct blade: oborokage:raikiri
+PASS New Overworld recipe assembles correct blade: oborokage:frostmoon
+PASS New Overworld recipe assembles correct blade: oborokage:voidstring
+PASS Config clamps bounds and handles invalid numbers/booleans
+PASS Malformed config falls back without crashing
+PASS Immediate guard rearm is rejected and grants no stamina
+PASS Precise guard reflects approaching arrow with new ownership
+PASS Same-source parries cannot repeatedly reward intent

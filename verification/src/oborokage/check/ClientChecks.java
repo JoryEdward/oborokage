@@ -279,7 +279,7 @@ public class ClientChecks implements ClientModInitializer {
           c,
           p -> {
             float health = p.getHealth();
-            p.setInvulnerableTime(0);
+            oborokage.compat.Compat.resetHurtCooldown(p);
             p.hurtServer((ServerLevel) p.level(), p.level().damageSources().mobAttack(practice), 6);
             normalGuardOK = Math.abs(health - p.getHealth() - 2.1f) < .15;
             System.out.println(
@@ -300,8 +300,8 @@ public class ClientChecks implements ClientModInitializer {
     }
     if (tick == 420)
       KeyMapping.click(
-          com.mojang.blaze3d.platform.InputConstants.Type.KEYBOARD.getOrCreate(
-              com.mojang.blaze3d.platform.InputConstants.KEY_V));
+          oborokage.client.compat.ClientCompat.keyboard()
+              .getOrCreate(com.mojang.blaze3d.platform.InputConstants.KEY_V));
     if (tick == 430)
       check(
           c.player.getZ() < -1.5, "Client keybinding triggers server collision-aware shadow step");
@@ -329,8 +329,8 @@ public class ClientChecks implements ClientModInitializer {
     }
     if (tick == 610)
       KeyMapping.click(
-          com.mojang.blaze3d.platform.InputConstants.Type.KEYBOARD.getOrCreate(
-              com.mojang.blaze3d.platform.InputConstants.KEY_J));
+          oborokage.client.compat.ClientCompat.keyboard()
+              .getOrCreate(com.mojang.blaze3d.platform.InputConstants.KEY_J));
     if (tick == 617) shot(c, "11-dual-ultimate-draw");
     if (tick == 624) {
       check(

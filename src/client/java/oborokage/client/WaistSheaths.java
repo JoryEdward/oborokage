@@ -84,8 +84,8 @@ final class WaistSheaths extends RenderLayer<AvatarRenderState, PlayerModel> {
       pose.pushPose();
       getParentModel().body.translateAndRotate(pose);
       pose.translate(sign * .23, .62, .15);
-      pose.rotateDegrees(Axis.YP, sign * 35);
-      pose.rotateDegrees(Axis.ZP, sign * 65);
+      oborokage.client.compat.ClientCompat.rotate(pose, Axis.YP, sign * 35);
+      oborokage.client.compat.ClientCompat.rotate(pose, Axis.ZP, sign * 65);
       pose.scale(.72f, .72f, .72f);
       item.submit(pose, nodes, light, OverlayTexture.NO_OVERLAY, 0);
       pose.popPose();

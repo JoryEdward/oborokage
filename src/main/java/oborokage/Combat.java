@@ -21,6 +21,7 @@ public final class Combat {
     DualCombat.clear();
     Feats.clear();
     TerrainCut.clear();
+    BladeArts.clear();
   }
 
   public static void markDamaged(java.util.UUID id) {
@@ -36,6 +37,7 @@ public final class Combat {
     LegacyIaido.tick(s);
     DualCombat.tick(s);
     TerrainCut.tick(s);
+    BladeArts.tick(s);
   }
 
   public static void strikeTarget(ServerLevel l, ServerPlayer p, LivingEntity e, float q) {

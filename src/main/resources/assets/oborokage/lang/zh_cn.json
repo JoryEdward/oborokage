@@ -53,5 +53,15 @@
   "advancement.oborokage.far_bank.title": "隔岸一线",
   "advancement.oborokage.far_bank.description": "用空弦剑气命中至少十六格外的敌人。",
   "advancement.oborokage.five_paths.title": "五刃同途",
-  "advancement.oborokage.five_paths.description": "同时携带胧影剑系的五把刀。"
+  "advancement.oborokage.five_paths.description": "同时携带胧影剑系的五把刀。",
+  "ui.oborokage.combo": "%s 连斩",
+  "ui.oborokage.riposte": "影返 · 下一击强化",
+  "advancement.oborokage.afterimage.title": "残影见切",
+  "advancement.oborokage.afterimage.description": "在影步起手的瞬间避开一次攻击。",
+  "advancement.oborokage.thunder_chain.title": "雷鸣三响",
+  "advancement.oborokage.thunder_chain.description": "以赤霆为主刀，双刀交叉斩的雷链同时波及两个敌人。",
+  "tooltip.oborokage.art.tachi": "双刀终式 · 月蚀：交叉斩额外施压，更快破势",
+  "tooltip.oborokage.art.storm": "双刀终式 · 雷链；满蓄力击杀时雷返，几乎立刻再次突击",
+  "tooltip.oborokage.art.frost": "双刀终式 · 霜蚀：三层冻结；满蓄力半秒后回霜二段",
+  "tooltip.oborokage.art.void": "双刀终式 · 虚刃；满蓄力剑气留下虚印，双刀命中引爆增伤"
 }

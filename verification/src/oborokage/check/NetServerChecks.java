@@ -54,7 +54,7 @@ public final class NetServerChecks implements ModInitializer {
                               .add(p.getLookAngle().multiply(1, 0, 1).normalize().scale(2)));
                       p.level().addFreshEntity(mob);
                       counterTarget = mob;
-                      p.damageCooldownTime = 0;
+                      oborokage.compat.Compat.resetHurtCooldown(p);
                       float health = p.getHealth();
                       p.hurtServer(p.level(), p.level().damageSources().mobAttack(mob), 6);
                       record(

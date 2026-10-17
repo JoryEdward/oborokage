@@ -29,6 +29,7 @@ public final class ServerChecks implements ModInitializer {
   Probe target, behind;
   double startZ;
   List<String> results = new ArrayList<>();
+  ExpansionChecks expansion;
 
   @Override
   public void onInitialize() {
@@ -75,7 +76,7 @@ public final class ServerChecks implements ModInitializer {
     if (stage == 0) {
       check(
           level.registryAccess().lookupOrThrow(Registries.ITEM) != null,
-          "26.3 temporary world and dynamic registries load");
+          oborokage.compat.Compat.TARGET + " temporary world and dynamic registries load");
       check(
           BuiltInRegistries.ITEM.keySet().stream()
                   .filter(i -> i.getNamespace().equals("oborokage"))
@@ -460,10 +461,18 @@ public final class ServerChecks implements ModInitializer {
       if (age == 12) DualCombat.request(player, new ActionRequest(sequence, 0));
       if (age == 25) {
         check(target.hits == 1, "Replayed request sequence cannot execute a second attack");
-        flawlessWindowBoundary();
-        ReviewChecks.run(this);
-        finish();
+        for (var probe : level.getEntitiesOfClass(Probe.class, player.getBoundingBox().inflate(48)))
+          probe.discard();
+        expansion = new ExpansionChecks(this);
+        stage = 16;
+        age = 0;
       }
+      return;
+    }
+    if (stage == 16 && expansion.tick()) {
+      flawlessWindowBoundary();
+      ReviewChecks.run(this);
+      finish();
     }
   }
 

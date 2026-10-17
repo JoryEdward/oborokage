@@ -35,6 +35,15 @@ public final class ServerConfig {
     public double ultimateReach = 6.5;
     public double dualDamageMultiplier = 1.0;
     public int maxTargetsPerWindow = 64;
+    public boolean bladeArts = true;
+    public boolean guardProjectiles = true;
+    public int perfectDodgeTicks = 3;
+    public int perfectDodgeIntent = 10;
+    public int riposteWindowTicks = 20;
+    public double riposteMultiplier = 1.5;
+    public int voidMarkTicks = 100;
+    public double voidMarkBonus = 1.25;
+    public int voidMarkIntent = 8;
   }
 
   private static volatile Values current = new Values();
@@ -75,6 +84,15 @@ public final class ServerConfig {
                 + "ultimateReach=6.5\n"
                 + "dualDamageMultiplier=1.0\n"
                 + "maxTargetsPerWindow=64\n"
+                + "bladeArts=true\n"
+                + "guardProjectiles=true\n"
+                + "perfectDodgeTicks=3\n"
+                + "perfectDodgeIntent=10\n"
+                + "riposteWindowTicks=20\n"
+                + "riposteMultiplier=1.5\n"
+                + "voidMarkTicks=100\n"
+                + "voidMarkBonus=1.25\n"
+                + "voidMarkIntent=8\n"
                 + "terrainCutEnabled=true\n"
                 + "terrainMaxBlocks=32\n"
                 + "terrainBlocksPerTick=4\n"
@@ -122,6 +140,18 @@ public final class ServerConfig {
         (double) ConfigIO.number(p, "dualDamageMultiplier", next.dualDamageMultiplier, 0.1, 10);
     next.maxTargetsPerWindow =
         (int) ConfigIO.number(p, "maxTargetsPerWindow", next.maxTargetsPerWindow, 8, 256);
+    next.bladeArts = ConfigIO.bool(p, "bladeArts", next.bladeArts);
+    next.guardProjectiles = ConfigIO.bool(p, "guardProjectiles", next.guardProjectiles);
+    next.perfectDodgeTicks =
+        (int) ConfigIO.number(p, "perfectDodgeTicks", next.perfectDodgeTicks, 0, 5);
+    next.perfectDodgeIntent =
+        (int) ConfigIO.number(p, "perfectDodgeIntent", next.perfectDodgeIntent, 0, 100);
+    next.riposteWindowTicks =
+        (int) ConfigIO.number(p, "riposteWindowTicks", next.riposteWindowTicks, 0, 60);
+    next.riposteMultiplier = ConfigIO.number(p, "riposteMultiplier", next.riposteMultiplier, 1, 3);
+    next.voidMarkTicks = (int) ConfigIO.number(p, "voidMarkTicks", next.voidMarkTicks, 20, 400);
+    next.voidMarkBonus = ConfigIO.number(p, "voidMarkBonus", next.voidMarkBonus, 1, 3);
+    next.voidMarkIntent = (int) ConfigIO.number(p, "voidMarkIntent", next.voidMarkIntent, 0, 100);
     next.terrainCutEnabled = ConfigIO.bool(p, "terrainCutEnabled", true);
     next.terrainMaxBlocks = (int) ConfigIO.number(p, "terrainMaxBlocks", 32, 1, 128);
     next.terrainBlocksPerTick = (int) ConfigIO.number(p, "terrainBlocksPerTick", 4, 1, 8);

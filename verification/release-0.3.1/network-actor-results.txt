@@ -1,9 +1,0 @@
-PASS Server equipment reaches attacker client
-PASS Own input predicts swing before delayed response
-PASS Confirmed server hits synchronize full intent over network
-PASS Attacker receives own ultimate camera
-PASS Attacker camera restores after networked ultimate
-PASS Idle right-click sends no stale cancel to owner
-PASS Delayed parry predicts counter immediately before acknowledgement
-PASS Server acknowledgement preserves the predicted counter
-PASS Client remains connected after dual actions

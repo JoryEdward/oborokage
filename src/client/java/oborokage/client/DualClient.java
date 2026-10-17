@@ -28,6 +28,8 @@ public final class DualClient {
   private static boolean guardHeld, guardPredictionRejected;
   private static final Set<Integer> guardRequests = new HashSet<>();
   private static int heartbeat;
+  private static int comboCount;
+  private static long comboShownUntil, riposteShownUntil;
   private static KeyMapping guard, step, ultimate;
 
   public static final class Scene {
@@ -65,15 +67,24 @@ public final class DualClient {
     guard =
         KeyMappingHelper.registerKeyMapping(
             new KeyMapping(
-                "key.oborokage.guard", InputConstants.Type.KEYBOARD, InputConstants.KEY_H, cat));
+                "key.oborokage.guard",
+                oborokage.client.compat.ClientCompat.keyboard(),
+                InputConstants.KEY_H,
+                cat));
     step =
         KeyMappingHelper.registerKeyMapping(
             new KeyMapping(
-                "key.oborokage.step", InputConstants.Type.KEYBOARD, InputConstants.KEY_V, cat));
+                "key.oborokage.step",
+                oborokage.client.compat.ClientCompat.keyboard(),
+                InputConstants.KEY_V,
+                cat));
     ultimate =
         KeyMappingHelper.registerKeyMapping(
             new KeyMapping(
-                "key.oborokage.ultimate", InputConstants.Type.KEYBOARD, InputConstants.KEY_J, cat));
+                "key.oborokage.ultimate",
+                oborokage.client.compat.ClientCompat.keyboard(),
+                InputConstants.KEY_J,
+                cat));
     ClientPlayNetworking.registerGlobalReceiver(
         ActionEvent.TYPE, (p, c) -> c.client().execute(() -> receive(p)));
     ClientTickEvents.END_CLIENT_TICK.register(DualClient::tick);
@@ -128,6 +139,23 @@ public final class DualClient {
                   + " · "
                   + ultimate.getTranslatedKeyMessage().getString();
           g.text(c.font, controls, x, y - 12, 0xffb7a6d5);
+          long now = c.level == null ? 0 : c.level.getGameTime();
+          if (comboCount >= 2 && now <= comboShownUntil) {
+            int fade = (int) (255 * Math.min(1, (comboShownUntil - now) / 20f));
+            g.text(
+                c.font,
+                Component.translatable("ui.oborokage.combo", comboCount),
+                x + 126,
+                y + 1,
+                (Math.max(24, fade) << 24) | 0xf2e5ff);
+          }
+          if (now <= riposteShownUntil)
+            g.text(
+                c.font,
+                Component.translatable("ui.oborokage.riposte"),
+                x + 126,
+                y + 10,
+                0xffffd88a);
           g.pose().popMatrix();
         });
   }
@@ -220,9 +248,13 @@ public final class DualClient {
   public static boolean interceptAttack() {
     var c = Minecraft.getInstance();
     if (c.player == null
-        || c.gui.screen() != null
+        || oborokage.client.compat.ClientCompat.screenOpen(c)
         || !DualCombat.equipped(c.player)
         || !ClientPlayNetworking.canSend(ActionRequest.TYPE)) return false;
+    // Non-living entities (end crystals, item frames, boats) keep the ordinary attack.
+    if (c.hitResult instanceof EntityHitResult entityHit
+        && !(entityHit.getEntity() instanceof net.minecraft.world.entity.LivingEntity))
+      return false;
     if (c.hitResult != null && c.hitResult.getType() == HitResult.Type.BLOCK) {
       if (c.player.isShiftKeyDown() || !hasTargetNearby(c)) return false;
     }
@@ -239,7 +271,22 @@ public final class DualClient {
       stamina = e.stamina();
     }
     var previous = scenes.get(e.actor());
-    if (e.kind() < 0 || e.kind() > ActionEvent.REJECT || !Move.known(e.move())) return;
+    if (e.kind() < 0 || e.kind() > ActionEvent.EVADE || !Move.known(e.move())) return;
+    if (e.kind() == ActionEvent.EVADE) {
+      if (local) riposteShownUntil = c.level.getGameTime() + 26;
+      for (int i = 0; i < 16; i++) {
+        double a = i * Math.PI * 2 / 16;
+        c.level.addParticle(
+            new DustParticleOptions(i % 2 == 0 ? 0xe8e2ff : 0x8f7ad0, .7f),
+            e.origin().x + Math.cos(a) * .55,
+            e.origin().y - .4 + (i % 4) * .3,
+            e.origin().z + Math.sin(a) * .55,
+            0,
+            .01,
+            0);
+      }
+      return;
+    }
     if (e.kind() == ActionEvent.REJECT) {
       if (local && guardRequests.remove(e.sequence())) guardPredictionRejected = true;
       if (local && pendingAttack == e.sequence()) pendingAttack = -1;
@@ -281,6 +328,11 @@ public final class DualClient {
     }
     if (e.kind() == ActionEvent.IMPACT || e.kind() == ActionEvent.PARRY) {
       if (local && e.kind() == ActionEvent.PARRY) counterUntil = c.level.getGameTime() + 12;
+      if (local && e.kind() == ActionEvent.IMPACT) {
+        long now = c.level.getGameTime();
+        comboCount = now <= comboShownUntil ? comboCount + 1 : 1;
+        comboShownUntil = now + 60;
+      }
       for (int i = 0; i < (e.kind() == ActionEvent.PARRY ? 12 : 7); i++) {
         double a = i * Math.PI * 2 / 18;
         c.level.addParticle(
@@ -320,6 +372,8 @@ public final class DualClient {
       pendingAttack = -1;
       nextCombo = Move.MAIN;
       comboUntil = stepUntil = ultimateUntil = counterUntil = 0;
+      comboCount = 0;
+      comboShownUntil = riposteShownUntil = 0;
     }
     if (c.player == null || c.level == null) return;
     if (!guided && DualCombat.equipped(c.player)) {
@@ -335,7 +389,10 @@ public final class DualClient {
         for (KeyMapping ours : new KeyMapping[] {guard, step, ultimate})
           if (!ours.isUnbound())
             for (KeyMapping other : c.options.keyMappings)
-              if (other != ours && ours.same(other)) {
+              // Debug keys only act while F3 is held, so sharing a letter with them is no conflict.
+              if (other != ours
+                  && other.getCategory() != KeyMapping.Category.DEBUG
+                  && ours.same(other)) {
                 c.player.sendSystemMessage(
                     Component.translatable(
                         "ui.oborokage.key_conflict",
@@ -344,7 +401,10 @@ public final class DualClient {
                 break;
               }
     }
-    boolean pressed = c.gui.screen() == null && DualCombat.equipped(c.player) && guard.isDown();
+    boolean pressed =
+        !oborokage.client.compat.ClientCompat.screenOpen(c)
+            && DualCombat.equipped(c.player)
+            && guard.isDown();
     if (pressed != guardHeld) {
       request(pressed ? 1 : 2);
       guardHeld = pressed;
@@ -356,9 +416,11 @@ public final class DualClient {
       heartbeat = 0;
     }
     while (step.consumeClick())
-      if (c.gui.screen() == null && DualCombat.equipped(c.player)) request(3);
+      if (!oborokage.client.compat.ClientCompat.screenOpen(c) && DualCombat.equipped(c.player))
+        request(3);
     while (ultimate.consumeClick())
-      if (c.gui.screen() == null && DualCombat.equipped(c.player)) request(4);
+      if (!oborokage.client.compat.ClientCompat.screenOpen(c) && DualCombat.equipped(c.player))
+        request(4);
     int predictedNext = 0, predictedSequence = -1;
     var it = scenes.values().iterator();
     while (it.hasNext()) {
@@ -512,11 +574,11 @@ public final class DualClient {
     float q = cut(s, partial, hand == InteractionHand.MAIN_HAND ? 0 : 1);
     if (s.event.move() == Move.GUARD) {
       pose.translate(-side * .15, .25, -.18);
-      pose.rotateDegrees(Axis.ZP, -side * 38);
+      oborokage.client.compat.ClientCompat.rotate(pose, Axis.ZP, -side * 38);
       return;
     }
     pose.translate(-side * .36 * q, .12 * q, -.20 * q);
-    pose.rotateDegrees(Axis.ZP, -side * 75 * q);
-    pose.rotateDegrees(Axis.YP, -side * 24 * q);
+    oborokage.client.compat.ClientCompat.rotate(pose, Axis.ZP, -side * 75 * q);
+    oborokage.client.compat.ClientCompat.rotate(pose, Axis.YP, -side * 24 * q);
   }
 }

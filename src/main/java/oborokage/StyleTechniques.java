@@ -12,9 +12,14 @@ import net.minecraft.world.phys.*;
 
 /** Bounded server hit volumes: assault line, radial control, long-range energy line. */
 public final class StyleTechniques {
-  public static boolean release(
+  /** Outcome of a release: whether it fired, and how many enemies it felled. */
+  public record Result(boolean fired, int kills) {
+    static final Result FAILED = new Result(false, 0);
+  }
+
+  public static Result release(
       ServerPlayer p, ItemStack blade, StyleBladeItem.Style style, float charge) {
-    if (Combat.active(p.getUUID())) return false;
+    if (Combat.active(p.getUUID())) return Result.FAILED;
     DualCombat.cancel(p);
     ServerLevel level = (ServerLevel) p.level();
     Vec3 origin = p.getEyePosition(), direction = p.getLookAngle();
@@ -31,7 +36,8 @@ public final class StyleTechniques {
     if (style != StyleBladeItem.Style.FROST && wall.getType() != HitResult.Type.MISS)
       end = wall.getLocation();
     double distance = origin.distanceTo(end);
-    int processed = 0, frozen = 0;
+    int processed = 0, frozen = 0, kills = 0;
+    boolean full = charge >= 1;
     float base =
         (style == StyleBladeItem.Style.STORM ? 28 : style == StyleBladeItem.Style.FROST ? 22 : 36)
             * (1 + charge * 3);
@@ -62,11 +68,16 @@ public final class StyleTechniques {
       processed++;
       boolean hit =
           WeaponDamage.apply(p, target, blade, scaled, style == StyleBladeItem.Style.FROST);
+      if (hit && !target.isAlive() && Feats.enemy(target)) kills++;
       if (hit && style == StyleBladeItem.Style.FROST) {
         target.addEffect(
             new MobEffectInstance(MobEffects.SLOWNESS, (int) (30 + charge * 50), 2), p);
         if (Feats.enemy(target) && ++frozen >= 3) Feats.award(p, "frost_truce");
+        if (target.isAlive()) BladeArts.frostHit(p, target);
       }
+      // 空弦 · 虚印: a full-charge line marks survivors for one empowered dual hit.
+      if (hit && full && style == StyleBladeItem.Style.VOID && target.isAlive())
+        BladeArts.mark(p, target);
       if (hit
           && style == StyleBladeItem.Style.VOID
           && delta.lengthSqr() >= 256
@@ -107,8 +118,11 @@ public final class StyleTechniques {
           .025,
           .015);
     }
+    // 霜轮 · 回霜: a full-charge ring answers itself half a second later.
+    if (full && style == StyleBladeItem.Style.FROST)
+      BladeArts.schedulePulse(p, blade, p.position().add(0, .9, 0), range, scaled * .6f, 10);
     TechniqueEvent.send(p, style.ordinal(), origin, end, charge);
-    p.swing(p.getUsedItemHand(), net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+    oborokage.compat.Compat.swing(p, p.getUsedItemHand());
     level.playSound(
         null,
         p.blockPosition(),
@@ -116,7 +130,7 @@ public final class StyleTechniques {
         SoundSource.PLAYERS,
         1,
         style == StyleBladeItem.Style.STORM ? 1.5f : .75f);
-    return true;
+    return new Result(true, kills);
   }
 
   private StyleTechniques() {}

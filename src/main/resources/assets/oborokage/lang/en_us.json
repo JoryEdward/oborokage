@@ -53,5 +53,15 @@
   "advancement.oborokage.far_bank.title": "Across the Far Bank",
   "advancement.oborokage.far_bank.description": "Land a Voidstring technique on a hostile at least sixteen blocks away.",
   "advancement.oborokage.five_paths.title": "Five Blades, One Path",
-  "advancement.oborokage.five_paths.description": "Carry all five Oborokage blades at once."
+  "advancement.oborokage.five_paths.description": "Carry all five Oborokage blades at once.",
+  "ui.oborokage.combo": "%s Hit Combo",
+  "ui.oborokage.riposte": "Riposte · next cut empowered",
+  "advancement.oborokage.afterimage.title": "Afterimage",
+  "advancement.oborokage.afterimage.description": "Slip an attack in the opening instant of a Shadow Step.",
+  "advancement.oborokage.thunder_chain.title": "Three Peals of Thunder",
+  "advancement.oborokage.thunder_chain.description": "With Raikiri as the main blade, chain a cross cut's lightning into two more enemies.",
+  "tooltip.oborokage.art.tachi": "Dual finisher · Eclipse: the cross cut breaks posture faster",
+  "tooltip.oborokage.art.storm": "Dual finisher · Thunder Chain; a full-charge kill recalls the assault almost at once",
+  "tooltip.oborokage.art.frost": "Dual finisher · Rime: three stacks freeze; full charge rings again after half a second",
+  "tooltip.oborokage.art.void": "Dual finisher · Void Edge; full charge leaves a mark that dual hits detonate"
 }

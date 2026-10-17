@@ -26,8 +26,22 @@ public final class StyleBladeItem extends TachiItem {
     if (!(user instanceof ServerPlayer p) || 72000 - remaining < 4) return false;
     float charge = Math.min(1, (72000 - remaining) / (style == Style.STORM ? 20f : 40f));
     if (p.isShiftKeyDown()) return super.releaseUsing(stack, level, user, remaining);
-    if (!StyleTechniques.release(p, stack, style, charge)) return false;
-    p.getCooldowns().addCooldown(stack, style == Style.STORM ? 14 : style == Style.FROST ? 30 : 36);
+    var result = StyleTechniques.release(p, stack, style, charge);
+    if (!result.fired()) return false;
+    // 赤霆 · 雷返: a full-charge assault that fells an enemy is ready again almost at once.
+    boolean recall =
+        style == Style.STORM && charge >= 1 && result.kills() > 0 && BladeArts.enabled();
+    p.getCooldowns()
+        .addCooldown(
+            stack, recall ? 4 : style == Style.STORM ? 14 : style == Style.FROST ? 30 : 36);
+    if (recall)
+      level.playSound(
+          null,
+          p.blockPosition(),
+          net.minecraft.sounds.SoundEvents.LIGHTNING_BOLT_IMPACT,
+          net.minecraft.sounds.SoundSource.PLAYERS,
+          .5f,
+          2f);
     stack.hurtAndBreak(
         charge >= 1 ? 6 : 2,
         p,
@@ -68,6 +82,10 @@ public final class StyleBladeItem extends TachiItem {
         net.minecraft.network.chat.Component.translatable(
                 "tooltip.oborokage." + style.name().toLowerCase(java.util.Locale.ROOT))
             .withStyle(net.minecraft.ChatFormatting.AQUA));
+    out.accept(
+        net.minecraft.network.chat.Component.translatable(
+                "tooltip.oborokage.art." + style.name().toLowerCase(java.util.Locale.ROOT))
+            .withStyle(net.minecraft.ChatFormatting.DARK_AQUA));
     out.accept(
         net.minecraft.network.chat.Component.translatable("tooltip.oborokage.terrain")
             .withStyle(net.minecraft.ChatFormatting.GRAY));
