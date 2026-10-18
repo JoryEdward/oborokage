@@ -123,7 +123,7 @@ public final class Oborokage implements ModInitializer {
         // keep
         // the ordinary attack so they can still be broken with a blade drawn.
         (p, l, h, e, hit) ->
-            DualCombat.holdsBlade(p) && e instanceof net.minecraft.world.entity.LivingEntity
+            DualCombat.ownsAttack(p, e)
                 ? net.minecraft.world.InteractionResult.FAIL
                 : net.minecraft.world.InteractionResult.PASS);
     net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.ALLOW_DAMAGE.register(

@@ -23,7 +23,7 @@ public final class DualClient {
   public static int intent, stamina = 100;
   private static int sequence, nextCombo = Move.MAIN, pendingAttack = -1;
   private static long comboUntil, stepUntil, ultimateUntil, counterUntil;
-  private static boolean guided;
+  private static boolean guided, guidedSolo;
   private static Object level;
   private static boolean guardHeld, guardPredictionRejected;
   private static final Set<Integer> guardRequests = new HashSet<>();
@@ -37,7 +37,8 @@ public final class DualClient {
     public float age;
     public boolean predicted;
     float stopAt = -99, stopLen;
-    float pitch = Float.NaN;
+    // Per-cut heading and pitch the light is drawn with (see SlashFx).
+    float[] cutYaw, cutPitch;
 
     Scene(ActionEvent e, float age) {
       event = e;
@@ -290,7 +291,7 @@ public final class DualClient {
     var c = Minecraft.getInstance();
     if (c.player == null
         || oborokage.client.compat.ClientCompat.screenOpen(c)
-        || !DualCombat.holdsBlade(c.player)
+        || !DualCombat.chainsReady(c.player)
         || !ClientPlayNetworking.canSend(ActionRequest.TYPE)) return false;
     // Non-living entities (end crystals, item frames, boats) keep the ordinary attack.
     if (c.hitResult instanceof EntityHitResult entityHit
@@ -441,6 +442,13 @@ public final class DualClient {
       comboShownUntil = riposteShownUntil = 0;
     }
     if (c.player == null || c.level == null) return;
+    // A single blade has its own chain since 0.6.0; say so once, the first time one is drawn.
+    if (!guidedSolo && DualCombat.holdsBlade(c.player) && !DualCombat.equipped(c.player)) {
+      guidedSolo = true;
+      if (ClientConfig.get().tutorial)
+        c.player.sendSystemMessage(
+            Component.translatable("ui.oborokage.guide_solo", ultimate.getTranslatedKeyMessage()));
+    }
     if (!guided && DualCombat.equipped(c.player)) {
       guided = true;
       if (ClientConfig.get().tutorial)
@@ -552,8 +560,7 @@ public final class DualClient {
     Move m = Move.of(id);
     for (int w = 0; w < m.hits().length; w++) {
       int hit = m.hits()[w];
-      if (!(before < hit && scene.age >= hit) || !struckSomething(c, m, scene.event.yaw()))
-        continue;
+      if (!(before < hit && scene.age >= hit) || !struckSomething(c, m)) continue;
       boolean big = Move.finisher(id) && w == m.hits().length - 1;
       scene.hitstop(hit, big ? 2.2f : 1.3f);
       var style = BladeStyle.of(c.player.getMainHandItem());
@@ -562,19 +569,19 @@ public final class DualClient {
     }
   }
 
-  private static boolean struckSomething(Minecraft c, Move m, float yaw) {
+  /** Same cone as the server's plain cut: along the current line of sight, up and down too. */
+  private static boolean struckSomething(Minecraft c, Move m) {
     Vec3 eye = c.player.getEyePosition();
-    Vec3 f = new Vec3(-Math.sin(Math.toRadians(yaw)), 0, Math.cos(Math.toRadians(yaw)));
+    Vec3 look = c.player.getLookAngle();
     double reach = m.reach() + .6, cos = Math.cos(Math.toRadians(Math.min(359, m.arc()) / 2));
     for (var e :
         c.level.getEntitiesOfClass(
             net.minecraft.world.entity.LivingEntity.class,
-            c.player.getBoundingBox().inflate(reach, 2.0, reach),
+            c.player.getBoundingBox().inflate(reach),
             e -> e != c.player && e.isAlive() && !e.isSpectator())) {
       Vec3 d = e.getBoundingBox().getCenter().subtract(eye);
-      Vec3 h = new Vec3(d.x, 0, d.z);
       if (d.lengthSqr() > reach * reach) continue;
-      if (h.lengthSqr() < .2 || m.arc() >= 359 || h.normalize().dot(f) >= cos) return true;
+      if (d.lengthSqr() < .2 || m.arc() >= 359 || d.normalize().dot(look) >= cos) return true;
     }
     return false;
   }
@@ -632,6 +639,12 @@ public final class DualClient {
     off.xRot = -.78f + .68f * b;
     off.yRot = sign * (1.35f - 2.8f * b);
     off.zRot = sign * (.45f - .5f * b);
+    if (move != Move.ULTIMATE) {
+      // Plain cuts follow the eyes: both arms lift or drop with the head.
+      float aim = model.head.xRot * .6f;
+      main.xRot += aim;
+      off.xRot += aim;
+    }
     model.body.xRot = .10f;
     model.body.yRot = sign * (-.2f + .48f * a - .4f * b);
     if (move == Move.ULTIMATE && s.age > 18 && s.age < 28)

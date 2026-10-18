@@ -102,7 +102,14 @@ public final class LegacyIaido {
         Vec3 to = p.position();
         s.blocked =
             to.subtract(from).horizontalDistanceSqr() < requested.horizontalDistanceSqr() * .96;
-        if (p.connection != null) p.connection.teleport(to.x, to.y, to.z, p.getYRot(), p.getXRot());
+        // Rotation is sent as relative zero: the client keeps the view it is turning, instead of
+        // snapping back to the server's last known angles every tick of the dash.
+        if (p.connection != null)
+          p.connection.teleport(
+              new net.minecraft.world.entity.PositionMoveRotation(to, Vec3.ZERO, 0, 0),
+              java.util.Set.of(
+                  net.minecraft.world.entity.Relative.Y_ROT,
+                  net.minecraft.world.entity.Relative.X_ROT));
         sweep(s, from, to);
       }
       if (age == delay + 9 && !s.full) {

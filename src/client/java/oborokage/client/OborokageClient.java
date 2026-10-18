@@ -148,6 +148,9 @@ public final class OborokageClient implements ClientModInitializer {
       return;
     }
     DualClient.scenes.remove(p.owner());
+    // A new draw replaces the owner's previous one. A full draw's scene lasts 64 ticks, longer than
+    // its 45-tick cooldown, and poses and the sheath model read the first scene they find.
+    scenes.removeIf(s -> s.p.owner() == p.owner());
     if (scenes.size() > 40) scenes.removeFirst();
     scenes.add(new Scene(p));
     if (p.owner() == c.player.getId()) {

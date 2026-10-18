@@ -86,5 +86,6 @@
   "tooltip.oborokage.solo.moon": "Alone · three-cut chain; finisher \"Falling Petals\": a full turn that quickens the feet",
   "tooltip.oborokage.solo.storm": "Alone · three-cut chain; finisher \"Thunderflash\": lightning leaps to enemies beyond reach",
   "tooltip.oborokage.solo.frost": "Alone · three-cut chain; every cut frosts, finisher \"Frost Bloom\" rings out a chill",
-  "tooltip.oborokage.solo.void": "Alone · three-cut chain; finisher \"Void Edge\": sword-qi pierces the rank behind"
+  "tooltip.oborokage.solo.void": "Alone · three-cut chain; finisher \"Void Edge\": sword-qi pierces the rank behind",
+  "ui.oborokage.guide_solo": "One blade drawn: attack for a three-cut chain (the third is the blade's finisher), aimed wherever you look; hold use to charge a technique; %s ultimate (at 100 intent). Put the wakizashi in your offhand for two blades."
 }

@@ -86,5 +86,6 @@
   "tooltip.oborokage.solo.moon": "单持左键 · 三段连斩；终式「落花」：回身一周，命中后步履轻快",
   "tooltip.oborokage.solo.storm": "单持左键 · 三段连斩；终式「雷闪」：雷光跳向射程外的敌人",
   "tooltip.oborokage.solo.frost": "单持左键 · 三段连斩；每斩叠霜，终式「霜华」：冰环迟滞",
-  "tooltip.oborokage.solo.void": "单持左键 · 三段连斩；终式「虚刃」：剑气贯穿后排"
+  "tooltip.oborokage.solo.void": "单持左键 · 三段连斩；终式「虚刃」：剑气贯穿后排",
+  "ui.oborokage.guide_solo": "单持一把刀：左键三段连斩（第三段为本刀终式），视线向哪里刀就斩向哪里；右键蓄力本刀技；%s 奥义（剑意满百）。副手拿胧月脇差即为双刀。"
 }

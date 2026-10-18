@@ -98,7 +98,9 @@ final class SlashFx {
       boolean big,
       int hand,
       float t,
-      float dur) {}
+      float dur,
+      float yaw,
+      float pitch) {}
 
   private static List<Live> live(Minecraft c, float partial) {
     List<Live> out = new ArrayList<>();
@@ -110,13 +112,19 @@ final class SlashFx {
         continue;
       Entity e = c.level.getEntity(scene.event.actor());
       if (e == null) continue;
-      // The pitch the actor was looking at when the move began.
-      if (Float.isNaN(scene.pitch)) scene.pitch = e.getXRot();
+      // Plain cuts follow the view; ultimates keep the heading they were cast with.
+      boolean plain = !Move.ultimate(id);
+      boolean eyes = e == c.player && firstPerson(c);
       BladeStyle main =
           e instanceof Player p ? BladeStyle.of(p.getMainHandItem()) : BladeStyle.TACHI;
       if (main == null) main = BladeStyle.TACHI;
       Move move = Move.of(id);
       float age = scene.time(partial);
+      if (plain && (scene.cutYaw == null || scene.cutYaw.length != move.hits().length)) {
+        scene.cutYaw = new float[move.hits().length];
+        scene.cutPitch = new float[move.hits().length];
+        Arrays.fill(scene.cutYaw, Float.NaN);
+      }
       for (int w = 0; w < move.hits().length; w++) {
         int logical = move.hands()[w];
         BladeStyle style = logical == 1 && !Move.ultimate(id) ? BladeStyle.WAKIZASHI : main;
@@ -130,7 +138,18 @@ final class SlashFx {
                 || id == Move.ULT_MOON && w == 8;
         int hand =
             e instanceof Player p && p.getMainArm() == HumanoidArm.LEFT ? 1 - logical : logical;
-        out.add(new Live(scene, e, cut, style, big, hand, t, dur));
+        float yaw = scene.event.yaw(), pitch = 0;
+        if (plain) {
+          // While the edge travels the cut turns with the view; once drawn it stays where it was
+          // cut. Seen through the player's own eyes it always stays in front of them.
+          if (eyes || t <= dur || Float.isNaN(scene.cutYaw[w])) {
+            scene.cutYaw[w] = e.getViewYRot(partial);
+            scene.cutPitch[w] = e.getViewXRot(partial);
+          }
+          yaw = scene.cutYaw[w];
+          pitch = scene.cutPitch[w];
+        }
+        out.add(new Live(scene, e, cut, style, big, hand, t, dur, yaw, pitch));
       }
     }
     return out;
@@ -157,18 +176,20 @@ final class SlashFx {
   /** The local player's own cuts while looking through their eyes. */
   private static boolean firstPerson(Live l) {
     var c = Minecraft.getInstance();
-    return l.actor == c.player
-        && c.options.getCameraType().isFirstPerson()
-        && !Cinematics.cameraActive();
+    return l.actor == c.player && firstPerson(c);
+  }
+
+  private static boolean firstPerson(Minecraft c) {
+    return c.options.getCameraType().isFirstPerson() && !Cinematics.cameraActive();
   }
 
   private static Frame frame(Live l) {
-    Vec3 f = forward(l.scene.event.yaw());
+    Vec3 f = forward(l.yaw);
     Vec3 right = f.cross(UP);
     Vec3 up = UP;
-    // 空弦 cuts along the line of sight: the whole cut tips up or down with the eyes.
-    if (l.style == BladeStyle.VOIDSTRING && !Float.isNaN(l.scene.pitch)) {
-      double pitch = Math.toRadians(l.scene.pitch);
+    // The whole cut tips up or down with the eyes.
+    if (l.pitch != 0) {
+      double pitch = Math.toRadians(l.pitch);
       f = f.scale(Math.cos(pitch)).add(0, -Math.sin(pitch), 0);
       up = right.cross(f);
     }

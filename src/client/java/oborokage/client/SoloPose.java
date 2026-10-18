@@ -64,6 +64,10 @@ final class SoloPose {
     off.zRot = sign * cut[5];
     model.body.yRot = sign * cut[6];
     model.body.xRot = cut[7];
+    // The cut goes where the eyes are on, so the arms follow the head up and down.
+    float aim = model.head.xRot * .6f;
+    main.xRot += aim;
+    off.xRot += aim;
     // Arms are not children of the body: carry the shoulders round with its twist, as vanilla's
     // own attack swing does.
     float yaw = model.body.yRot;

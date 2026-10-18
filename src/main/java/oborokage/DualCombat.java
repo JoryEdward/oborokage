@@ -52,7 +52,8 @@ public final class DualCombat {
     long lastParryTick = -99;
     Move move;
     Vec3 direction = Vec3.ZERO;
-    // Where the eyes pointed when the move began; 空弦 cuts along it, up and down included.
+    // Where the eyes point. Plain cuts take it again on the tick they land, so they follow a view
+    // turned during the wind-up, up and down included.
     Vec3 aim = Vec3.ZERO;
     float yaw;
     boolean buffered, guarding, blocked;
@@ -90,6 +91,20 @@ public final class DualCombat {
   /** Holding any of the five blades in the main hand: enough for the ultimate and the HUD. */
   public static boolean holdsBlade(Player p) {
     return BladeStyle.of(p.getMainHandItem()) != null;
+  }
+
+  /**
+   * Whether a left click on this entity belongs to the blade chains instead of the vanilla attack.
+   * Riding, gliding and spectating keep the vanilla behaviour: the chains refuse those states, so
+   * taking the click there would swallow it.
+   */
+  public static boolean ownsAttack(Player p, Entity target) {
+    return target instanceof LivingEntity && chainsReady(p);
+  }
+
+  /** The player state in which a left click starts a blade chain. */
+  public static boolean chainsReady(Player p) {
+    return holdsBlade(p) && !p.isSpectator() && !p.isPassenger() && !p.isFallFlying();
   }
 
   public static boolean equipped(Player p) {
@@ -316,7 +331,10 @@ public final class DualCombat {
             || id == Move.SOLO_3 && age == 6) stopMotion(s);
         if (id == Move.ULTIMATE && age >= 7 && age < 11) move(s, s.direction.scale(.9));
         // The single-blade finisher steps into its cut.
-        if (id == Move.SOLO_3 && age >= 3 && age < 6) move(s, s.direction.scale(.3));
+        if (id == Move.SOLO_3 && age >= 3 && age < 6) {
+          look(s);
+          move(s, s.direction.scale(.3));
+        }
         if (Move.ultimate(id)) Ultimates.tick(s, age);
         for (int i = 0; i < s.move.hits().length; i++) if (age == s.move.hits()[i]) hit(s, i);
         if (age >= s.move.length()) {
@@ -379,6 +397,7 @@ public final class DualCombat {
     boolean finalCross = m.id() == Move.CROSS && window == m.hits().length - 1;
     boolean ultimate = Move.ultimate(m.id());
     boolean riposte = !ultimate && now <= s.riposteUntil;
+    if (!ultimate) look(s);
     int hand = m.hands()[window];
     // A solo ultimate has no offhand blade; its offhand beats are cut by the main blade.
     ItemStack blade = hand == 0 || BladeStyle.of(s.off) == null ? s.main : s.off;
@@ -388,8 +407,8 @@ public final class DualCombat {
     boolean solo = Move.solo(m.id());
     // 胧月 · 落花: alone in the hand, the short blade's finisher is a full turn.
     float arc = arts && m.id() == Move.SOLO_3 && style == Oborokage.WAKIZASHI ? 360 : m.arc();
-    // 空弦 follows the line of sight: its plain cuts reach up and down to what the eyes are on.
-    boolean sighted = !ultimate && style == Oborokage.VOIDSTRING && blade == s.main;
+    // Plain cuts go where the eyes are on; ultimates keep their scripted heading.
+    boolean sighted = !ultimate;
     float baseDamage =
         WeaponDamage.scaled(s.p, blade, m.damage()) * BladeStyle.power(blade) * m.weights()[window];
     if (riposte) baseDamage *= (float) cfg.riposteMultiplier;
@@ -536,6 +555,13 @@ public final class DualCombat {
       // 空弦 · 虚刃: a short sword-qi line reaches the rank behind the first.
       BladeArts.voidEdge(s.p, s.main, s.aim, baseDamage * .5f, struckIds);
     }
+  }
+
+  /** Takes the player's current heading and line of sight for a plain cut. */
+  private static void look(State s) {
+    s.yaw = s.p.getYRot();
+    s.direction = forward(s.yaw);
+    s.aim = s.p.getLookAngle();
   }
 
   /** The single-blade finisher takes on the drawn blade's character. */

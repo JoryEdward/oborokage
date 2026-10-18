@@ -225,9 +225,54 @@ final class SoloChecks {
           p.getHealth() >= p.getMaxHealth() - .01f,
           "The wielder is never struck by their own thunder");
       creeper.discard();
+      // 0.6.2: every blade's plain cut takes the view on the tick it lands. Begin facing +Z, turn
+      // to face -X during the wind-up: the cut must land on the side, not straight ahead.
+      single(Oborokage.TACHI);
+      probe(0, 2.6);
+      probe(-2.6, .5);
+      t.act(0);
+      p.setYRot(90);
+      step = 9;
+      return false;
+    }
+    if (step == 9 && age == 12) {
+      t.check(
+          probes.get(1).hits == 1 && probes.get(0).hits == 0,
+          "A cut follows a view turned during its wind-up: side="
+              + probes.get(1).hits
+              + " front="
+              + probes.get(0).hits);
+      clearProbes();
+      single(Oborokage.FROSTMOON);
+      probe(0, 1.8).setPos(.5, 103.5, 1.8);
+      t.act(0);
+      step = 10;
+      return false;
+    }
+    if (step == 10 && age == 12) {
+      t.check(probes.get(0).hits == 0, "A level cut leaves an enemy overhead untouched (霜轮)");
+      p.setXRot(-60);
+      t.act(0);
+    }
+    if (step == 10 && age == 24) {
+      t.check(probes.get(0).hits == 1, "Looking up, 霜轮's cut reaches the enemy overhead too");
+      clearProbes();
+      // Riding, gliding and spectating keep the vanilla attack instead of a refused chain.
+      single(Oborokage.TACHI);
+      var zombie = probe(0, 2.6);
+      t.check(DualCombat.ownsAttack(p, zombie), "Standing with a blade, the chain owns the click");
+      t.check(!DualCombat.ownsAttack(p, null), "Non-living targets keep the vanilla attack");
+      p.startFallFlying();
+      t.check(!DualCombat.ownsAttack(p, zombie), "Gliding keeps the vanilla attack");
+      p.stopFallFlying();
+      p.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
+      t.check(!DualCombat.ownsAttack(p, zombie), "Spectating keeps the vanilla click");
+      p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+      clearProbes();
       Combat.clear();
       p.removeAllEffects();
       p.setXRot(0);
+      p.setYRot(0);
       p.setPos(.5, 100, .5);
       p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Oborokage.TACHI));
       p.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(Oborokage.WAKIZASHI));
