@@ -142,6 +142,15 @@ public final class ClientUltimateShowcase implements ClientModInitializer {
       act++;
       local = 0;
       int s0 = ACTS.length + 5;
+      if (act == s0 + SOLO.length + 1) {
+        // 0.6.1: 空弦 looking up; its cuts tip with the eyes.
+        solo = -2;
+        setup(c, new Act("solo", Oborokage.VOIDSTRING, new int[0], new double[][] {{1.3, 2.4}}));
+        onServer(c, p -> p.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY));
+        c.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK);
+        c.player.setXRot(-40);
+        return;
+      }
       if (act >= s0 && act <= s0 + SOLO.length) {
         // 0.6.0: the single-blade chain of every blade, then the tachi's in first person.
         solo = act - s0 + 1;
@@ -156,7 +165,7 @@ public final class ClientUltimateShowcase implements ClientModInitializer {
         if (fp) solo = -1;
         return;
       }
-      if (act > s0 + SOLO.length) {
+      if (act > s0 + SOLO.length + 1) {
         labels.add("PASS ultimate showcase captured " + labels.size() + " beats");
         finish(c);
         return;
@@ -187,7 +196,11 @@ public final class ClientUltimateShowcase implements ClientModInitializer {
     }
     if (solo != 0) {
       String name =
-          solo < 0 ? "solo-first-person" : "solo-" + SOLO[solo - 1].toString().replace(':', '-');
+          solo == -2
+              ? "solo-void-looking-up"
+              : solo < 0
+                  ? "solo-first-person"
+                  : "solo-" + SOLO[solo - 1].toString().replace(':', '-');
       if (local == 30 || local == 42 || local == 54) DualClient.interceptAttack();
       if (local == 33) shot(c, name + "-1");
       if (local == 45) shot(c, name + "-2");

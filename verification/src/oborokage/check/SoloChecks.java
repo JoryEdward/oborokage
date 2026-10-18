@@ -3,6 +3,7 @@ package oborokage.check;
 import java.util.*;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.*;
 import oborokage.*;
 
@@ -14,6 +15,7 @@ final class SoloChecks {
   private final ServerChecks t;
   private int step, age;
   private final List<ServerChecks.Probe> probes = new ArrayList<>();
+  private net.minecraft.world.entity.monster.Creeper creeper;
 
   SoloChecks(ServerChecks t) {
     this.t = t;
@@ -178,7 +180,54 @@ final class SoloChecks {
           "At the sheath every marked enemy falls at once");
       t.check(p.getZ() > 12, "The full draw dashes farther than before: z=" + p.getZ());
       clearProbes();
+      // 0.6.1 空弦: a cut level with the eyes misses an enemy overhead; looking up finds it.
+      single(Oborokage.VOIDSTRING);
+      probe(0, 1.8).setPos(.5, 103.5, 1.8);
+      t.act(0);
+      step = 7;
+      return false;
+    }
+    if (step == 7 && age == 12) {
+      t.check(probes.get(0).hits == 0, "空弦's level cut leaves an enemy overhead untouched");
+      p.setXRot(-60);
+      t.act(0);
+    }
+    if (step == 7 && age == 24) {
+      t.check(
+          probes.get(0).hits == 1, "空弦 cuts along the line of sight and reaches an enemy overhead");
+      clearProbes();
+      // 0.6.1 赤霆: the ultimate's thunder is real for what it strikes; a creeper is charged.
+      single(Oborokage.RAIKIRI);
+      var f = DualCombat.State.class.getDeclaredField("intent");
+      f.setAccessible(true);
+      f.setInt(DualCombat.state(p), 100);
+      creeper =
+          EntityTypes.CREEPER.create(t.level, net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+      creeper.setPos(.5, 100, 6);
+      creeper.setNoAi(true);
+      creeper
+          .getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH)
+          .setBaseValue(1024);
+      creeper.setHealth(1024);
+      t.level.addFreshEntity(creeper);
+      t.act(4);
+      step = 8;
+      return false;
+    }
+    if (step == 8 && age == 62) {
+      t.check(
+          creeper.isAlive() && creeper.isPowered(),
+          "万雷天降's thunder charges a creeper that survives it: alive="
+              + creeper.isAlive()
+              + " powered="
+              + creeper.isPowered());
+      t.check(
+          p.getHealth() >= p.getMaxHealth() - .01f,
+          "The wielder is never struck by their own thunder");
+      creeper.discard();
       Combat.clear();
+      p.removeAllEffects();
+      p.setXRot(0);
       p.setPos(.5, 100, .5);
       p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Oborokage.TACHI));
       p.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(Oborokage.WAKIZASHI));

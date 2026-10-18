@@ -110,6 +110,8 @@ final class SlashFx {
         continue;
       Entity e = c.level.getEntity(scene.event.actor());
       if (e == null) continue;
+      // The pitch the actor was looking at when the move began.
+      if (Float.isNaN(scene.pitch)) scene.pitch = e.getXRot();
       BladeStyle main =
           e instanceof Player p ? BladeStyle.of(p.getMainHandItem()) : BladeStyle.TACHI;
       if (main == null) main = BladeStyle.TACHI;
@@ -163,20 +165,27 @@ final class SlashFx {
   private static Frame frame(Live l) {
     Vec3 f = forward(l.scene.event.yaw());
     Vec3 right = f.cross(UP);
+    Vec3 up = UP;
+    // 空弦 cuts along the line of sight: the whole cut tips up or down with the eyes.
+    if (l.style == BladeStyle.VOIDSTRING && !Float.isNaN(l.scene.pitch)) {
+      double pitch = Math.toRadians(l.scene.pitch);
+      f = f.scale(Math.cos(pitch)).add(0, -Math.sin(pitch), 0);
+      up = right.cross(f);
+    }
     // A left-handed player's cuts mirror; a cut of the left hand leaves from the left shoulder.
     if (l.hand == 1) right = right.scale(-1);
     double roll = Math.toRadians(l.cut.roll());
-    Vec3 s = right.scale(Math.cos(roll)).add(UP.scale(Math.sin(roll)));
+    Vec3 s = right.scale(Math.cos(roll)).add(up.scale(Math.sin(roll)));
     if (firstPerson(l)) {
       // Through the eyes a cut is a crescent across the view, on a plane that faces the camera.
-      Vec3 middle = UP.scale(Math.cos(roll)).subtract(right.scale(Math.sin(roll)));
+      Vec3 middle = up.scale(Math.cos(roll)).subtract(right.scale(Math.sin(roll)));
       Vec3 center = new Vec3(0, 1.42, 0).add(f.scale(1.8)).subtract(middle.scale(.3));
       return new Frame(center, middle, s, .42);
     }
     // A cut whose plane holds the line of sight is a hairline from behind the shoulder; tipping
     // the far side up turns its face to the usual camera. Spins tip less, to stay above ground.
     double tilt = Math.toRadians(l.cut.sweep() >= 300 ? 12 : 22);
-    Vec3 middle = f.scale(Math.cos(tilt)).add(UP.scale(Math.sin(tilt)));
+    Vec3 middle = f.scale(Math.cos(tilt)).add(up.scale(Math.sin(tilt)));
     Vec3 side = s.subtract(middle.scale(s.dot(middle))).normalize();
     Vec3 center = new Vec3(0, l.cut.height() - .15, 0).add(right.scale(.22));
     return new Frame(center, middle, side, 1);

@@ -52,6 +52,8 @@ public final class DualCombat {
     long lastParryTick = -99;
     Move move;
     Vec3 direction = Vec3.ZERO;
+    // Where the eyes pointed when the move began; 空弦 cuts along it, up and down included.
+    Vec3 aim = Vec3.ZERO;
     float yaw;
     boolean buffered, guarding, blocked;
     double dodgeDistance;
@@ -244,6 +246,7 @@ public final class DualCombat {
       if (s.direction.lengthSqr() < .1) s.direction = forward.scale(-1);
       else s.direction = s.direction.normalize();
     } else s.direction = forward;
+    s.aim = s.p.getLookAngle();
     send(s, ActionEvent.START, s.p.position());
   }
 
@@ -385,6 +388,8 @@ public final class DualCombat {
     boolean solo = Move.solo(m.id());
     // 胧月 · 落花: alone in the hand, the short blade's finisher is a full turn.
     float arc = arts && m.id() == Move.SOLO_3 && style == Oborokage.WAKIZASHI ? 360 : m.arc();
+    // 空弦 follows the line of sight: its plain cuts reach up and down to what the eyes are on.
+    boolean sighted = !ultimate && style == Oborokage.VOIDSTRING && blade == s.main;
     float baseDamage =
         WeaponDamage.scaled(s.p, blade, m.damage()) * BladeStyle.power(blade) * m.weights()[window];
     if (riposte) baseDamage *= (float) cfg.riposteMultiplier;
@@ -404,7 +409,7 @@ public final class DualCombat {
     for (LivingEntity target :
         s.level.getEntitiesOfClass(
             LivingEntity.class,
-            s.p.getBoundingBox().inflate(reach, 2.0, reach),
+            s.p.getBoundingBox().inflate(reach, sighted ? reach : 2.0, reach),
             t -> allowed(s.p, t))) {
       if (targets >= cfg.maxTargetsPerWindow) break;
       AABB b = target.getBoundingBox();
@@ -415,10 +420,17 @@ public final class DualCombat {
               Math.clamp(anchor.y, b.minY, b.maxY),
               Math.clamp(anchor.z, b.minZ, b.maxZ));
       Vec3 d = point.subtract(anchor);
-      if (d.lengthSqr() > reach * reach || Math.abs(d.y) > 2.2) continue;
-      Vec3 horizontal = new Vec3(d.x, 0, d.z);
-      if (horizontal.lengthSqr() > .15
-          && horizontal.normalize().dot(s.direction) < Math.cos(Math.toRadians(arc / 2))) continue;
+      if (d.lengthSqr() > reach * reach) continue;
+      if (sighted) {
+        if (d.lengthSqr() > .15 && d.normalize().dot(s.aim) < Math.cos(Math.toRadians(arc / 2)))
+          continue;
+      } else {
+        if (Math.abs(d.y) > 2.2) continue;
+        Vec3 horizontal = new Vec3(d.x, 0, d.z);
+        if (horizontal.lengthSqr() > .15
+            && horizontal.normalize().dot(s.direction) < Math.cos(Math.toRadians(arc / 2)))
+          continue;
+      }
       if (s.level
               .clip(
                   new ClipContext(
@@ -522,7 +534,7 @@ public final class DualCombat {
       if (arcs >= 2) Feats.award(s.p, "thunder_chain");
     } else if (style == Oborokage.VOIDSTRING) {
       // 空弦 · 虚刃: a short sword-qi line reaches the rank behind the first.
-      BladeArts.voidEdge(s.p, s.main, s.direction, baseDamage * .5f, struckIds);
+      BladeArts.voidEdge(s.p, s.main, s.aim, baseDamage * .5f, struckIds);
     }
   }
 
@@ -552,7 +564,7 @@ public final class DualCombat {
       TechniqueEvent.send(s.p, TechniqueEvent.RING, c, c.add(3.2, 0, 0), .6f);
     } else if (style == Oborokage.VOIDSTRING) {
       // 空弦 · 虚刃: the line runs on to the rank behind.
-      BladeArts.voidEdge(s.p, s.main, s.direction, baseDamage * .5f, struckIds);
+      BladeArts.voidEdge(s.p, s.main, s.aim, baseDamage * .5f, struckIds);
     }
   }
 

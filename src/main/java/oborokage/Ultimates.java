@@ -101,9 +101,11 @@ final class Ultimates {
       else if (k < 3) blinkForward(s, 3.2);
       else return;
       Vec3 at = target != null ? target.position() : p.position().add(s.direction.scale(1.5));
-      p.level().addFreshEntity(Compat.visualLightning((ServerLevel) p.level(), at.x, at.y, at.z));
+      var bolt = Compat.visualLightning((ServerLevel) p.level(), at.x, at.y, at.z);
+      p.level().addFreshEntity(bolt);
       for (LivingEntity e : near(s, at, target == null ? 2.5 : 1.6)) {
         strike(s, e, s.move.damage(), false);
+        thunder(s, e, bolt);
         BladeArts.thunderChain(p, s.main, e, scaled(s, s.move.damage()) * .4f, s.struck);
       }
       sound(s, SoundEvents.LIGHTNING_BOLT_IMPACT, 1.4f, .9f + k * .08f);
@@ -116,9 +118,11 @@ final class Ultimates {
         level.addFreshEntity(
             Compat.visualLightning(level, c.x + Math.cos(a) * 2.6, c.y, c.z + Math.sin(a) * 2.6));
       }
-      level.addFreshEntity(Compat.visualLightning(level, c.x, c.y, c.z));
+      var bolt = Compat.visualLightning(level, c.x, c.y, c.z);
+      level.addFreshEntity(bolt);
       for (LivingEntity e : near(s, c, 6.5)) {
         strike(s, e, s.move.damage() * 1.3f, true);
+        thunder(s, e, bolt);
         e.push(0, .55, 0);
         Compat.syncMotion(e);
       }
@@ -261,6 +265,17 @@ final class Ultimates {
       s.struck.add(e.getUUID());
       afterStrike(s, e);
     }
+  }
+
+  /**
+   * The thunder is real for whatever the blade struck: vanilla lightning effects follow (a creeper
+   * becomes charged, a pig turns, the struck burn). The bolt itself stays visual-only, so it sets
+   * no blocks alight and never touches the wielder or the creatures the blade spared.
+   */
+  private static void thunder(DualCombat.State s, LivingEntity e, LightningBolt bolt) {
+    if (!e.isAlive() || e.isRemoved() || !s.struck.contains(e.getUUID())) return;
+    bolt.setCause(s.p);
+    e.thunderHit((ServerLevel) s.p.level(), bolt);
   }
 
   private static List<LivingEntity> near(DualCombat.State s, Vec3 at, double radius) {

@@ -37,6 +37,7 @@ public final class DualClient {
     public float age;
     public boolean predicted;
     float stopAt = -99, stopLen;
+    float pitch = Float.NaN;
 
     Scene(ActionEvent e, float age) {
       event = e;
