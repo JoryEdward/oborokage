@@ -2,15 +2,16 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "pattern": [
-    "  D",
-    " MD",
-    "SG "
+    " RD",
+    " ND",
+    "BL "
   ],
   "key": {
-    "D": "minecraft:diamond",
-    "M": "minecraft:copper_ingot",
-    "S": "minecraft:stick",
-    "G": "minecraft:redstone"
+    "R": "minecraft:redstone_block",
+    "D": "minecraft:diamond_block",
+    "N": "minecraft:netherite_ingot",
+    "B": "minecraft:blaze_rod",
+    "L": "minecraft:lightning_rod"
   },
   "result": {
     "id": "oborokage:raikiri"

@@ -31,5 +31,19 @@ public final class Compat {
     target.knockback(strength, x, z, source, damage);
   }
 
+  /** A lightning flash and thunder with no fire and no damage. */
+  public static LightningBolt visualLightning(
+      net.minecraft.server.level.ServerLevel level, double x, double y, double z) {
+    LightningBolt bolt = new LightningBolt(EntityTypes.LIGHTNING_BOLT, level);
+    bolt.setVisualOnly(true);
+    bolt.setPos(x, y, z);
+    return bolt;
+  }
+
+  /** Flags a server-side velocity change so it is sent to clients this tick. */
+  public static void syncMotion(Entity e) {
+    e.hurtMarked = true;
+  }
+
   private Compat() {}
 }

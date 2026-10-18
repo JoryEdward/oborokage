@@ -16,6 +16,20 @@ public final class ReviewChecks {
   static void run(ServerChecks t) throws Exception {
     var p = t.player;
     var level = t.level;
+    attachConnection(t);
+    var latencyField =
+        net.minecraft.server.network.ServerCommonPacketListenerImpl.class.getDeclaredField(
+            "latency");
+    latencyField.setAccessible(true);
+    int savedLatency = latencyField.getInt(p.connection);
+    latencyField.setInt(p.connection, 200);
+    runRest(t, latencyField, savedLatency);
+  }
+
+  /** A connection that drops packets, so the fake player behaves like a connected one. */
+  static void attachConnection(ServerChecks t) {
+    var p = t.player;
+    if (p.connection != null) return;
     p.connection =
         new net.minecraft.server.network.ServerGamePacketListenerImpl(
             t.server,
@@ -32,12 +46,12 @@ public final class ReviewChecks {
               net.minecraft.network.protocol.Packet<?> packet,
               io.netty.channel.ChannelFutureListener listener) {}
         };
-    var latencyField =
-        net.minecraft.server.network.ServerCommonPacketListenerImpl.class.getDeclaredField(
-            "latency");
-    latencyField.setAccessible(true);
-    int savedLatency = latencyField.getInt(p.connection);
-    latencyField.setInt(p.connection, 200);
+  }
+
+  private static void runRest(
+      ServerChecks t, java.lang.reflect.Field latencyField, int savedLatency) throws Exception {
+    var p = t.player;
+    var level = t.level;
     t.check(
         DualCombat.guardWindow(p) == ServerConfig.get().guardWindowTicks + 2,
         "200ms RTT adds two ticks of guard allowance");
@@ -169,24 +183,10 @@ public final class ReviewChecks {
       p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(blade));
       t.check(DualCombat.equipped(p), "New main blade pairs with wakizashi: " + blade);
     }
-    Item[] metals = {Items.COPPER_INGOT, Items.PACKED_ICE, Items.ENDER_PEARL};
-    Item[] gems = {Items.REDSTONE, Items.LAPIS_LAZULI, Items.AMETHYST_SHARD};
+    String[] names = {"raikiri", "frostmoon", "voidstring"};
     Item[] blades = {Oborokage.RAIKIRI, Oborokage.FROSTMOON, Oborokage.VOIDSTRING};
     for (int i = 0; i < 3; i++) {
-      var input =
-          CraftingInput.of(
-              3,
-              3,
-              List.of(
-                  ItemStack.EMPTY,
-                  ItemStack.EMPTY,
-                  new ItemStack(Items.DIAMOND),
-                  ItemStack.EMPTY,
-                  new ItemStack(metals[i]),
-                  new ItemStack(Items.DIAMOND),
-                  new ItemStack(Items.STICK),
-                  new ItemStack(gems[i]),
-                  ItemStack.EMPTY));
+      var input = RecipeInputs.of(names[i]);
       var recipe = t.server.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, level);
       t.check(
           recipe.isPresent() && recipe.get().value().assemble(input).is(blades[i]),

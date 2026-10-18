@@ -137,7 +137,11 @@ public final class TechniqueFx {
   private static void quad(
       PoseStack.Pose pose, VertexConsumer v, Vec3 a, Vec3 b, Vec3 c, Vec3 d, float alpha, int rgb) {
     int color = (int) (255 * Math.clamp(alpha, 0, 1)) << 24 | rgb;
-    for (Vec3 point : new Vec3[] {a, b, c, d, d, c, b, a})
+    Vec3[] points =
+        ClientConfig.get().trailShaderCompat
+            ? new Vec3[] {a, b, c, d}
+            : new Vec3[] {a, b, c, d, d, c, b, a};
+    for (Vec3 point : points)
       oborokage.client.compat.ClientCompat.vertex(
           v, pose, (float) point.x, (float) point.y, (float) point.z, color);
   }

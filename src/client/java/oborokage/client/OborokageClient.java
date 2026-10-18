@@ -7,7 +7,6 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
-import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.*;
 import net.minecraft.network.chat.Component;
@@ -20,44 +19,26 @@ public final class OborokageClient implements ClientModInitializer {
   public static boolean localFull = false;
   public static boolean cinematic = true, screenShake = true;
   private static Object lastLevel;
-  public static boolean thirdPersonUltimate = true, dualUltimate = false;
+  public static boolean thirdPersonUltimate = true;
 
   public static void cancelPresentation(int id) {
     scenes.removeIf(s -> s.p.owner() == id);
     var c = Minecraft.getInstance();
     if (c.player != null && c.player.getId() == id) {
-      restoreCamera(c);
+      Cinematics.cancel();
       localAge = -1;
       localFull = false;
     }
   }
 
-  public static void beginDualCamera(float yaw, int age) {
-    var c = Minecraft.getInstance();
-    restoreCamera(c);
-    dualUltimate = true;
-    localAge = age;
-    localFull = true;
-    cinematicYaw = yaw;
-    if (cinematic && thirdPersonUltimate) {
-      previousCamera = c.options.getCameraType();
-      c.options.setCameraType(CameraType.THIRD_PERSON_BACK);
-    }
+  /** Full-charge iaido scenes for the world effects: owner, origin, yaw, age. */
+  public interface IaidoSink {
+    void accept(int owner, Vec3 origin, float yaw, float age);
   }
 
-  private static CameraType previousCamera;
-  public static float cinematicYaw;
-
-  public static boolean cameraActive() {
-    return previousCamera != null && localFull && localAge >= 0 && localAge <= 48;
-  }
-
-  private static void restoreCamera(Minecraft c) {
-    if (previousCamera != null) {
-      if (c.options.getCameraType() == CameraType.THIRD_PERSON_BACK)
-        c.options.setCameraType(previousCamera);
-      previousCamera = null;
-    }
+  public static void forEachFullIaido(IaidoSink sink) {
+    for (Scene s : scenes)
+      if (s.p.charge() >= 1) sink.accept(s.p.owner(), s.p.origin(), s.p.yaw(), s.age);
   }
 
   public static int sceneDelay(int entityId) {
@@ -94,6 +75,22 @@ public final class OborokageClient implements ClientModInitializer {
                 (options, l, x, y, z, dx, dy, dz, random) ->
                     new CrescentParticle(
                         l, x, y, z, (float) dx, (float) dy, (float) dz, sprites.first()));
+    for (var entry :
+        java.util.Map.of(
+                Oborokage.PETAL, FxParticle.Kind.PETAL,
+                Oborokage.SPARK, FxParticle.Kind.SPARK,
+                Oborokage.SHARD, FxParticle.Kind.SHARD,
+                Oborokage.MOTE, FxParticle.Kind.MOTE)
+            .entrySet()) {
+      var kind = entry.getValue();
+      ParticleProviderRegistry.getInstance()
+          .register(
+              entry.getKey(),
+              sprites ->
+                  (options, l, x, y, z, dx, dy, dz, random) ->
+                      new FxParticle(l, x, y, z, dx, dy, dz, kind, sprites.first()));
+    }
+    UltimateFx.init();
     ClientPlayNetworking.registerGlobalReceiver(
         SlashPayload.TYPE, (p, context) -> context.client().execute(() -> receive(p)));
     ClientTickEvents.END_CLIENT_TICK.register(OborokageClient::tick);
@@ -120,44 +117,7 @@ public final class OborokageClient implements ClientModInitializer {
                 y - 14,
                 q >= 1 ? 0xfff2e5ff : 0xffc0b0d9);
           }
-          if (!cinematic || !localFull || localAge < 0) return;
-          float t = localAge + delta.getGameTimeDeltaPartialTick(false);
-          int bar = (int) (h * .09 * Math.min(1, t / 3) * Math.min(1, (48 - t) / 10));
-          if (bar > 0) {
-            g.fill(0, 0, w, bar, 0xdd090713);
-            g.fill(0, h - bar, w, h, 0xdd090713);
-            g.fill(0, bar, w, bar + 1, 0x807d66b6);
-          }
-          if (t > 1 && t < 35) {
-            int a = (int) (255 * Math.min(1, (35 - t) / 8));
-            g.pose().pushMatrix();
-            g.pose().translate(w - 270, h / 3f);
-            g.pose().scale(2, 2);
-            g.text(
-                c.font,
-                Component.translatable(
-                    dualUltimate ? "ui.oborokage.dual_ultimate" : "ui.oborokage.ultimate"),
-                0,
-                0,
-                (a << 24) | 0xe7ddff);
-            g.pose().popMatrix();
-            g.fill(w - 266, h / 3 + 26, w - 46, h / 3 + 27, (a << 24) | 0x9c7dd9);
-            g.text(
-                c.font,
-                dualUltimate
-                    ? "O B O R O K A G E   /   N I T E N"
-                    : "O B O R O K A G E   /   I A I",
-                w - 264,
-                h / 3 + 36,
-                (a << 24) | 0xb09ec9);
-          }
-          if (t >= 12 && t < 15) {
-            int a = (int) (110 * (15 - t) / 3);
-            for (int x = 0; x < w; x += 2) {
-              int y = h / 2 - (int) ((x - w / 2) * .18);
-              g.fill(x, y - 1, x + 2, y + 1, (a << 24) | 0xeaddff);
-            }
-          }
+          Cinematics.overlay(g, delta.getGameTimeDeltaPartialTick(false));
         });
   }
 
@@ -181,40 +141,26 @@ public final class OborokageClient implements ClientModInitializer {
     if (scenes.size() > 40) scenes.removeFirst();
     scenes.add(new Scene(p));
     if (p.owner() == c.player.getId()) {
-      restoreCamera(c);
-      dualUltimate = false;
       localAge = 0;
       localFull = p.charge() >= 1;
-      cinematicYaw = p.yaw();
-      if (localFull && cinematic && thirdPersonUltimate) {
-        previousCamera = c.options.getCameraType();
-        c.options.setCameraType(CameraType.THIRD_PERSON_BACK);
-      }
+      if (localFull) Cinematics.begin(Cinematics.IAIDO, p.yaw(), 0);
+      else Cinematics.cancel();
     }
   }
 
   private static void tick(Minecraft c) {
     if (c.level != lastLevel) {
-      restoreCamera(c);
+      Cinematics.cancel();
       lastLevel = c.level;
       scenes.clear();
       localAge = -1;
     }
     if (c.level == null || c.player == null) {
-      restoreCamera(c);
+      Cinematics.cancel();
       return;
     }
-    if (localAge >= 0 && ++localAge > 48) {
-      restoreCamera(c);
-      localAge = -1;
-    }
-    if (cameraActive()
-        && (!c.player.isAlive()
-            || oborokage.client.compat.ClientCompat.screenOpen(c)
-            || c.options.getCameraType() != CameraType.THIRD_PERSON_BACK)) {
-      restoreCamera(c);
-      localAge = -1;
-    }
+    Cinematics.tick(c);
+    if (localAge >= 0 && ++localAge > 48) localAge = -1;
     for (var player : c.level.players()) {
       if (!player.isUsingItem()
           || !Oborokage.mainBlade(player.getUseItem())
@@ -222,12 +168,30 @@ public final class OborokageClient implements ClientModInitializer {
       float q = Math.min(1, player.getTicksUsingItem() / (float) fullChargeTicks(player));
       double phase = player.tickCount * .28;
       Vec3 base = player.position().add(0, .9, 0);
+      // The charge aura takes the blade's colours and, once full, its own particle.
+      var style = BladeStyle.of(player.getUseItem());
+      int dim = style == null ? 0x8171c4 : style.secondary,
+          bright = style == null ? 0xe4dbff : style.primary;
       for (int i = 0; i < 4; i++) {
         double a = phase + i * Math.PI / 2;
         double radius = 1.2 - .8 * q;
         Vec3 pos = base.add(Math.cos(a) * radius, .15 * Math.sin(a * 2), Math.sin(a) * radius);
-        dust(pos, q >= 1 ? 0xe4dbff : 0x8171c4, .55f);
+        dust(pos, q >= 1 ? bright : dim, .55f);
       }
+      if (q >= 1 && style != null && player.tickCount % 3 == 0)
+        c.level.addParticle(
+            switch (style) {
+              case RAIKIRI -> Oborokage.SPARK;
+              case FROSTMOON -> Oborokage.SHARD;
+              case VOIDSTRING -> Oborokage.MOTE;
+              default -> Oborokage.PETAL;
+            },
+            base.x + (player.getRandom().nextDouble() - .5) * 1.4,
+            base.y + player.getRandom().nextDouble() * 1.2,
+            base.z + (player.getRandom().nextDouble() - .5) * 1.4,
+            0,
+            .02,
+            0);
       if (q >= 1 && player.tickCount % 12 == 0) streak(base.add(0, .1, 0), .32f, 20);
     }
     var it = scenes.iterator();

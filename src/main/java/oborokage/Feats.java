@@ -43,6 +43,13 @@ public final class Feats {
         p.getAdvancements().award(a, criterion);
   }
 
+  /** Awards one criterion of a multi-part advancement (e.g. one blade of "all_ultimates"). */
+  public static void awardCriterion(ServerPlayer p, String id, String criterion) {
+    var a = p.level().getServer().getAdvancements().get(Oborokage.id(id));
+    if (a != null && a.value().criteria().containsKey(criterion))
+      p.getAdvancements().award(a, criterion);
+  }
+
   public static boolean has(ServerPlayer p, String id) {
     var a = p.level().getServer().getAdvancements().get(Oborokage.id(id));
     return a != null && p.getAdvancements().getOrStartProgress(a).isDone();

@@ -87,6 +87,10 @@ public final class StyleBladeItem extends TachiItem {
                 "tooltip.oborokage.art." + style.name().toLowerCase(java.util.Locale.ROOT))
             .withStyle(net.minecraft.ChatFormatting.DARK_AQUA));
     out.accept(
+        net.minecraft.network.chat.Component.translatable(
+                "tooltip.oborokage.ult." + style.name().toLowerCase(java.util.Locale.ROOT))
+            .withStyle(net.minecraft.ChatFormatting.GOLD));
+    out.accept(
         net.minecraft.network.chat.Component.translatable("tooltip.oborokage.terrain")
             .withStyle(net.minecraft.ChatFormatting.GRAY));
   }

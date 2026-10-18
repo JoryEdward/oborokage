@@ -30,6 +30,7 @@ public final class ServerChecks implements ModInitializer {
   double startZ;
   List<String> results = new ArrayList<>();
   ExpansionChecks expansion;
+  UltimateChecks ultimates;
 
   @Override
   public void onInitialize() {
@@ -470,6 +471,12 @@ public final class ServerChecks implements ModInitializer {
       return;
     }
     if (stage == 16 && expansion.tick()) {
+      ultimates = new UltimateChecks(this);
+      stage = 17;
+      age = 0;
+      return;
+    }
+    if (stage == 17 && ultimates.tick()) {
       flawlessWindowBoundary();
       ReviewChecks.run(this);
       finish();
@@ -508,7 +515,21 @@ public final class ServerChecks implements ModInitializer {
   }
 
   void recipes() {
-    var t =
+    for (String name : List.of("tachi", "wakizashi")) {
+      var input = RecipeInputs.of(name);
+      var recipe =
+          server
+              .getRecipeManager()
+              .getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING, input, level);
+      check(recipe.isPresent(), "Netherite and diamond-block recipe matches " + name);
+      var result = recipe.orElseThrow().value().assemble(input);
+      check(
+          result.is(name.equals("tachi") ? Oborokage.TACHI : Oborokage.WAKIZASHI)
+              && result.getDamageValue() == 0,
+          "Recipe outputs original full-durability weapon");
+    }
+    // The 0.4 iron/diamond grid for the tachi must no longer craft anything.
+    var cheap =
         net.minecraft.world.item.crafting.CraftingInput.of(
             3,
             3,
@@ -522,34 +543,12 @@ public final class ServerChecks implements ModInitializer {
                 new ItemStack(Items.STICK),
                 new ItemStack(Items.AMETHYST_SHARD),
                 ItemStack.EMPTY));
-    var w =
-        net.minecraft.world.item.crafting.CraftingInput.of(
-            3,
-            3,
-            List.of(
-                ItemStack.EMPTY,
-                ItemStack.EMPTY,
-                new ItemStack(Items.IRON_INGOT),
-                ItemStack.EMPTY,
-                new ItemStack(Items.AMETHYST_SHARD),
-                new ItemStack(Items.IRON_INGOT),
-                ItemStack.EMPTY,
-                new ItemStack(Items.STICK),
-                ItemStack.EMPTY));
-    for (var input : List.of(t, w)) {
-      var recipe =
-          server
-              .getRecipeManager()
-              .getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING, input, level);
-      check(
-          recipe.isPresent(),
-          "Overworld workbench recipe matches " + (input == t ? "tachi" : "wakizashi"));
-      var result = recipe.orElseThrow().value().assemble(input);
-      check(
-          result.is(input == t ? Oborokage.TACHI : Oborokage.WAKIZASHI)
-              && result.getDamageValue() == 0,
-          "Recipe outputs original full-durability weapon");
-    }
+    check(
+        server
+            .getRecipeManager()
+            .getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING, cheap, level)
+            .isEmpty(),
+        "The old iron and diamond recipe no longer crafts a blade");
   }
 
   void finish() {

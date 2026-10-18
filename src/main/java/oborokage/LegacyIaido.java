@@ -141,6 +141,7 @@ public final class LegacyIaido {
           != HitResult.Type.MISS) continue;
       s.hit.add(target.getUUID());
       strikeTarget(s.level, s.player, target, s.charge);
+      DualCombat.reward(s.player, target, ServerConfig.get().iaidoIntent);
       if (!target.isAlive() && !(target instanceof Player)) s.kills++;
       broadcast(
           s.player,

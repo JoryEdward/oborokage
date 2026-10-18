@@ -39,19 +39,20 @@ public abstract class IaidoPoseMixin {
             : t < delay + 4
                 ? Math.min(1, (t - delay) / 4)
                 : t < 29 ? 1 : Math.max(0, 1 - (t - 29) / 9);
-    // Grip stays at the hand; the shoulder drives a single cross-body draw and horizontal cut.
-    body.xRot = .13f + .08f * cut;
-    body.yRot = -.18f + .38f * cut;
+    // Ready: right hand on the hilt in front of the belly, scabbard back past the left hip, the
+    // free hand steadying it there. The draw then sweeps the shoulder into one horizontal cut.
+    body.xRot = .1f + .1f * cut;
+    body.yRot = -.16f + .36f * cut;
     ModelPart sword =
         p.getMainArm() == net.minecraft.world.entity.HumanoidArm.RIGHT ? rightArm : leftArm;
     ModelPart support = sword == rightArm ? leftArm : rightArm;
     float sign = sword == rightArm ? 1 : -1;
-    sword.xRot = -.58f - .75f * cut;
-    sword.yRot = sign * (-.65f + 1.9f * cut);
-    sword.zRot = sign * (-.16f - .32f * cut);
-    support.xRot = -.65f;
-    support.yRot = sign * .55f;
-    support.zRot = sign * .18f;
+    sword.xRot = -.42f + (-1.33f + .42f) * cut;
+    sword.yRot = sign * (-.3f + 1.55f * cut);
+    sword.zRot = sign * (-.48f * cut);
+    support.xRot = -.22f - .2f * cut;
+    support.yRot = sign * (.32f - .1f * cut);
+    support.zRot = sign * (.05f + .1f * cut);
     rightLeg.xRot = -.22f;
     leftLeg.xRot = .27f;
     rightLeg.zRot = .06f;

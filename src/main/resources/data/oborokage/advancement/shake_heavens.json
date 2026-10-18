@@ -1,0 +1,14 @@
+{
+  "parent": "oborokage:twin_moon_ultimate",
+  "display": {
+    "icon": {"id": "oborokage:raikiri"},
+    "title": {"translate": "advancement.oborokage.shake_heavens.title"},
+    "description": {"translate": "advancement.oborokage.shake_heavens.description"},
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {"complete": {"trigger": "minecraft:impossible"}},
+  "requirements": [["complete"]]
+}

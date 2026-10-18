@@ -181,7 +181,31 @@ public final class ClientSmokeChecks implements ClientModInitializer {
     if (ticks == 274)
       check(OborokageClient.sceneAge(id) >= 0, "Original iaido scene plays on this version");
     if (ticks == 290) screenshot(c, "smoke-iaido");
-    if (ticks == 340) {
+    if (ticks == 330)
+      onServer(
+          c,
+          p -> {
+            // A drawn Frostmoon alone unleashes its own ultimate on every 26.x line.
+            hold(p, Oborokage.FROSTMOON);
+            p.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
+            try {
+              var f = DualCombat.State.class.getDeclaredField("intent");
+              f.setAccessible(true);
+              f.setInt(DualCombat.state(p), 100);
+            } catch (ReflectiveOperationException e) {
+              throw new RuntimeException(e);
+            }
+          });
+    if (ticks == 345) DualClient.request(4);
+    if (ticks == 350)
+      check(
+          DualClient.scene(id) != null
+              && DualClient.scene(id).event.move() == Move.ULT_FROST
+              && Cinematics.playing(),
+          "Solo Frostmoon ultimate plays with its cinematic");
+    if (ticks == 372) screenshot(c, "smoke-frost-ultimate");
+    if (ticks == 420) {
+      check(c.options.getCameraType() == before, "Camera returns after the solo ultimate");
       check(
           !oborokage.client.compat.ClientCompat.screenOpen(c),
           "No error screen interrupted the run");

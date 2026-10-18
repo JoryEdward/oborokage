@@ -1,0 +1,20 @@
+{
+  "parent": "oborokage:twin_moon_ultimate",
+  "display": {
+    "icon": {"id": "oborokage:voidstring"},
+    "title": {"translate": "advancement.oborokage.all_ultimates.title"},
+    "description": {"translate": "advancement.oborokage.all_ultimates.description"},
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "tachi": {"trigger": "minecraft:impossible"},
+    "moon": {"trigger": "minecraft:impossible"},
+    "storm": {"trigger": "minecraft:impossible"},
+    "frost": {"trigger": "minecraft:impossible"},
+    "void": {"trigger": "minecraft:impossible"}
+  },
+  "requirements": [["tachi"], ["moon"], ["storm"], ["frost"], ["void"]]
+}

@@ -33,12 +33,14 @@ public final class Oborokage implements ModInitializer {
           new WakizashiItem(
               new Item.Properties()
                   .setId(WAKI_KEY)
-                  .sword(ToolMaterial.IRON, 4, -1.8f)
-                  .durability(2048)
-                  .rarity(Rarity.EPIC)));
-  public static final Item RAIKIRI = blade("raikiri", StyleBladeItem.Style.STORM, 6, -2.1f);
-  public static final Item FROSTMOON = blade("frostmoon", StyleBladeItem.Style.FROST, 9, -2.8f);
-  public static final Item VOIDSTRING = blade("voidstring", StyleBladeItem.Style.VOID, 7, -2.5f);
+                  .sword(ToolMaterial.NETHERITE, 5, -1.6f)
+                  .durability(2560)
+                  .rarity(Rarity.EPIC)
+                  .fireResistant()));
+  // Netherite-forged since 0.5.0: about a third more melee damage than the 0.4 diamond blades.
+  public static final Item RAIKIRI = blade("raikiri", StyleBladeItem.Style.STORM, 8, -2.0f);
+  public static final Item FROSTMOON = blade("frostmoon", StyleBladeItem.Style.FROST, 11, -2.7f);
+  public static final Item VOIDSTRING = blade("voidstring", StyleBladeItem.Style.VOID, 9, -2.4f);
 
   private static Item blade(String name, StyleBladeItem.Style style, int damage, float speed) {
     ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, id(name));
@@ -48,9 +50,10 @@ public final class Oborokage implements ModInitializer {
         new StyleBladeItem(
             new Item.Properties()
                 .setId(key)
-                .sword(ToolMaterial.DIAMOND, damage, speed)
-                .durability(3072)
-                .rarity(Rarity.EPIC),
+                .sword(ToolMaterial.NETHERITE, damage, speed)
+                .durability(3584)
+                .rarity(Rarity.EPIC)
+                .fireResistant(),
             style));
   }
 
@@ -86,6 +89,19 @@ public final class Oborokage implements ModInitializer {
           BuiltInRegistries.PARTICLE_TYPE,
           id("streak"),
           net.fabricmc.fabric.api.particle.v1.FabricParticleTypes.simple(true));
+  // 0.5.0 blade particles: moon petals, thunder sparks, ice shards and void motes.
+  public static final net.minecraft.core.particles.SimpleParticleType PETAL = particle("petal");
+  public static final net.minecraft.core.particles.SimpleParticleType SPARK = particle("spark");
+  public static final net.minecraft.core.particles.SimpleParticleType SHARD = particle("shard");
+  public static final net.minecraft.core.particles.SimpleParticleType MOTE = particle("mote");
+
+  private static net.minecraft.core.particles.SimpleParticleType particle(String name) {
+    return Registry.register(
+        BuiltInRegistries.PARTICLE_TYPE,
+        id(name),
+        net.fabricmc.fabric.api.particle.v1.FabricParticleTypes.simple(true));
+  }
+
   public static boolean allowPlayerDamage = false;
 
   public static Identifier id(String s) {

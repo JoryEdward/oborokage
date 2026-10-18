@@ -57,6 +57,10 @@ public final class DualCombat {
     double dodgeDistance;
     long stepFollowUntil;
     long riposteUntil, lastEvadeTick = -99, evadeRewardAfter;
+    // Ultimate scratch state: blink path, frozen targets and everything already struck.
+    List<LivingEntity> ultTargets = new ArrayList<>();
+    final Set<UUID> frozen = new HashSet<>(), struck = new HashSet<>();
+    Vec3 ultOrigin = Vec3.ZERO;
     float beforeDamageTotal = Float.NaN;
     ItemStack main, off;
     final Set<String> hits = new HashSet<>();
@@ -79,6 +83,11 @@ public final class DualCombat {
     public int move() {
       return move == null ? 0 : move.id();
     }
+  }
+
+  /** Holding any of the five blades in the main hand: enough for the ultimate and the HUD. */
+  public static boolean holdsBlade(Player p) {
+    return BladeStyle.of(p.getMainHandItem()) != null;
   }
 
   public static boolean equipped(Player p) {
@@ -124,7 +133,8 @@ public final class DualCombat {
       s.requestsThisTick = 0;
     }
     if (++s.requestsThisTick > 8) return;
-    if (!equipped(p)
+    // The ultimate belongs to whichever blade is drawn; every other action needs both blades.
+    if (!(request.action() == 4 ? holdsBlade(p) : equipped(p))
         || !p.isAlive()
         || p.isSpectator()
         || p.isPassenger()
@@ -138,7 +148,7 @@ public final class DualCombat {
     switch (request.action()) {
       case 0 -> {
         if (s.move != null) {
-          if (s.move.id() != Move.ULTIMATE && s.move.id() != Move.DODGE) {
+          if (!Move.ultimate(s.move.id()) && s.move.id() != Move.DODGE) {
             s.buffered = true;
             s.bufferedUntil = now + 8;
             s.bufferedSequence = request.sequence();
@@ -190,7 +200,7 @@ public final class DualCombat {
         if (s.move == null && now >= s.ultimateUntil && s.intent >= 100) {
           s.intent -= 100;
           s.ultimateUntil = now + ServerConfig.get().ultimateCooldownTicks;
-          begin(s, Move.ULTIMATE);
+          begin(s, BladeStyle.of(p.getMainHandItem()).ultimate);
         } else reject(s, request.sequence());
       }
     }
@@ -215,6 +225,9 @@ public final class DualCombat {
     s.buffered = false;
     s.blocked = false;
     s.dodgeDistance = 0;
+    s.struck.clear();
+    s.frozen.clear();
+    s.ultTargets.clear();
     s.main = s.p.getMainHandItem();
     s.off = s.p.getOffhandItem();
     Vec3 forward = forward(s.yaw);
@@ -254,7 +267,8 @@ public final class DualCombat {
         continue;
       }
       live.add(p.getUUID());
-      if (!equipped(p)
+      boolean ultimate = s.move != null && Move.ultimate(s.move.id());
+      if (!(ultimate ? holdsBlade(p) : equipped(p))
           || p.isPassenger()
           || p.isFallFlying()
           || p.isUsingItem()
@@ -266,7 +280,11 @@ public final class DualCombat {
         send(s, ActionEvent.CANCEL, p.position(), Move.GUARD);
       }
       if (!s.guarding && now >= s.regenAfter) s.stamina = Math.min(100, s.stamina + 1);
-      if (s.intent > 0 && now - s.lastUsefulHit > 160 && now - s.lastDecay >= 20) {
+      // A full gauge holds: the ultimate waits for the right moment instead of draining away.
+      if (s.intent > 0
+          && s.intent < 100
+          && now - s.lastUsefulHit > 160
+          && now - s.lastDecay >= 20) {
         s.intent--;
         s.lastDecay = now;
       }
@@ -290,8 +308,10 @@ public final class DualCombat {
           move(s, s.direction.scale(ServerConfig.get().dodgeDistance / 5));
         if (id == Move.DODGE && age == 5 || id == Move.ULTIMATE && age == 11) stopMotion(s);
         if (id == Move.ULTIMATE && age >= 7 && age < 11) move(s, s.direction.scale(.9));
+        if (Move.ultimate(id)) Ultimates.tick(s, age);
         for (int i = 0; i < s.move.hits().length; i++) if (age == s.move.hits()[i]) hit(s, i);
         if (age >= s.move.length()) {
+          if (Move.ultimate(id)) Ultimates.finish(s);
           if (id == Move.DODGE && s.dodgeDistance >= 2 && !s.blocked) s.stepFollowUntil = now + 12;
           s.move = null;
           s.nextCombo =
@@ -308,7 +328,7 @@ public final class DualCombat {
       }
       if (p.connection != null && now - s.lastStatus >= 2) ownerStatus(s);
       // Idle, fully recovered states of players who put the blades away carry no information.
-      if (!equipped(p)
+      if (!holdsBlade(p)
           && !s.wasEquipped
           && s.move == null
           && !s.guarding
@@ -351,26 +371,29 @@ public final class DualCombat {
     var cfg = ServerConfig.get();
     boolean execute = m.id() == Move.ULTIMATE && window == 2;
     boolean finalCross = m.id() == Move.CROSS && window == m.hits().length - 1;
-    boolean riposte = m.id() != Move.ULTIMATE && now <= s.riposteUntil;
+    boolean ultimate = Move.ultimate(m.id());
+    boolean riposte = !ultimate && now <= s.riposteUntil;
     int hand = m.hands()[window];
-    ItemStack blade = hand == 0 ? s.main : s.off;
+    // A solo ultimate has no offhand blade; its offhand beats are cut by the main blade.
+    ItemStack blade = hand == 0 || BladeStyle.of(s.off) == null ? s.main : s.off;
     Item style = s.main.getItem();
     boolean arts = BladeArts.enabled();
     float reach = m.id() == Move.ULTIMATE ? (float) cfg.ultimateReach : m.reach();
-    float baseDamage = WeaponDamage.scaled(s.p, blade, m.damage());
+    float baseDamage =
+        WeaponDamage.scaled(s.p, blade, m.damage()) * BladeStyle.power(blade) * m.weights()[window];
     if (riposte) baseDamage *= (float) cfg.riposteMultiplier;
     int targets = 0;
     List<LivingEntity> struck = new ArrayList<>();
     Set<UUID> struckIds = new HashSet<>();
     oborokage.compat.Compat.swing(
-        s.p, hand == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
+        s.p, blade == s.main ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
     s.level.playSound(
         null,
         s.p.blockPosition(),
         SoundEvents.PLAYER_ATTACK_SWEEP,
         SoundSource.PLAYERS,
         .75f,
-        m.id() == Move.ULTIMATE ? .65f : hand == 1 ? 1.4f : 1f);
+        ultimate ? .65f + .05f * window : hand == 1 ? 1.4f : 1f);
     for (LivingEntity target :
         s.level.getEntitiesOfClass(
             LivingEntity.class,
@@ -410,9 +433,13 @@ public final class DualCombat {
             s.p,
             target,
             blade,
-            baseDamage * (broken ? 1.3f : 1) * (marked ? (float) cfg.voidMarkBonus : 1),
-            m.id() == Move.CROSS || m.id() == Move.ULTIMATE);
+            baseDamage
+                * (broken ? 1.3f : 1)
+                * (marked ? (float) cfg.voidMarkBonus : 1)
+                * (ultimate ? Ultimates.windowScale(s, target) : 1),
+            m.id() == Move.CROSS || ultimate);
       }
+      if (ultimate) Ultimates.afterStrike(s, target);
       boolean useful =
           before > target.getHealth() + target.getAbsorptionAmount() || !target.isAlive();
       if (!useful) continue;
@@ -429,7 +456,7 @@ public final class DualCombat {
         int n = pressure == null || pressure.until < now ? 1 : pressure.count + 1;
         // 胧影 · 月蚀: the original blade's cross presses posture one step harder.
         if (arts && m.id() == Move.CROSS && style == Oborokage.TACHI) n++;
-        if ((n >= 3 || m.id() == Move.ULTIMATE) && !broken) {
+        if ((n >= 3 || ultimate) && !broken) {
           s.pressure.put(
               target.getUUID(), new Pressure(0, now + 80, now + cfg.postureDurationTicks));
           if (target.getMaxHealth() < 100)
@@ -460,11 +487,11 @@ public final class DualCombat {
           null, s.p.blockPosition(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1, 1.2f);
     }
     // Like a vanilla sword, an ordinary chain swing that meets nothing does not wear the blade.
-    if (targets > 0 || m.id() == Move.ULTIMATE)
+    if (targets > 0 || ultimate)
       blade.hurtAndBreak(
-          execute ? 8 : m.id() == Move.ULTIMATE ? 2 : 1,
+          execute ? 8 : ultimate ? 2 : 1,
           s.p,
-          hand == 0 ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
+          blade == s.main ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
   }
 
   /** The closing cross cut takes on the main blade's style. */
@@ -482,6 +509,18 @@ public final class DualCombat {
       // 空弦 · 虚刃: a short sword-qi line reaches the rank behind the first.
       BladeArts.voidEdge(s.p, s.main, s.direction, baseDamage * .5f, struckIds);
     }
+  }
+
+  /** Intent for a useful hit on an enemy by any blade action, throttled per target. */
+  public static void reward(ServerPlayer p, LivingEntity target, int amount) {
+    if (!Feats.enemy(target)) return;
+    State s = state(p);
+    long now = s.level.getGameTime();
+    Long previous = s.rewarded.get(target.getUUID());
+    if (previous != null && now - previous < 8) return;
+    s.rewarded.put(target.getUUID(), now);
+    gainIntent(s, amount);
+    s.lastUsefulHit = now;
   }
 
   private static void gainIntent(State s, int amount) {
@@ -568,6 +607,12 @@ public final class DualCombat {
     State s = states.get(p.getUUID());
     if (s == null) return true;
     if (evade(s, source)) return false;
+    // While an ultimate plays out, attacks from creatures and projectiles cannot interrupt it.
+    if (s.move != null
+        && Move.ultimate(s.move.id())
+        && ServerConfig.get().ultimateGuard
+        && (source.getEntity() != null || source.getDirectEntity() != null)
+        && !source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) return false;
     if (!guardable(s, source)) return true;
     long now = p.level().getGameTime();
     if (now - s.guardStart >= guardWindow(p) || s.stamina < ServerConfig.get().perfectGuardCost)
@@ -636,7 +681,7 @@ public final class DualCombat {
   }
 
   private static void ownerStatus(State s) {
-    boolean equip = equipped(s.p);
+    boolean equip = equipped(s.p) || holdsBlade(s.p);
     int move = s.move == null ? s.guarding ? Move.GUARD : 0 : s.move.id();
     if (!equip && !s.wasEquipped) return;
     if (equip == s.wasEquipped
@@ -761,7 +806,7 @@ public final class DualCombat {
         s.actionSequence);
   }
 
-  private static void send(State s, int kind, Vec3 at) {
+  static void send(State s, int kind, Vec3 at) {
     send(s, kind, at, s.move == null ? 0 : s.move.id());
   }
 

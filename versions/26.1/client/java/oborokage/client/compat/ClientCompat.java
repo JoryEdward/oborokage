@@ -34,7 +34,8 @@ public final class ClientCompat {
         .setColor(color)
         .setUv(.5f, .5f)
         .setLight(0x00f000f0)
-        .setOverlay(0)
+        // NO_OVERLAY, not 0: overlay row 0 is the red hurt flash and tinted every effect red.
+        .setOverlay(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY)
         .setNormal(pose, 0, 1, 0);
   }
 

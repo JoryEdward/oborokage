@@ -41,7 +41,7 @@ public final class StyleTechniques {
     float base =
         (style == StyleBladeItem.Style.STORM ? 28 : style == StyleBladeItem.Style.FROST ? 22 : 36)
             * (1 + charge * 3);
-    float scaled = WeaponDamage.scaled(p, blade, base);
+    float scaled = WeaponDamage.scaled(p, blade, base) * BladeStyle.power(blade);
     var box =
         style == StyleBladeItem.Style.FROST
             ? p.getBoundingBox().inflate(range)
@@ -69,6 +69,7 @@ public final class StyleTechniques {
       boolean hit =
           WeaponDamage.apply(p, target, blade, scaled, style == StyleBladeItem.Style.FROST);
       if (hit && !target.isAlive() && Feats.enemy(target)) kills++;
+      if (hit) DualCombat.reward(p, target, ServerConfig.get().techniqueIntent);
       if (hit && style == StyleBladeItem.Style.FROST) {
         target.addEffect(
             new MobEffectInstance(MobEffects.SLOWNESS, (int) (30 + charge * 50), 2), p);
@@ -105,10 +106,10 @@ public final class StyleTechniques {
               : origin.lerp(end, t);
       level.sendParticles(
           style == StyleBladeItem.Style.STORM
-              ? ParticleTypes.ELECTRIC_SPARK
+              ? Oborokage.SPARK
               : style == StyleBladeItem.Style.FROST
-                  ? ParticleTypes.SNOWFLAKE
-                  : new net.minecraft.core.particles.DustParticleOptions(0x9765e7, .35f),
+                  ? (i % 2 == 0 ? Oborokage.SHARD : ParticleTypes.SNOWFLAKE)
+                  : Oborokage.MOTE,
           at.x,
           at.y,
           at.z,

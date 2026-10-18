@@ -58,6 +58,13 @@ public final class DualClient {
             0));
   }
 
+  /** Ultimates open and close with the blade in its scabbard. */
+  public static boolean sheathedPhase(Scene s) {
+    int m = s.event.move();
+    if (m == Move.ULTIMATE) return s.age < 7 || s.age >= 34;
+    return Move.ultimate(m) && (s.age < 4 || s.age >= Move.of(m).length() - 8);
+  }
+
   public static Scene scene(int actor) {
     return scenes.get(actor);
   }
@@ -101,9 +108,9 @@ public final class DualClient {
         (g, d) -> {
           Minecraft c = Minecraft.getInstance();
           if (c.player == null
-              || !DualCombat.equipped(c.player)
+              || !DualCombat.holdsBlade(c.player) && !DualCombat.equipped(c.player)
               || c.player.isUsingItem()
-              || OborokageClient.localFull && OborokageClient.localAge >= 0) return;
+              || Cinematics.playing()) return;
           g.pose().pushMatrix();
           int
               x =
@@ -179,7 +186,7 @@ public final class DualClient {
     if (ClientConfig.get().localPrediction
         && c.player != null
         && c.level != null
-        && DualCombat.equipped(c.player)
+        && (action == 4 ? DualCombat.holdsBlade(c.player) : DualCombat.equipped(c.player))
         && !c.player.isUsingItem()) {
       Scene old = scenes.get(c.player.getId());
       long now = c.level.getGameTime();
@@ -190,18 +197,21 @@ public final class DualClient {
             case 0 -> now < counterUntil ? Move.COUNTER : now > comboUntil ? Move.MAIN : nextCombo;
             case 1 -> guardPredictionRejected ? 0 : Move.GUARD;
             case 3 -> now >= stepUntil ? Move.DODGE : 0;
-            case 4 -> intent >= 100 && now >= ultimateUntil ? Move.ULTIMATE : 0;
+            case 4 ->
+                intent >= 100 && now >= ultimateUntil
+                    ? BladeStyle.of(c.player.getMainHandItem()).ultimate
+                    : 0;
             default -> 0;
           };
       if (action == 0
           && old != null
           && old.event.move() != Move.GUARD
-          && old.event.move() != Move.ULTIMATE
+          && !Move.ultimate(old.event.move())
           && old.event.move() != Move.DODGE) pendingAttack = seq;
       else if (move != 0 && (old == null || action == 0 && old.event.move() == Move.GUARD)) {
         predict(c, move, seq);
         if (move == Move.DODGE) stepUntil = now + 16;
-        if (move == Move.ULTIMATE) ultimateUntil = now + 100;
+        if (Move.ultimate(move)) ultimateUntil = now + 100;
       }
     }
     ClientPlayNetworking.send(new ActionRequest(seq, action));
@@ -225,7 +235,7 @@ public final class DualClient {
     Scene scene = new Scene(event, 0);
     scene.predicted = true;
     scenes.put(c.player.getId(), scene);
-    if (move == Move.ULTIMATE) OborokageClient.beginDualCamera(event.yaw(), 0);
+    if (Move.ultimate(move)) Cinematics.begin(move, event.yaw(), 0);
   }
 
   private static boolean hasTargetNearby(Minecraft c) {
@@ -321,22 +331,38 @@ public final class DualClient {
           && (!previous.predicted || previous.event.sequence() == e.sequence())
           && e.actionId() >= previous.event.actionId()) {
         scenes.remove(e.actor());
-        if (local && previous.event.move() == Move.ULTIMATE)
+        if (local && Move.ultimate(previous.event.move()))
           OborokageClient.cancelPresentation(e.actor());
       }
       return;
     }
     if (e.kind() == ActionEvent.IMPACT || e.kind() == ActionEvent.PARRY) {
       if (local && e.kind() == ActionEvent.PARRY) counterUntil = c.level.getGameTime() + 12;
+      if (e.kind() == ActionEvent.IMPACT) UltimateFx.impact(e.actor(), e.origin());
       if (local && e.kind() == ActionEvent.IMPACT) {
         long now = c.level.getGameTime();
         comboCount = now <= comboShownUntil ? comboCount + 1 : 1;
         comboShownUntil = now + 60;
       }
+      var actorEntity = c.level.getEntity(e.actor());
+      var hitStyle =
+          actorEntity instanceof net.minecraft.world.entity.player.Player pl
+              ? BladeStyle.of(pl.getMainHandItem())
+              : null;
+      ParticleOptions burst =
+          e.kind() == ActionEvent.PARRY || hitStyle == null
+              ? ParticleTypes.ELECTRIC_SPARK
+              : switch (hitStyle) {
+                case RAIKIRI -> Oborokage.SPARK;
+                case FROSTMOON -> Oborokage.SHARD;
+                case VOIDSTRING -> Oborokage.MOTE;
+                case WAKIZASHI -> Oborokage.PETAL;
+                default -> ParticleTypes.ELECTRIC_SPARK;
+              };
       for (int i = 0; i < (e.kind() == ActionEvent.PARRY ? 12 : 7); i++) {
         double a = i * Math.PI * 2 / 18;
         c.level.addParticle(
-            ParticleTypes.ELECTRIC_SPARK,
+            burst,
             e.origin().x + Math.cos(a) * .16,
             e.origin().y,
             e.origin().z + Math.sin(a) * .16,
@@ -356,8 +382,9 @@ public final class DualClient {
         e.actor(),
         new Scene(
             e, Math.clamp(elapsed, 0, e.move() == Move.GUARD ? 600 : Move.of(e.move()).length())));
-    if (local && e.move() == Move.ULTIMATE)
-      OborokageClient.beginDualCamera(e.yaw(), (int) Math.clamp(elapsed, 0, 47));
+    if (local && Move.ultimate(e.move()))
+      Cinematics.begin(
+          e.move(), e.yaw(), (int) Math.clamp(elapsed, 0, Move.of(e.move()).length() - 1));
   }
 
   private static void tick(Minecraft c) {
@@ -419,7 +446,7 @@ public final class DualClient {
       if (!oborokage.client.compat.ClientCompat.screenOpen(c) && DualCombat.equipped(c.player))
         request(3);
     while (ultimate.consumeClick())
-      if (!oborokage.client.compat.ClientCompat.screenOpen(c) && DualCombat.equipped(c.player))
+      if (!oborokage.client.compat.ClientCompat.screenOpen(c) && DualCombat.holdsBlade(c.player))
         request(4);
     int predictedNext = 0, predictedSequence = -1;
     var it = scenes.values().iterator();
@@ -431,11 +458,14 @@ public final class DualClient {
         continue;
       }
       boolean local = scene.event.actor() == c.player.getId();
-      if (local
-          && (!(scene.event.move() >= Move.STORM
+      int sm = scene.event.move();
+      boolean held =
+          Move.ultimate(sm)
+              ? DualCombat.holdsBlade(c.player)
+              : sm >= Move.STORM && sm <= Move.TERRAIN
                   ? Oborokage.mainBlade(c.player.getMainHandItem())
-                  : DualCombat.equipped(c.player))
-              || c.player.isUsingItem())) {
+                  : DualCombat.equipped(c.player);
+      if (local && (!held || c.player.isUsingItem())) {
         it.remove();
         pendingAttack = -1;
         OborokageClient.cancelPresentation(scene.event.actor());
@@ -508,6 +538,10 @@ public final class DualClient {
       model.body.xRot = .1f;
       return true;
     }
+    if (move >= Move.ULT_MOON) {
+      ultimatePose(model, main, off, sign, move, s.age + partial);
+      return true;
+    }
     if (move >= Move.STORM) {
       singleBladePose(model, main, off, sign, move, a);
       return true;
@@ -527,6 +561,84 @@ public final class DualClient {
     model.rightLeg.zRot = .07f;
     model.leftLeg.zRot = -.07f;
     return true;
+  }
+
+  private static float ease(float x) {
+    x = Math.clamp(x, 0, 1);
+    return x * x * (3 - 2 * x);
+  }
+
+  /** A quick strike envelope: 0 before `at`, peaks 1.5 ticks later, gone by 5. */
+  private static float strike(float t, float at) {
+    float d = t - at + 1.5f;
+    return d < 0 || d > 5 ? 0 : d < 1.5f ? ease(d / 1.5f) : 1 - ease((d - 1.5f) / 3.5f);
+  }
+
+  private static void ultimatePose(
+      HumanoidModel<?> model,
+      net.minecraft.client.model.geom.ModelPart main,
+      net.minecraft.client.model.geom.ModelPart off,
+      float sign,
+      int move,
+      float t) {
+    model.rightLeg.xRot = -.3f;
+    model.leftLeg.xRot = .34f;
+    model.rightLeg.zRot = .1f;
+    model.leftLeg.zRot = -.1f;
+    switch (move) {
+      case Move.ULT_MOON -> {
+        // Whirling cuts that swing wider each beat, then the blade rises and blooms down.
+        float beat = t >= 8 && t < 24 ? (float) Math.sin((t - 8) * Math.PI / 2) : 0;
+        float rise = ease((t - 26) / 4) * (1 - ease((t - 32) / 2));
+        main.xRot = -1.35f - 1.5f * rise + .9f * ease((t - 32) / 2) * (t < 40 ? 1 : 0);
+        main.yRot = sign * 1.45f * beat;
+        main.zRot = sign * -.3f * beat;
+        off.xRot = -.9f + .4f * beat;
+        off.yRot = -sign * .9f * beat;
+        model.body.yRot = sign * .7f * beat;
+        model.body.xRot = .12f;
+      }
+      case Move.ULT_STORM -> {
+        // Leaning lunges: the blade waits low behind and snaps forward at every blink.
+        float hit = 0;
+        for (int k = 0; k < 6; k++) hit = Math.max(hit, strike(t, 8 + 5 * k));
+        float raise = ease((t - 38) / 5) * (1 - ease((t - 44) / 2));
+        float slam = ease((t - 44) / 2) * (1 - ease((t - 52) / 4));
+        main.xRot = .55f - 2.2f * hit - 3.4f * raise - .2f * slam;
+        main.yRot = sign * (.35f - .5f * hit);
+        main.zRot = 0;
+        off.xRot = .7f - .5f * hit;
+        off.yRot = -sign * .2f;
+        model.body.xRot = .32f - .2f * raise + .25f * slam;
+        model.body.yRot = sign * -.25f * hit;
+      }
+      case Move.ULT_FROST -> {
+        // The blade is raised to the sky, held while the lake freezes, then spun into the shatter.
+        float up = ease(t / 10) * (1 - ease((t - 35) / 2));
+        float spin = t >= 35 && t < 41 ? (float) Math.sin((t - 35) / 6 * Math.PI) : 0;
+        main.xRot = -3.05f * up - 1.4f * spin - .3f;
+        main.yRot = sign * (1.6f * spin - .1f);
+        main.zRot = sign * -.15f * up;
+        off.xRot = -1.0f * up - .3f;
+        off.yRot = -sign * .3f * up;
+        off.zRot = -sign * .5f * up;
+        model.body.yRot = sign * 1.0f * spin;
+        model.body.xRot = -.05f * up;
+      }
+      case Move.ULT_VOID -> {
+        // Drawn back like a bowstring, the free hand sighting down the line, then one downstroke.
+        float draw = ease(t / 24) * (1 - ease((t - 27) / 1.5f));
+        float cut = ease((t - 27) / 2.5f) * (1 - ease((t - 48) / 8));
+        main.xRot = -2.3f * draw - .4f * cut - (t >= 27 && t < 29 ? 2.6f * (1 - (t - 27) / 2) : 0);
+        main.yRot = sign * (.95f * draw - .1f * cut);
+        main.zRot = sign * .2f * draw;
+        off.xRot = -1.55f * draw - .3f;
+        off.yRot = -sign * .25f * draw;
+        model.body.yRot = sign * (-.55f * draw + .2f * cut);
+        model.body.xRot = .05f + .22f * cut;
+      }
+      default -> {}
+    }
   }
 
   private static void singleBladePose(

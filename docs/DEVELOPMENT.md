@@ -14,6 +14,19 @@ JDK25下，按版本线分别构建（默认 26.3）：
 
 **版本差异只能放在 `versions/<线>/`**：公共源码通过 `oborokage.compat.Compat`（服务端）与 `oborokage.client.compat.ClientCompat`（客户端）调用有差异的接口；每条线各有一份同名实现。同一个类不能同时出现在公共源码和覆盖目录。
 
+## 美术与视觉检查（0.5.0）
+
+```sh
+python3 tools/create_blades_v5.py   # 四把重做刀的模型/纹理/图标，以及五把刀的手持变换
+python3 tools/create_fx_v5.py       # 花瓣、雷星、冰晶、星点粒子贴图
+python3 verification/run.py client --showcase   # 人偶展示台：正面/右侧/背面/斜前方、第一人称、蓄力
+python3 verification/run.py client --ultshow    # 五个奥义各三个节拍、居合、双刀三段、架刀、三种本刀技
+```
+
+手持变换不要手调欧拉角：在 `create_blades_v5.py` 里写“刀尖方向”和“刃口方向”（第三人称坐标系 +X 前、+Y 左、+Z 上；第一人称 +X 右、+Y 上、+Z 朝向观者），脚本解出角度并把握点放到刀柄上。左右手写同一组数值，Minecraft 会自己镜像。
+
+世界光效统一走无光照的信标光束管线（`UltimateFx`）；顶点覆盖层必须是 `OverlayTexture.NO_OVERLAY`（在 `ClientCompat.vertex`）。
+
 ## 全版本矩阵
 
 ```sh

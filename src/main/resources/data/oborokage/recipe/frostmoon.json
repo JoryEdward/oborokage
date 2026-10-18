@@ -2,15 +2,16 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "pattern": [
-    "  D",
-    " MD",
-    "SG "
+    " ID",
+    " ND",
+    "BP "
   ],
   "key": {
-    "D": "minecraft:diamond",
-    "M": "minecraft:packed_ice",
-    "S": "minecraft:stick",
-    "G": "minecraft:lapis_lazuli"
+    "I": "minecraft:blue_ice",
+    "D": "minecraft:diamond_block",
+    "N": "minecraft:netherite_ingot",
+    "B": "minecraft:blaze_rod",
+    "P": "minecraft:prismarine_crystals"
   },
   "result": {
     "id": "oborokage:frostmoon"

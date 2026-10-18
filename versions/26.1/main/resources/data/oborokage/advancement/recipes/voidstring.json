@@ -1,12 +1,12 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_material": {
+    "has_netherite": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
-            "items": "minecraft:ender_pearl"
+            "items": "minecraft:netherite_ingot"
           }
         ]
       }
@@ -20,7 +20,7 @@
   },
   "requirements": [
     [
-      "has_material",
+      "has_netherite",
       "has_the_recipe"
     ]
   ],

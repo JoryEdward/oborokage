@@ -8,8 +8,8 @@ lowfx='--lowfx' in sys.argv
 fullpack='--fullpack' in sys.argv or shader
 baseline='--baseline' in sys.argv
 maintenance='--maintenance' in sys.argv
-smoke='--smoke' in sys.argv
-client_class='ClientSmokeChecks' if smoke else 'BaselineAuditChecks' if baseline else 'MaintenanceClientChecks' if maintenance else 'FocusedClientChecks' if '--focused' in sys.argv else 'ClientChecks'
+smoke='--smoke' in sys.argv or '--showcase' in sys.argv or '--ultshow' in sys.argv
+client_class='ClientUltimateShowcase' if '--ultshow' in sys.argv else 'ClientShowcase' if '--showcase' in sys.argv else 'ClientSmokeChecks' if smoke else 'BaselineAuditChecks' if baseline else 'MaintenanceClientChecks' if maintenance else 'FocusedClientChecks' if '--focused' in sys.argv else 'ClientChecks'
 b=ROOT/'build';deps=b/'verification-deps';deps.mkdir(exist_ok=True)
 cp=[str(INSTANCE/(INSTANCE.name+'.jar'))]
 meta=json.loads((INSTANCE/(INSTANCE.name+'.json')).read_text())
@@ -28,7 +28,7 @@ with zipfile.ZipFile(api) as z:
    if not p.exists():p.write_bytes(z.read(name))
    cp.append(str(p))
 cp=':'.join(dict.fromkeys(cp));(b/'verification-classpath.txt').write_text(cp)
-jar=ROOT/'backups/gemini-baseline/oborokage-tachi-0.3.0.jar' if baseline else Path(os.environ['OBOROKAGE_JAR']) if 'OBOROKAGE_JAR' in os.environ else max((p for p in (ROOT/'build/libs').glob('oborokage-tachi-*.jar') if not p.name.endswith('-sources.jar')),key=lambda p:p.stat().st_mtime);run=b/('verification-'+GAME_VERSION+'-'+mode+('-fullpack' if fullpack else '')+('-shader' if shader else '')+('-lowfx' if lowfx else '')+('-baseline' if baseline else '')+('-maintenance' if maintenance else '')+('-smoke' if smoke else ''));run.mkdir(exist_ok=True);mods=run/'mods';mods.mkdir(exist_ok=True)
+jar=ROOT/'backups/gemini-baseline/oborokage-tachi-0.3.0.jar' if baseline else Path(os.environ['OBOROKAGE_JAR']) if 'OBOROKAGE_JAR' in os.environ else max((p for p in (ROOT/'build/libs').glob('oborokage-tachi-*.jar') if not p.name.endswith('-sources.jar')),key=lambda p:p.stat().st_mtime);run=b/('verification-'+GAME_VERSION+'-'+mode+('-fullpack' if fullpack else '')+('-shader' if shader else '')+('-lowfx' if lowfx else '')+('-baseline' if baseline else '')+('-maintenance' if maintenance else '')+('-ultshow' if '--ultshow' in sys.argv else '-showcase' if '--showcase' in sys.argv else '-smoke' if smoke else ''));run.mkdir(exist_ok=True);mods=run/'mods';mods.mkdir(exist_ok=True)
 (run/(mode+'-results.txt')).unlink(missing_ok=True)
 classes=b/('checks-'+mode);shutil.rmtree(classes,ignore_errors=True);classes.mkdir(exist_ok=True)
 # Test sources are written against 26.3; older 26.x lines get their equivalent names.
@@ -40,7 +40,7 @@ for f in check_src.rglob('*.java'):
  for old,new in renames:text=text.replace(old,new)
  f.write_text(text)
 source=check_src/('ServerChecks.java' if mode=='server' else client_class+'.java')
-subprocess.run([str(JAVA/'javac'),'-proc:none','--release','25','-cp',cp+':'+str(jar),'-d',str(classes),str(source)]+([str(source.parent/'ReviewChecks.java'),str(source.parent/'ExpansionChecks.java')] if mode=='server' else [])+([str(source.parent/'ClientChecks.java'),str(source.parent/'FocusedChecks.java'),str(source.parent/'RenderObservations.java')]+[str(p) for p in (source.parent/'mixin').glob('*.java') if maintenance or p.stem in ['ObservedPose','ObservedEvent','ObservedCut','ObservedTerrain']] + ([str(source.parent/'MaintenanceObservations.java')] if maintenance else []) if mode=='client' and not smoke else []),check=True)
+subprocess.run([str(JAVA/'javac'),'-proc:none','--release','25','-cp',cp+':'+str(jar),'-d',str(classes),str(source)]+([str(source.parent/'ReviewChecks.java'),str(source.parent/'ExpansionChecks.java'),str(source.parent/'RecipeInputs.java'),str(source.parent/'UltimateChecks.java')] if mode=='server' else [])+([str(source.parent/'ClientChecks.java'),str(source.parent/'FocusedChecks.java'),str(source.parent/'RenderObservations.java')]+[str(p) for p in (source.parent/'mixin').glob('*.java') if maintenance or p.stem in ['ObservedPose','ObservedEvent','ObservedCut','ObservedTerrain']] + ([str(source.parent/'MaintenanceObservations.java')] if maintenance else []) if mode=='client' and not smoke else []),check=True)
 with zipfile.ZipFile(mods/'oborokage-checks.jar','w') as z:
  for p in classes.rglob('*.class'):z.write(p,p.relative_to(classes))
  z.writestr('fabric.mod.json',json.dumps({'schemaVersion':1,'id':'oborokage_checks','version':'1','environment':mode,'mixins':(['observations.mixins.json'] if mode=='client' and not smoke else []),'entrypoints':{'main' if mode=='server' else 'client':['oborokage.check.'+('ServerChecks' if mode=='server' else client_class)]}}))

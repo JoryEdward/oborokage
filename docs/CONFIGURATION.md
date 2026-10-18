@@ -36,6 +36,9 @@
 | perfectDodgeIntent | 10 | 0–100；见切奖励剑意，每20 tick最多一次 |
 | riposteWindowTicks / riposteMultiplier | 20 / 1.5 | 0–60 tick；1–3倍。见切后影步结束起算的影返窗口及下一击倍率 |
 | voidMarkTicks / voidMarkBonus / voidMarkIntent | 100 / 1.25 / 8 | 20–400 tick；1–3倍；0–100。空弦满蓄力虚印的时长、双刀引爆倍率与剑意 |
+| ultimateGuard | true | 0.5.0：奥义进行中，生物与投射物的攻击无法打断 |
+| zanshinTicks | 100 | 0–400；奥义结束后“残心”速度 I 的时长，0 为关闭 |
+| techniqueIntent / iaidoIntent | 6 / 10 | 0–100；本刀技、居合每命中一个敌人获得的剑意 |
 
 斩物数量=`floor(1+(terrainMaxBlocks-1)×charge²)`；起始硬度以2为基准，并随蓄力增长到配置上限。主刀普通战斗不触发斩物。方块原生事件、冒险规则、世界边界、正确工具掉落仍有效。默认5硬度不能斩黑曜石。
 

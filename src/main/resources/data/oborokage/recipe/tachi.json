@@ -3,14 +3,14 @@
   "category": "equipment",
   "pattern": [
     "  D",
-    " ID",
-    "SA "
+    " ND",
+    "BA "
   ],
   "key": {
-    "D": "minecraft:diamond",
-    "I": "minecraft:iron_block",
-    "S": "minecraft:stick",
-    "A": "minecraft:amethyst_shard"
+    "D": "minecraft:diamond_block",
+    "N": "minecraft:netherite_ingot",
+    "B": "minecraft:blaze_rod",
+    "A": "minecraft:amethyst_block"
   },
   "result": {
     "id": "oborokage:tachi"

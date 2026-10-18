@@ -24,17 +24,13 @@ final class BladeTrails {
           || scene.event.move() == Move.GUARD
           || scene.event.move() == Move.DODGE) continue;
       var move = Move.of(scene.event.move());
-      int bladeColor =
+      // Each blade writes its trail in its own colour; the wakizashi's is pale moonlight.
+      var style =
           e instanceof net.minecraft.world.entity.player.Player player
-                  && player.getMainHandItem().is(Oborokage.RAIKIRI)
-              ? 0xf28b56
-              : e instanceof net.minecraft.world.entity.player.Player player
-                      && player.getMainHandItem().is(Oborokage.FROSTMOON)
-                  ? 0x8cdeef
-                  : e instanceof net.minecraft.world.entity.player.Player player
-                          && player.getMainHandItem().is(Oborokage.VOIDSTRING)
-                      ? 0xbb87eb
-                      : 0xbca6f4;
+              ? BladeStyle.of(player.getMainHandItem())
+              : null;
+      int bladeColor = style == null ? 0xbca6f4 : style.primary;
+      int offColor = BladeStyle.WAKIZASHI.primary;
       float age = scene.age + partial;
       for (int w = 0; w < move.hits().length; w++) {
         float t = age - (move.hits()[w] - 2);
@@ -75,7 +71,7 @@ final class BladeTrails {
                       alpha,
                       finalCut ? 3.4f : logical == 0 ? 2.7f : 2.0f,
                       .18f,
-                      logical == 0 ? bladeColor : 0x9bd6e5,
+                      logical == 0 ? bladeColor : offColor,
                       segments);
                   ribbon(
                       p,
@@ -121,7 +117,9 @@ final class BladeTrails {
       };
       int color = (int) (255 * fade) << 24 | rgb;
       for (Vec3 pos : quad) vertex(p, v, pos, color);
-      for (int j = 3; j >= 0; j--) vertex(p, v, quad[j], color);
+      // The emissive pipeline draws both sides; only the culling beacon fallback needs a copy.
+      if (!ClientConfig.get().trailShaderCompat)
+        for (int j = 3; j >= 0; j--) vertex(p, v, quad[j], color);
     }
   }
 

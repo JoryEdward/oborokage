@@ -21,13 +21,13 @@ public final class FirstPersonPose {
     var p = Minecraft.getInstance().player;
     if (p != null && p.isUsingItem() && p.getUsedItemHand() == hand) {
       float q = Math.min(1, p.getTicksUsingItem() / (float) OborokageClient.fullChargeTicks(p));
-      pose.translate(-.18 * q, -.13 * q, .08 * q);
+      pose.translate(-.12 * q, -.02 * q, -.05 * q);
       ClientCompat.rotate(pose, Axis.ZP, -12 * q);
     }
     // The iaido draw belongs to the main hand; the dual ultimate has its own scene-driven pose.
     int age = OborokageClient.localAge;
     if (hand == InteractionHand.MAIN_HAND
-        && !OborokageClient.dualUltimate
+        && !oborokage.Move.ultimate(Cinematics.kind)
         && age >= 0
         && age < 26) {
       int delay = OborokageClient.localFull ? oborokage.Combat.FULL_WINDUP : 0;

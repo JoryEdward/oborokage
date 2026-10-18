@@ -32,7 +32,7 @@ public abstract class SheathModelMixin {
     if ((!Oborokage.mainBlade(item) && !item.is(Oborokage.WAKIZASHI))
         || context == ItemDisplayContext.GUI) return;
     var dual = oborokage.client.DualClient.scene(owner.getId());
-    if (dual != null && dual.event.move() == Move.ULTIMATE && (dual.age < 7 || dual.age >= 34)) {
+    if (dual != null && oborokage.client.DualClient.sheathedPhase(dual)) {
       ItemStack render = item.copy();
       render.set(
           DataComponents.ITEM_MODEL,

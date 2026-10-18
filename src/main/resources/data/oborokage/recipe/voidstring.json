@@ -2,15 +2,16 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "pattern": [
-    "  D",
-    " MD",
-    "SG "
+    " ED",
+    " ND",
+    "BS "
   ],
   "key": {
-    "D": "minecraft:diamond",
-    "M": "minecraft:ender_pearl",
-    "S": "minecraft:stick",
-    "G": "minecraft:amethyst_shard"
+    "E": "minecraft:ender_eye",
+    "D": "minecraft:diamond_block",
+    "N": "minecraft:netherite_ingot",
+    "B": "minecraft:blaze_rod",
+    "S": "minecraft:shulker_shell"
   },
   "result": {
     "id": "oborokage:voidstring"

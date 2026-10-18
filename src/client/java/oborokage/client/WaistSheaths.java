@@ -43,8 +43,7 @@ final class WaistSheaths extends RenderLayer<AvatarRenderState, PlayerModel> {
         || !DualCombat.equipped(p)
         || p.isInvisible()) return;
     var scene = DualClient.scene(state.id);
-    if (scene != null && scene.event.move() == Move.ULTIMATE && (scene.age < 7 || scene.age >= 34))
-      return;
+    if (scene != null && DualClient.sheathedPhase(scene)) return;
     if (world != c.level) {
       cache.clear();
       world = c.level;

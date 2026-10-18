@@ -87,6 +87,7 @@ final class ExpansionChecks {
       setLong(s, "start", level.getGameTime());
       expectedRiposte =
           WeaponDamage.scaled(p, p.getOffhandItem(), Move.of(Move.OFF).damage())
+              * BladeStyle.power(p.getOffhandItem())
               * (float) ServerConfig.get().riposteMultiplier;
       step = 1;
       age = 0;
@@ -218,6 +219,8 @@ final class ExpansionChecks {
       Combat.clear();
       dual(Oborokage.TACHI);
       DualCombat.state(p);
+      // Since 0.5.0 a single drawn blade keeps the intent HUD alive; put both away.
+      p.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
       p.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
       step = 5;
       age = 0;

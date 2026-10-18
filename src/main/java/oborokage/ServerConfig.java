@@ -44,6 +44,10 @@ public final class ServerConfig {
     public int voidMarkTicks = 100;
     public double voidMarkBonus = 1.25;
     public int voidMarkIntent = 8;
+    public boolean ultimateGuard = true;
+    public int zanshinTicks = 100;
+    public int techniqueIntent = 6;
+    public int iaidoIntent = 10;
   }
 
   private static volatile Values current = new Values();
@@ -93,6 +97,10 @@ public final class ServerConfig {
                 + "voidMarkTicks=100\n"
                 + "voidMarkBonus=1.25\n"
                 + "voidMarkIntent=8\n"
+                + "ultimateGuard=true\n"
+                + "zanshinTicks=100\n"
+                + "techniqueIntent=6\n"
+                + "iaidoIntent=10\n"
                 + "terrainCutEnabled=true\n"
                 + "terrainMaxBlocks=32\n"
                 + "terrainBlocksPerTick=4\n"
@@ -152,6 +160,11 @@ public final class ServerConfig {
     next.voidMarkTicks = (int) ConfigIO.number(p, "voidMarkTicks", next.voidMarkTicks, 20, 400);
     next.voidMarkBonus = ConfigIO.number(p, "voidMarkBonus", next.voidMarkBonus, 1, 3);
     next.voidMarkIntent = (int) ConfigIO.number(p, "voidMarkIntent", next.voidMarkIntent, 0, 100);
+    next.ultimateGuard = ConfigIO.bool(p, "ultimateGuard", next.ultimateGuard);
+    next.zanshinTicks = (int) ConfigIO.number(p, "zanshinTicks", next.zanshinTicks, 0, 400);
+    next.techniqueIntent =
+        (int) ConfigIO.number(p, "techniqueIntent", next.techniqueIntent, 0, 100);
+    next.iaidoIntent = (int) ConfigIO.number(p, "iaidoIntent", next.iaidoIntent, 0, 100);
     next.terrainCutEnabled = ConfigIO.bool(p, "terrainCutEnabled", true);
     next.terrainMaxBlocks = (int) ConfigIO.number(p, "terrainMaxBlocks", 32, 1, 128);
     next.terrainBlocksPerTick = (int) ConfigIO.number(p, "terrainBlocksPerTick", 4, 1, 8);

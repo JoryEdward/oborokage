@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "oborokage:item/waki_icon"
+    "layer0": "oborokage:item/wakizashi_icon"
   }
 }
