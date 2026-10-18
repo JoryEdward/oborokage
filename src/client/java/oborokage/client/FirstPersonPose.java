@@ -26,15 +26,25 @@ public final class FirstPersonPose {
     }
     // The iaido draw belongs to the main hand; the dual ultimate has its own scene-driven pose.
     int age = OborokageClient.localAge;
+    boolean full = OborokageClient.localFull;
     if (hand == InteractionHand.MAIN_HAND
         && !oborokage.Move.ultimate(Cinematics.kind)
         && age >= 0
-        && age < 26) {
-      int delay = OborokageClient.localFull ? oborokage.Combat.FULL_WINDUP : 0;
+        && age < (full ? 36 : 26)) {
+      int delay = full ? oborokage.Combat.FULL_WINDUP : 0;
       float a = age + pt - delay;
-      float cut = a < 0 ? 0 : a < 3 ? a / 3 : a < 9 ? 1 : Math.max(0, 1 - (a - 9) / 12);
-      pose.translate(-.48 * cut, .15 * cut, -.12 * cut);
-      ClientCompat.rotate(pose, Axis.ZP, -72 * cut);
+      // A full draw holds the blade out through the stillness, flicks it and slides it home.
+      float cut =
+          a < 0
+              ? 0
+              : a < 3
+                  ? a / 3
+                  : full
+                      ? a < 19 ? 1 : Math.max(0, 1 - (a - 19) / 3)
+                      : a < 9 ? 1 : Math.max(0, 1 - (a - 9) / 12);
+      float flick = full && a >= 16 && a < 20 ? (float) Math.sin((a - 16) / 4 * Math.PI) : 0;
+      pose.translate(-.48 * cut + .1 * flick, .15 * cut - .12 * flick, -.12 * cut);
+      ClientCompat.rotate(pose, Axis.ZP, -72 * cut + 25 * flick);
       ClientCompat.rotate(pose, Axis.YP, -22 * cut);
     }
   }

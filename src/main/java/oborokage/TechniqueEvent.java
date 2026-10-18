@@ -9,8 +9,12 @@ import net.minecraft.world.phys.Vec3;
 
 public record TechniqueEvent(int actor, int style, Vec3 origin, Vec3 end, float charge)
     implements CustomPacketPayload {
-  /** Styles 0-2 are blade techniques, 3 is terrain cutting, 4 is a ring-only echo. */
-  public static final int RING = 4;
+  /**
+   * Styles 0-2 are blade techniques and 3 is terrain cutting; they also replay the actor's pose.
+   * The rest are accents drawn in place: 4 a frost ring, 5 the tachi's shadow cut on a target, 6 a
+   * lightning arc between two points, 7 a void sword-qi line.
+   */
+  public static final int RING = 4, ECHO = 5, ARC = 6, EDGE = 7, LAST = EDGE;
 
   public static final Type<TechniqueEvent> TYPE = new Type<>(Oborokage.id("technique_v1"));
   public static final StreamCodec<RegistryFriendlyByteBuf, TechniqueEvent> CODEC =

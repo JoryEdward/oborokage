@@ -78,5 +78,13 @@
   "advancement.oborokage.all_ultimates.description": "Unleash the ultimate of all five blades.",
   "advancement.oborokage.shake_heavens.title": "Heaven Trembles, Demons Weep",
   "advancement.oborokage.shake_heavens.description": "Fell a foe with at least 150 health using an ultimate.",
-  "ui.oborokage.zanshin": "Zanshin"
+  "ui.oborokage.zanshin": "Zanshin",
+  "ui.oborokage.stage.1": "I",
+  "ui.oborokage.stage.2": "II",
+  "ui.oborokage.stage.3": "III",
+  "tooltip.oborokage.solo.tachi": "Alone · three-cut chain; finisher \"Waning Moon\": the blade's shadow cuts again",
+  "tooltip.oborokage.solo.moon": "Alone · three-cut chain; finisher \"Falling Petals\": a full turn that quickens the feet",
+  "tooltip.oborokage.solo.storm": "Alone · three-cut chain; finisher \"Thunderflash\": lightning leaps to enemies beyond reach",
+  "tooltip.oborokage.solo.frost": "Alone · three-cut chain; every cut frosts, finisher \"Frost Bloom\" rings out a chill",
+  "tooltip.oborokage.solo.void": "Alone · three-cut chain; finisher \"Void Edge\": sword-qi pierces the rank behind"
 }

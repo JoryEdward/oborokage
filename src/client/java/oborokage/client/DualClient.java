@@ -36,10 +36,29 @@ public final class DualClient {
     public ActionEvent event;
     public float age;
     public boolean predicted;
+    float stopAt = -99, stopLen;
 
     Scene(ActionEvent e, float age) {
       event = e;
       this.age = age;
+    }
+
+    /**
+     * Visual time of the scene. After a landed cut the picture holds still for a beat (hitstop) and
+     * then runs a little fast until it is back on time; the logical age never waits, so the chain
+     * stays in step with the server.
+     */
+    public float time(float partial) {
+      float t = age + partial, d = t - stopAt;
+      if (d < 0 || stopLen <= 0) return t;
+      float lag = d < stopLen ? d : Math.max(0, stopLen - (d - stopLen) / 2);
+      return t - lag;
+    }
+
+    void hitstop(float at, float length) {
+      if (age + 1 - stopAt < 4) return;
+      stopAt = at;
+      stopLen = length;
     }
   }
 
@@ -95,7 +114,7 @@ public final class DualClient {
     ClientPlayNetworking.registerGlobalReceiver(
         ActionEvent.TYPE, (p, c) -> c.client().execute(() -> receive(p)));
     ClientTickEvents.END_CLIENT_TICK.register(DualClient::tick);
-    LevelRenderEvents.COLLECT_SUBMITS.register(BladeTrails::submit);
+    LevelRenderEvents.COLLECT_SUBMITS.register(SlashFx::submit);
     net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback.EVENT
         .register(
             (type, renderer, helper, context) -> {
@@ -139,12 +158,15 @@ public final class DualClient {
               x,
               y + 10,
               0xffe2d6ef);
+          // Guard and step need both blades; a single blade only adds the ultimate key.
           String controls =
-              guard.getTranslatedKeyMessage().getString()
-                  + " · "
-                  + step.getTranslatedKeyMessage().getString()
-                  + " · "
-                  + ultimate.getTranslatedKeyMessage().getString();
+              DualCombat.equipped(c.player)
+                  ? guard.getTranslatedKeyMessage().getString()
+                      + " · "
+                      + step.getTranslatedKeyMessage().getString()
+                      + " · "
+                      + ultimate.getTranslatedKeyMessage().getString()
+                  : ultimate.getTranslatedKeyMessage().getString();
           g.text(c.font, controls, x, y - 12, 0xffb7a6d5);
           long now = c.level == null ? 0 : c.level.getGameTime();
           if (comboCount >= 2 && now <= comboShownUntil) {
@@ -186,7 +208,9 @@ public final class DualClient {
     if (ClientConfig.get().localPrediction
         && c.player != null
         && c.level != null
-        && (action == 4 ? DualCombat.holdsBlade(c.player) : DualCombat.equipped(c.player))
+        && (action == 4 || action == 0
+            ? DualCombat.holdsBlade(c.player)
+            : DualCombat.equipped(c.player))
         && !c.player.isUsingItem()) {
       Scene old = scenes.get(c.player.getId());
       long now = c.level.getGameTime();
@@ -194,7 +218,13 @@ public final class DualClient {
         scenes.remove(c.player.getId());
       int move =
           switch (action) {
-            case 0 -> now < counterUntil ? Move.COUNTER : now > comboUntil ? Move.MAIN : nextCombo;
+            case 0 -> {
+              boolean dual = DualCombat.equipped(c.player);
+              if (dual && now < counterUntil) yield Move.COUNTER;
+              yield now > comboUntil
+                  ? dual ? Move.MAIN : Move.SOLO_1
+                  : Move.follow(nextCombo, dual);
+            }
             case 1 -> guardPredictionRejected ? 0 : Move.GUARD;
             case 3 -> now >= stepUntil ? Move.DODGE : 0;
             case 4 ->
@@ -259,7 +289,7 @@ public final class DualClient {
     var c = Minecraft.getInstance();
     if (c.player == null
         || oborokage.client.compat.ClientCompat.screenOpen(c)
-        || !DualCombat.equipped(c.player)
+        || !DualCombat.holdsBlade(c.player)
         || !ClientPlayNetworking.canSend(ActionRequest.TYPE)) return false;
     // Non-living entities (end crystals, item frames, boats) keep the ordinary attack.
     if (c.hitResult instanceof EntityHitResult entityHit
@@ -338,7 +368,14 @@ public final class DualClient {
     }
     if (e.kind() == ActionEvent.IMPACT || e.kind() == ActionEvent.PARRY) {
       if (local && e.kind() == ActionEvent.PARRY) counterUntil = c.level.getGameTime() + 12;
-      if (e.kind() == ActionEvent.IMPACT) UltimateFx.impact(e.actor(), e.origin());
+      if (e.kind() == ActionEvent.IMPACT) {
+        UltimateFx.impact(e.actor(), e.origin());
+        boolean big = previous != null && Move.finisher(previous.event.move());
+        SlashFx.impact(e.actor(), e.origin(), big);
+        // Other players' cuts hold on contact here; the local one already did, on prediction.
+        if (!local && previous != null && !Move.ultimate(previous.event.move()))
+          previous.hitstop(previous.age, big ? 2 : 1.2f);
+      }
       if (local && e.kind() == ActionEvent.IMPACT) {
         long now = c.level.getGameTime();
         comboCount = now <= comboShownUntil ? comboCount + 1 : 1;
@@ -460,7 +497,7 @@ public final class DualClient {
       boolean local = scene.event.actor() == c.player.getId();
       int sm = scene.event.move();
       boolean held =
-          Move.ultimate(sm)
+          Move.ultimate(sm) || Move.solo(sm)
               ? DualCombat.holdsBlade(c.player)
               : sm >= Move.STORM && sm <= Move.TERRAIN
                   ? Oborokage.mainBlade(c.player.getMainHandItem())
@@ -475,7 +512,9 @@ public final class DualClient {
         scene.age = Math.min(3, scene.age + 1);
         continue;
       }
+      float before = scene.age;
       scene.age++;
+      if (local) contact(c, scene, before);
       if (!scene.predicted) {
         long elapsed = c.level.getGameTime() - scene.event.startTick();
         if (elapsed >= 0 && elapsed < 80) {
@@ -486,13 +525,10 @@ public final class DualClient {
       if (scene.age > Move.of(scene.event.move()).length()) {
         if (local) {
           int id = scene.event.move();
-          nextCombo =
-              id == Move.MAIN || id == Move.DODGE
-                  ? Move.OFF
-                  : id == Move.OFF ? Move.CROSS : Move.MAIN;
+          nextCombo = Move.next(id);
           comboUntil = c.level.getGameTime() + 20;
           if (pendingAttack >= 0) {
-            predictedNext = nextCombo;
+            predictedNext = Move.follow(nextCombo, DualCombat.equipped(c.player));
             predictedSequence = pendingAttack;
             pendingAttack = -1;
           }
@@ -501,10 +537,49 @@ public final class DualClient {
       }
     }
     if (predictedNext != 0) predict(c, predictedNext, predictedSequence);
+    SlashFx.tick(c);
+  }
+
+  /**
+   * The local cut meets something: hold the picture, kick the camera and, on a closing cut, flash
+   * the screen edge in the blade's colour. Judged on the client at the moment the edge passes, so
+   * the feedback does not wait for the server's round trip.
+   */
+  private static void contact(Minecraft c, Scene scene, float before) {
+    int id = scene.event.move();
+    if (id == Move.GUARD || id == Move.DODGE || Move.ultimate(id)) return;
+    Move m = Move.of(id);
+    for (int w = 0; w < m.hits().length; w++) {
+      int hit = m.hits()[w];
+      if (!(before < hit && scene.age >= hit) || !struckSomething(c, m, scene.event.yaw()))
+        continue;
+      boolean big = Move.finisher(id) && w == m.hits().length - 1;
+      scene.hitstop(hit, big ? 2.2f : 1.3f);
+      var style = BladeStyle.of(c.player.getMainHandItem());
+      int rgb = style == null ? 0xbca6f4 : style.primary;
+      Cinematics.kick(big ? 1.5f : .7f, w % 2 == 0 ? 1 : -1, big ? rgb : 0);
+    }
+  }
+
+  private static boolean struckSomething(Minecraft c, Move m, float yaw) {
+    Vec3 eye = c.player.getEyePosition();
+    Vec3 f = new Vec3(-Math.sin(Math.toRadians(yaw)), 0, Math.cos(Math.toRadians(yaw)));
+    double reach = m.reach() + .6, cos = Math.cos(Math.toRadians(Math.min(359, m.arc()) / 2));
+    for (var e :
+        c.level.getEntitiesOfClass(
+            net.minecraft.world.entity.LivingEntity.class,
+            c.player.getBoundingBox().inflate(reach, 2.0, reach),
+            e -> e != c.player && e.isAlive() && !e.isSpectator())) {
+      Vec3 d = e.getBoundingBox().getCenter().subtract(eye);
+      Vec3 h = new Vec3(d.x, 0, d.z);
+      if (d.lengthSqr() > reach * reach) continue;
+      if (h.lengthSqr() < .2 || m.arc() >= 359 || h.normalize().dot(f) >= cos) return true;
+    }
+    return false;
   }
 
   public static float cut(Scene s, float partial, int hand) {
-    float t = s.age + partial;
+    float t = s.time(partial);
     int move = s.event.move();
     if (move == Move.GUARD) return 0;
     if (move == Move.DODGE) return (float) Math.sin(Math.min(1, t / 6) * Math.PI) * .35f;
@@ -538,11 +613,15 @@ public final class DualClient {
       model.body.xRot = .1f;
       return true;
     }
-    if (move >= Move.ULT_MOON) {
+    if (Move.solo(move)) {
+      SoloPose.thirdPerson(model, main, off, sign, move, s.time(partial));
+      return true;
+    }
+    if (Move.ultimate(move) && move != Move.ULTIMATE) {
       ultimatePose(model, main, off, sign, move, s.age + partial);
       return true;
     }
-    if (move >= Move.STORM) {
+    if (move >= Move.STORM && move <= Move.TERRAIN) {
       singleBladePose(model, main, off, sign, move, a);
       return true;
     }
@@ -683,6 +762,11 @@ public final class DualClient {
     if (s == null) return;
     float side = hand == InteractionHand.MAIN_HAND ? 1 : -1;
     if (c.player.getMainArm() == HumanoidArm.LEFT) side = -side;
+    if (Move.solo(s.event.move())) {
+      if (hand == InteractionHand.MAIN_HAND)
+        SoloPose.firstPerson(pose, side, s.event.move(), s.time(partial));
+      return;
+    }
     float q = cut(s, partial, hand == InteractionHand.MAIN_HAND ? 0 : 1);
     if (s.event.move() == Move.GUARD) {
       pose.translate(-side * .15, .25, -.18);

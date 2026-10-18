@@ -20,12 +20,15 @@ JDK25下，按版本线分别构建（默认 26.3）：
 python3 tools/create_blades_v5.py   # 四把重做刀的模型/纹理/图标，以及五把刀的手持变换
 python3 tools/create_fx_v5.py       # 花瓣、雷星、冰晶、星点粒子贴图
 python3 verification/run.py client --showcase   # 人偶展示台：正面/右侧/背面/斜前方、第一人称、蓄力
-python3 verification/run.py client --ultshow    # 五个奥义各三个节拍、居合、双刀三段、架刀、三种本刀技
+python3 verification/run.py client --ultshow    # 五个奥义各三个节拍、四段蓄力、胧月一闪七个节拍、双刀三段、架刀、三种本刀技、五把刀单刀连斩与第一人称连斩
+bash tools/dev/sheet.sh build/verification-26.3-client-ultshow build/sheets/all.png 6 400   # 截图拼图
 ```
 
 手持变换不要手调欧拉角：在 `create_blades_v5.py` 里写“刀尖方向”和“刃口方向”（第三人称坐标系 +X 前、+Y 左、+Z 上；第一人称 +X 右、+Y 上、+Z 朝向观者），脚本解出角度并把握点放到刀柄上。左右手写同一组数值，Minecraft 会自己镜像。
 
 世界光效统一走无光照的信标光束管线（`UltimateFx`）；顶点覆盖层必须是 `OverlayTexture.NO_OVERLAY`（在 `ClientCompat.vertex`）。
+
+0.6.0 的光效分工：`SlashFx` 画所有普通斩击（双刀、单刀、反切、本刀技挥刀、双月归寂三斩）、命中闪光并负责顿帧所用的数据；`ChargeFx` 画蓄力光阵与蓄力计量条；`TechniqueFx` 画本刀技与雷链、虚刃、回霜、残月等附带效果；`UltimateFx` 画五个奥义与胧月一闪。全部用 `Geo` 组装几何，`Geo.near` 让靠近镜头的顶点淡出。斩面不要放在包含视线方向的平面里：从肩后看会变成一条线（0.5 的“两条光弧”就是这个原因）。
 
 ## 全版本矩阵
 
@@ -54,7 +57,7 @@ python3 verification/rollback.py
 
 所有生成世界/测试JAR/配置都在项目`build/verification-*`内。测试JAR与Mixin不打进发布模组。
 
-- server：原版强度、碰撞、双刀窗口、成就、属性/附魔、保护、配置和节流的受控服务器回归。
+- server：原版强度、碰撞、双刀窗口、成就、属性/附魔、保护、配置和节流的受控服务器回归；0.5.0 起含 `UltimateChecks`，0.6.0 起含 `SoloChecks`（单刀连斩、终式、奥义伤害、胧月一闪时序）。
 - client：真实integrated server、本机完整模组组合、真实use/release/attack包、原版iframe、箭实体碰撞、原木掉落、权限、/reload和截图。
 - maintenance：0.3.1的HUD实际绘制、光环、原生音效、单手姿势、原版左键挖掘路径、刀碎边界、拒绝heartbeat与真实成就广播。左键场景直接调用Minecraft原生startAttack/continueAttack入口，避免自动化窗口失焦丢键；不以直接调用拦截函数代替挖掘结果。
 - shader：隔离目录启用ComplementaryReimagined_r5.9.3，复制光影文件，保留正式实例光影选项。

@@ -14,6 +14,8 @@ final class Geo {
   private final VertexConsumer v;
   private final boolean twoSided;
   private int budget;
+  private Vec3 eye;
+  private double reach;
 
   /**
    * @param twoSided emit each quad in both windings. Only for a render type that culls back faces:
@@ -25,6 +27,16 @@ final class Geo {
     this.v = v;
     this.budget = budget;
     this.twoSided = twoSided;
+  }
+
+  /**
+   * Fades every vertex that comes within reach of the eye (relative to the pose origin). Light that
+   * sweeps past the camera would otherwise fill the screen with one flat quad.
+   */
+  Geo near(Vec3 eye, double reach) {
+    this.eye = eye;
+    this.reach = reach;
+    return this;
   }
 
   static int argb(int rgb, float alpha) {
@@ -59,6 +71,13 @@ final class Geo {
   }
 
   private void put(Vec3 p, int color) {
+    if (eye != null) {
+      double d = p.distanceTo(eye);
+      if (d < reach) {
+        float k = (float) Math.clamp((d - .4) / (reach - .4), 0, 1);
+        color = (int) ((color >>> 24) * k * k) << 24 | (color & 0xffffff);
+      }
+    }
     ClientCompat.vertex(v, pose, (float) p.x, (float) p.y, (float) p.z, color);
   }
 

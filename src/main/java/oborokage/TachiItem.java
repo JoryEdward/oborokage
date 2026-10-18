@@ -33,6 +33,9 @@ public class TachiItem extends Item {
         net.minecraft.network.chat.Component.translatable("tooltip.oborokage.art.tachi")
             .withStyle(net.minecraft.ChatFormatting.AQUA));
     out.accept(
+        net.minecraft.network.chat.Component.translatable("tooltip.oborokage.solo.tachi")
+            .withStyle(net.minecraft.ChatFormatting.DARK_AQUA));
+    out.accept(
         net.minecraft.network.chat.Component.translatable("tooltip.oborokage.ult.tachi")
             .withStyle(net.minecraft.ChatFormatting.GOLD));
     out.accept(

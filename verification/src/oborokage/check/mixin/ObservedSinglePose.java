@@ -21,7 +21,7 @@ public class ObservedSinglePose {
     var c = Minecraft.getInstance();
     if (c.player == null || avatar.id != c.player.getId()) return;
     var s = DualClient.scene(avatar.id);
-    if (s == null || s.event.move() < Move.STORM) return;
+    if (s == null || s.event.move() < Move.STORM || s.event.move() > Move.TERRAIN) return;
     var m = (HumanoidModel<?>) (Object) this;
     var off =
         c.player.getMainArm() == net.minecraft.world.entity.HumanoidArm.RIGHT

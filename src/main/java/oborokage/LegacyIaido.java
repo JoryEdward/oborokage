@@ -12,8 +12,14 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.*;
 
+/**
+ * 胧月一闪. A charged draw dashes through everything in its path. Below full charge every cut lands as
+ * the blade passes. At full charge the dash is longer and wider, and what it passes through is only
+ * marked: the enemies stand pinned while the swordsman stands still, and when the blade clicks home
+ * in its scabbard (SHEATH) every one of them falls at once.
+ */
 public final class LegacyIaido {
-  public static final int FULL_WINDUP = 12;
+  public static final int FULL_WINDUP = 12, SHEATH = 34, FULL_END = 42;
   private static final Map<UUID, Strike> ACTIVE = new HashMap<>();
 
   public static void markDamaged(UUID id) {
@@ -90,7 +96,7 @@ public final class LegacyIaido {
       }
       if (age < delay + 6 && !s.blocked) {
         Vec3 from = p.position();
-        Vec3 requested = s.direction.scale(.9 + 1.1 * s.charge);
+        Vec3 requested = s.direction.scale(s.full ? 2.5 : .9 + 1.1 * s.charge);
         p.setDeltaMovement(Vec3.ZERO);
         p.move(MoverType.SELF, requested);
         Vec3 to = p.position();
@@ -99,7 +105,7 @@ public final class LegacyIaido {
         if (p.connection != null) p.connection.teleport(to.x, to.y, to.z, p.getYRot(), p.getXRot());
         sweep(s, from, to);
       }
-      if (age == delay + 9) {
+      if (age == delay + 9 && !s.full) {
         s.level.playSound(
             null,
             p.blockPosition(),
@@ -108,7 +114,19 @@ public final class LegacyIaido {
             .7f,
             1.7f);
       }
-      if (age >= (s.full ? 38 : delay + 14)) {
+      if (s.full && age > delay + 5 && age < SHEATH) pin(s);
+      if (s.full && age == SHEATH - 1) {
+        // The blade slides home: a soft ring, then the click.
+        s.level.playSound(
+            null,
+            p.blockPosition(),
+            SoundEvents.AMETHYST_BLOCK_CHIME,
+            SoundSource.PLAYERS,
+            .9f,
+            .6f);
+      }
+      if (s.full && age == SHEATH) sever(s);
+      if (age >= (s.full ? FULL_END : delay + 14)) {
         if (s.full && s.kills >= 3 && !s.tookDamage) {
           var advancement = server.getAdvancements().get(Oborokage.id("moon_still_hangs"));
           if (advancement != null) p.getAdvancements().award(advancement, "flawless_iaido");
@@ -118,8 +136,48 @@ public final class LegacyIaido {
     }
   }
 
+  /** Holds the marked still until the sheath: no drift, no stepping away. */
+  private static void pin(Strike s) {
+    for (LivingEntity target : s.marked) {
+      if (!target.isAlive() || target.isRemoved() || target.level() != s.level) continue;
+      Vec3 v = target.getDeltaMovement();
+      target.setDeltaMovement(0, Math.min(0, v.y), 0);
+      if (target instanceof net.minecraft.world.entity.Mob mob) mob.getNavigation().stop();
+    }
+  }
+
+  /** The click of the scabbard: every marked enemy is cut at once. */
+  private static void sever(Strike s) {
+    ServerPlayer p = s.player;
+    int cut = 0;
+    for (LivingEntity target : s.marked) {
+      if (!target.isAlive()
+          || target.isRemoved()
+          || target.level() != s.level
+          || target.distanceToSqr(p) > 48 * 48) continue;
+      Vec3 at = target.position().add(0, target.getBbHeight() * .5, 0);
+      strikeTarget(s.level, p, target, s.charge);
+      cut++;
+      if (!target.isAlive() && !(target instanceof Player)) s.kills++;
+      broadcast(p, new SlashPayload(p.getId(), at, p.getYRot(), s.charge, 2));
+    }
+    s.marked.clear();
+    s.level.playSound(
+        null,
+        p.blockPosition(),
+        SoundEvents.AMETHYST_CLUSTER_BREAK,
+        SoundSource.PLAYERS,
+        1.2f,
+        .8f);
+    if (cut > 0)
+      s.level.playSound(
+          null, p.blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.4f, .5f);
+  }
+
   private static void sweep(Strike s, Vec3 from, Vec3 to) {
-    AABB area = new AABB(from, to).inflate(1.65, 1.7, 1.65).move(0, .8, 0);
+    // The full draw cuts a wider swath.
+    double w = s.full ? 2.2 : 1.65;
+    AABB area = new AABB(from, to).inflate(w, s.full ? 1.9 : 1.7, w).move(0, .8, 0);
     for (LivingEntity target :
         s.level.getEntitiesOfClass(
             LivingEntity.class, area, e -> e != s.player && e.isAlive() && !e.isSpectator())) {
@@ -140,9 +198,15 @@ public final class LegacyIaido {
               .getType()
           != HitResult.Type.MISS) continue;
       s.hit.add(target.getUUID());
-      strikeTarget(s.level, s.player, target, s.charge);
       DualCombat.reward(s.player, target, ServerConfig.get().iaidoIntent);
-      if (!target.isAlive() && !(target instanceof Player)) s.kills++;
+      if (s.full && s.marked.size() < 64) {
+        // Marked now, cut when the blade is sheathed.
+        s.marked.add(target);
+        target.setDeltaMovement(Vec3.ZERO);
+      } else {
+        strikeTarget(s.level, s.player, target, s.charge);
+        if (!target.isAlive() && !(target instanceof Player)) s.kills++;
+      }
       broadcast(
           s.player,
           new SlashPayload(
@@ -198,6 +262,7 @@ public final class LegacyIaido {
     final boolean full;
     final Vec3 direction;
     final Set<UUID> hit = new HashSet<>();
+    final List<LivingEntity> marked = new ArrayList<>();
     int age, kills;
     boolean blocked, tookDamage;
 

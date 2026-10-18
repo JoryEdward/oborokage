@@ -17,6 +17,9 @@ public final class WakizashiItem extends Item {
         Component.translatable("tooltip.oborokage.wakizashi")
             .withStyle(net.minecraft.ChatFormatting.LIGHT_PURPLE));
     out.accept(
+        Component.translatable("tooltip.oborokage.solo.moon")
+            .withStyle(net.minecraft.ChatFormatting.DARK_AQUA));
+    out.accept(
         Component.translatable("tooltip.oborokage.ult.moon")
             .withStyle(net.minecraft.ChatFormatting.GOLD));
     out.accept(

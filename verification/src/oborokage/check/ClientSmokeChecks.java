@@ -58,6 +58,9 @@ public final class ClientSmokeChecks implements ClientModInitializer {
     server.execute(() -> work.accept(server.getPlayerList().getPlayer(c.player.getUUID())));
   }
 
+  private volatile net.minecraft.world.entity.LivingEntity soloTarget;
+  private volatile float soloDamage;
+
   private void hold(ServerPlayer p, net.minecraft.world.item.Item main) {
     p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(main));
     p.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(Oborokage.WAKIZASHI));
@@ -206,6 +209,42 @@ public final class ClientSmokeChecks implements ClientModInitializer {
     if (ticks == 372) screenshot(c, "smoke-frost-ultimate");
     if (ticks == 420) {
       check(c.options.getCameraType() == before, "Camera returns after the solo ultimate");
+      check(
+          !Cinematics.playing() && Cinematics.titleShowing(),
+          "The ultimate's name lingers after its cinematic");
+      c.player.setYRot(0);
+      c.player.setXRot(0);
+      onServer(
+          c,
+          p -> {
+            // 0.6.0: one blade alone has its own chain on the attack key.
+            hold(p, Oborokage.RAIKIRI);
+            p.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
+            p.setYRot(0);
+            p.setXRot(0);
+            var z = EntityTypes.ZOMBIE.create(p.level(), EntitySpawnReason.COMMAND);
+            z.setPos(p.getX(), p.getY(), p.getZ() + 2.3);
+            z.setNoAi(true);
+            z.setPersistenceRequired();
+            z.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1000);
+            z.setHealth(1000);
+            p.level().addFreshEntity(z);
+            soloTarget = z;
+          });
+    }
+    if (ticks == 430 || ticks == 442 || ticks == 454) {
+      check(DualClient.interceptAttack(), "Single-blade click intercepted at tick " + ticks);
+      int expected = ticks == 430 ? Move.SOLO_1 : ticks == 442 ? Move.SOLO_2 : Move.SOLO_3;
+      check(
+          predictionOff()
+              || DualClient.scene(id) != null && DualClient.scene(id).event.move() == expected,
+          "Single-blade chain step " + (expected - Move.SOLO_1 + 1) + " shows at once");
+    }
+    if (ticks == 461) screenshot(c, "smoke-solo");
+    if (ticks == 480)
+      onServer(c, p -> soloDamage = soloTarget.getMaxHealth() - soloTarget.getHealth());
+    if (ticks == 484) {
+      check(soloDamage > 40, "The single-blade chain damaged its target: " + soloDamage);
       check(
           !oborokage.client.compat.ClientCompat.screenOpen(c),
           "No error screen interrupted the run");

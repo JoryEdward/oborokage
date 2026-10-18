@@ -30,25 +30,35 @@ public final class Cinematics {
       int lineColor,
       int[] shakes) {}
 
+  /**
+   * 胧月一闪: low in front while the moon rises behind the stance; a whip to the side for the dash;
+   * then round in front of the still swordsman, the marked enemies frozen behind, creeping in until
+   * the scabbard clicks; and a slow pull back over the fallen.
+   */
   private static final Look IAIDO_LOOK =
       new Look(
-          48,
+          64,
           new Key[] {
-            new Key(0, 120, 4.6f, 8, 1.25f),
-            new Key(12, 75, 5.8f, 10, 1.25f),
-            new Key(20, 43, 5.8f, 12, 1.3f),
-            new Key(48, 98, 4.8f, 12, 1.3f)
+            new Key(0, 160, 4.4f, -8, 1.15f),
+            new Key(11, 140, 3.4f, -5, 1.05f),
+            new Key(13, 85, 6.5f, 6, 1.2f),
+            new Key(18, 100, 8.5f, 10, 1.3f),
+            new Key(22, 178, 4.6f, 3, 1.4f),
+            new Key(34, 188, 3.9f, 1, 1.4f),
+            new Key(44, 196, 4.6f, 6, 1.45f),
+            new Key(64, 205, 8.5f, 18, 1.7f)
           },
-          0x090713,
-          .45f,
-          0xf2e8ff,
-          new int[] {12},
-          1,
+          0x070512,
+          .62f,
+          0xf6f0ff,
+          new int[] {12, 34},
+          34,
           "ui.oborokage.ultimate",
           "O B O R O K A G E   /   I A I",
           0xe7ddff,
           0x9c7dd9,
-          new int[] {12});
+          new int[] {34});
+
   private static final Look TACHI =
       new Look(
           48,
@@ -157,6 +167,38 @@ public final class Cinematics {
   private static float yaw;
   private static CameraType previous;
 
+  /**
+   * The title card outlives the camera work: it inks in a few ticks after the cast, flares on the
+   * decisive beat and lingers on the plain game view after the cinematic hands the camera back.
+   */
+  private static final int TITLE_IN = 4, TITLE_LINGER = 60, TITLE_FADE = 24;
+
+  private static int titleKind;
+  private static float titleClock = -1;
+
+  // Contact feedback for plain cuts: a short camera kick and, on a closing cut, an edge flash.
+  private static int clock;
+  private static float kickAt = -99, kickPower, kickSide;
+  private static int flashColor;
+
+  /** A landed cut: camera kick of `power` degrees toward `side`; `color` != 0 also flashes. */
+  public static void kick(float power, float side, int color) {
+    kickAt = clock;
+    kickPower = power;
+    kickSide = side;
+    flashColor = color;
+  }
+
+  /** Camera offset {yaw, pitch} from the last kick, or null when it has settled. */
+  public static float[] kickOffset(float partial) {
+    float d = clock + partial - kickAt;
+    if (d < 0 || d > 5 || !OborokageClient.screenShake || playing()) return null;
+    float k = kickPower * (1 - d / 5) * (1 - d / 5);
+    return new float[] {
+      kickSide * k * (float) Math.cos(d * 2.6) * .8f, k * (float) Math.sin(d * 3.1 + .6)
+    };
+  }
+
   private static Look look(int kind) {
     return switch (kind) {
       case IAIDO -> IAIDO_LOOK;
@@ -184,16 +226,42 @@ public final class Cinematics {
     kind = newKind;
     age = startAge;
     yaw = sceneYaw;
+    titleKind = newKind;
+    titleClock = startAge;
     if (OborokageClient.cinematic && OborokageClient.thirdPersonUltimate) {
       previous = c.options.getCameraType();
       c.options.setCameraType(CameraType.THIRD_PERSON_BACK);
     }
   }
 
+  /**
+   * Stops an ultimate that was cut short. A title that is only lingering after a finished cinematic
+   * stays: a new attack right after the ultimate should not wipe its name.
+   */
   public static void cancel() {
+    if (playing()) clearTitle();
+    end();
+  }
+
+  /** Drops everything, title included: a new level, death or disconnect. */
+  public static void reset() {
+    clearTitle();
+    end();
+  }
+
+  private static void end() {
     restore(Minecraft.getInstance());
     kind = 0;
     age = -1;
+  }
+
+  private static void clearTitle() {
+    titleKind = 0;
+    titleClock = -1;
+  }
+
+  public static boolean titleShowing() {
+    return titleKind != 0;
   }
 
   private static void restore(Minecraft c) {
@@ -205,10 +273,16 @@ public final class Cinematics {
   }
 
   static void tick(Minecraft c) {
+    clock++;
+    if (c.player == null || !c.player.isAlive()) {
+      reset();
+      return;
+    }
+    if (titleKind != 0 && ++titleClock > look(titleKind).length + TITLE_LINGER) clearTitle();
     if (!playing()) return;
     Look l = look(kind);
-    if (++age > l.length || c.player == null || !c.player.isAlive()) {
-      cancel();
+    if (++age > l.length) {
+      end();
       return;
     }
     if (previous != null
@@ -258,7 +332,31 @@ public final class Cinematics {
 
   /** Letterbox, tint, vignette, flashes and the title card. */
   static void overlay(net.minecraft.client.gui.GuiGraphicsExtractor g, float partial) {
-    if (!playing() || !OborokageClient.cinematic) return;
+    if (!OborokageClient.cinematic) return;
+    if (playing()) frame(g, partial);
+    else edgeFlash(g, partial);
+    if (titleKind != 0) title(g, partial);
+  }
+
+  /** A closing cut's flash: the screen's rim lights up in the blade's colour for a few frames. */
+  private static void edgeFlash(net.minecraft.client.gui.GuiGraphicsExtractor g, float partial) {
+    float d = clock + partial - kickAt;
+    if (flashColor == 0 || d < 0 || d > 6) return;
+    int w = g.guiWidth(), h = g.guiHeight();
+    float a = (1 - d / 6) * (1 - d / 6);
+    for (int i = 0; i < 10; i++) {
+      int inset = (int) (i * Math.min(w, h) * .012f);
+      int alpha = (int) (255 * .1f * a * (10 - i) / 10f);
+      if (alpha <= 0) continue;
+      int col = alpha << 24 | (flashColor & 0xffffff);
+      g.fill(0, 0, w, inset + 1, col);
+      g.fill(0, h - inset - 1, w, h, col);
+      g.fill(0, 0, inset + 1, h, col);
+      g.fill(w - inset - 1, 0, w, h, col);
+    }
+  }
+
+  private static void frame(net.minecraft.client.gui.GuiGraphicsExtractor g, float partial) {
     Minecraft c = Minecraft.getInstance();
     Look l = look(kind);
     int w = g.guiWidth(), h = g.guiHeight();
@@ -290,9 +388,32 @@ public final class Cinematics {
       float d = t - at;
       if (d >= 0 && d < 6) {
         boolean last = at == l.flashes[l.flashes.length - 1];
-        float peak = last ? (kind == IAIDO ? .36f : .5f) : .24f;
+        float peak = last ? (kind == IAIDO ? .55f : .5f) : .24f;
         float strength = peak * (float) Math.pow(1 - d / 6, 2);
         g.fill(0, 0, w, h, (int) (255 * strength) << 24 | (l.flash & 0xffffff));
+      }
+    }
+    // 胧月一闪: the world holds its breath until the click, then the screen is cut across.
+    if (kind == IAIDO) {
+      float hush = t < 18 ? 0 : t < 34 ? Math.min(1, (t - 18) / 6) : Math.max(0, 1 - (t - 34) / 4);
+      if (hush > 0) {
+        g.fill(0, 0, w, h, (int) (255 * .1f * hush) << 24 | 0x05030c);
+        for (int i = 0; i < 10; i++) {
+          int inset = (int) (i * Math.min(w, h) * .02f);
+          int a = (int) (255 * .14f * hush * (10 - i) / 10f);
+          int col = a << 24 | 0x05030c;
+          g.fill(0, 0, w, inset + 1, col);
+          g.fill(0, h - inset - 1, w, h, col);
+          g.fill(0, 0, inset + 1, h, col);
+          g.fill(w - inset - 1, 0, w, h, col);
+        }
+      }
+      if (t >= 34 && t < 42) {
+        float a = 1 - (t - 34) / 8;
+        int y = (int) (h * .52), gap = (int) (3 + 6 * (t - 34) / 8);
+        g.fill(0, y - 1, w, y + 1, (int) (255 * a) << 24 | 0xffffff);
+        g.fill(0, y - gap - 1, w, y - gap, (int) (120 * a) << 24 | (l.lineColor & 0xffffff));
+        g.fill(0, y + gap, w, y + gap + 1, (int) (120 * a) << 24 | (l.lineColor & 0xffffff));
       }
     }
     // 空弦 · 断界: the screen itself appears cut along the stroke.
@@ -304,30 +425,77 @@ public final class Cinematics {
         g.fill(x, y + 3, x + 2, y + 5, (int) (140 * a) << 24 | (l.lineColor & 0xffffff));
       }
     }
-    // Title card: characters ink in one by one, then a brush line and the romanised name.
-    if (t >= l.titleFrom && t < len - 2) {
-      float local = t - l.titleFrom;
-      float a = Math.min(1, local / 3) * Math.min(1, (len - 2 - t) / 6);
-      String title = Component.translatable(l.title).getString();
-      int shown = Math.min(title.length(), (int) (local * 1.6f) + 1);
-      int x = (int) (w * .08), y = (int) (h * .36);
-      g.pose().pushMatrix();
-      g.pose().translate(x, y);
-      g.pose().scale(3.2f, 3.2f);
-      g.text(c.font, title.substring(0, shown), 1, 1, (int) (a * 150) << 24);
+  }
+
+  /**
+   * Title card: the name inks in a character at a time shortly after the cast, holds through the
+   * whole ultimate, flares with a fresh brush stroke on the decisive beat and fades out well after
+   * the camera has returned.
+   */
+  private static void title(net.minecraft.client.gui.GuiGraphicsExtractor g, float partial) {
+    Minecraft c = Minecraft.getInstance();
+    Look l = look(titleKind);
+    int w = g.guiWidth(), h = g.guiHeight();
+    float t = titleClock + partial, start = Math.min(TITLE_IN, l.titleFrom);
+    float end = l.length + TITLE_LINGER;
+    if (t < start || t >= end) return;
+    float local = t - start;
+    float a = Math.min(1, local / 4) * Math.min(1, (end - t) / TITLE_FADE);
+    // The decisive beat: a short swell in size and brightness, then the subtitle settles in.
+    float beat = t - l.titleFrom;
+    float flare = beat >= 0 && beat < 10 ? (float) Math.sin(beat / 10 * Math.PI) : 0;
+    String title = Component.translatable(l.title).getString();
+    int shown = Math.min(title.length(), (int) (local * 1.2f) + 1);
+    int x = (int) (w * .08), y = (int) (h * .36);
+    float scale = 3.2f + .35f * flare;
+    g.pose().pushMatrix();
+    g.pose().translate(x, y);
+    g.pose().scale(scale, scale);
+    g.text(c.font, title.substring(0, shown), 1, 1, (int) (a * 150) << 24);
+    if (flare > 0)
       g.text(
           c.font,
           title.substring(0, shown),
           0,
-          0,
-          (int) (a * 255) << 24 | (l.titleColor & 0xffffff));
-      g.pose().popMatrix();
-      int lineW = (int) (w * .34 * Math.min(1, local / 6));
-      g.fill(x, y + 36, x + lineW, y + 38, (int) (a * 230) << 24 | (l.lineColor & 0xffffff));
-      g.fill(
-          x, y + 38, x + lineW * 2 / 3, y + 39, (int) (a * 120) << 24 | (l.lineColor & 0xffffff));
-      g.text(c.font, l.subtitle, x + 2, y + 46, (int) (a * 230) << 24 | (l.lineColor & 0xffffff));
+          -1,
+          (int) (a * 110 * flare) << 24 | (l.lineColor & 0xffffff));
+    g.text(
+        c.font,
+        title.substring(0, shown),
+        0,
+        0,
+        (int) (a * 255) << 24 | (lerp(l.titleColor, 0xffffff, flare) & 0xffffff));
+    g.pose().popMatrix();
+    int lineY = y + 36;
+    int lineW = (int) (w * .34 * Math.min(1, local / 8));
+    g.fill(x, lineY, x + lineW, lineY + 2, (int) (a * 230) << 24 | (l.lineColor & 0xffffff));
+    g.fill(
+        x,
+        lineY + 2,
+        x + lineW * 2 / 3,
+        lineY + 3,
+        (int) (a * 120) << 24 | (l.lineColor & 0xffffff));
+    if (beat >= 0) {
+      // A second, brighter stroke races along the first on the decisive beat.
+      int strokeW = (int) (w * .34 * Math.min(1, beat / 5));
+      float sa = a * Math.max(.35f, 1 - beat / 14);
+      g.fill(x, lineY - 1, x + strokeW, lineY, (int) (sa * 255) << 24 | 0xffffff);
     }
+    float sub = Math.min(1, Math.max(0, (local - 6) / 6));
+    if (sub > 0)
+      g.text(
+          c.font,
+          l.subtitle,
+          x + 2,
+          y + 46,
+          (int) (a * sub * 230) << 24 | (l.lineColor & 0xffffff));
+  }
+
+  private static int lerp(int from, int to, float s) {
+    int r = (int) (((from >> 16) & 255) + (((to >> 16) & 255) - ((from >> 16) & 255)) * s);
+    int gr = (int) (((from >> 8) & 255) + (((to >> 8) & 255) - ((from >> 8) & 255)) * s);
+    int b = (int) ((from & 255) + ((to & 255) - (from & 255)) * s);
+    return r << 16 | gr << 8 | b;
   }
 
   private Cinematics() {}

@@ -53,7 +53,14 @@ public final class ClientUltimateShowcase implements ClientModInitializer {
   private final List<Entity> foes = new ArrayList<>();
   private int ticks, act = -1, local;
   private boolean done, iaido;
-  private int combat;
+  private int combat, solo;
+  private static final Item[] SOLO = {
+    Oborokage.TACHI,
+    Oborokage.WAKIZASHI,
+    Oborokage.RAIKIRI,
+    Oborokage.FROSTMOON,
+    Oborokage.VOIDSTRING
+  };
   private double bx, by, bz;
 
   public void onInitializeClient() {
@@ -128,11 +135,32 @@ public final class ClientUltimateShowcase implements ClientModInitializer {
       bz = Math.floor(c.player.getZ()) + .5;
     }
     local++;
-    if (act < 0 || local > 110) {
+    if (act < 0 || local > (iaido ? 140 : 110)) {
       iaido = false;
       combat = 0;
+      solo = 0;
       act++;
       local = 0;
+      int s0 = ACTS.length + 5;
+      if (act >= s0 && act <= s0 + SOLO.length) {
+        // 0.6.0: the single-blade chain of every blade, then the tachi's in first person.
+        solo = act - s0 + 1;
+        boolean fp = solo > SOLO.length;
+        Item blade = fp ? Oborokage.TACHI : SOLO[solo - 1];
+        setup(c, new Act("solo", blade, new int[0], new double[][] {{1.3, 2.4}}));
+        onServer(c, p -> p.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY));
+        c.options.setCameraType(
+            fp
+                ? net.minecraft.client.CameraType.FIRST_PERSON
+                : net.minecraft.client.CameraType.THIRD_PERSON_BACK);
+        if (fp) solo = -1;
+        return;
+      }
+      if (act > s0 + SOLO.length) {
+        labels.add("PASS ultimate showcase captured " + labels.size() + " beats");
+        finish(c);
+        return;
+      }
       if (act < ACTS.length) setup(c, ACTS[act]);
       else if (act == ACTS.length + 1) {
         combat = 1;
@@ -149,13 +177,23 @@ public final class ClientUltimateShowcase implements ClientModInitializer {
         iaido = true;
         setup(
             c,
-            new Act("tachi-iaido", Oborokage.TACHI, new int[0], new double[][] {{0, 5}, {1, 7}}));
+            new Act(
+                "tachi-iaido",
+                Oborokage.TACHI,
+                new int[0],
+                new double[][] {{0, 5}, {1.4, 8}, {-1.6, 10.5}, {1, 13}}));
         onServer(c, p -> p.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY));
-      } else if (act > ACTS.length + 4) {
-        labels.add("PASS ultimate showcase captured " + labels.size() + " beats");
-        finish(c);
-        return;
       }
+    }
+    if (solo != 0) {
+      String name =
+          solo < 0 ? "solo-first-person" : "solo-" + SOLO[solo - 1].toString().replace(':', '-');
+      if (local == 30 || local == 42 || local == 54) DualClient.interceptAttack();
+      if (local == 33) shot(c, name + "-1");
+      if (local == 45) shot(c, name + "-2");
+      if (local == 59) shot(c, name + "-3");
+      if (local == 62) shot(c, name + "-3b");
+      return;
     }
     if (combat == 1) {
       // Dual chain: main, off, cross, then a held guard; one shot mid-swing of each.
@@ -180,6 +218,7 @@ public final class ClientUltimateShowcase implements ClientModInitializer {
         c.gameMode.releaseUsingItem(c.player);
       }
       if (local == 71) shot(c, "technique-release-" + combat);
+      if (local == 76) shot(c, "technique-after-" + combat);
       return;
     }
     if (iaido) {
@@ -188,11 +227,13 @@ public final class ClientUltimateShowcase implements ClientModInitializer {
         c.options.keyUse.setDown(true);
         c.gameMode.useItem(c.player, InteractionHand.MAIN_HAND);
       }
+      // The four charge steps of the build-up.
+      for (int q : new int[] {12, 22, 32, 42}) if (local == 25 + q) shot(c, "charge-" + q);
       if (local == 68) {
         c.options.keyUse.setDown(false);
         c.gameMode.releaseUsingItem(c.player);
       }
-      for (int beat : new int[] {6, 15, 36})
+      for (int beat : new int[] {6, 14, 24, 33, 36, 40, 52})
         if (local == 68 + beat) shot(c, "tachi-iaido-t" + beat);
       return;
     }

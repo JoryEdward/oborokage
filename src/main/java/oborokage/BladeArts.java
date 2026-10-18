@@ -29,6 +29,15 @@ public final class BladeArts {
       float damage,
       long at) {}
 
+  private record Echo(
+      ServerPlayer owner,
+      ServerLevel level,
+      ItemStack blade,
+      List<LivingEntity> targets,
+      float damage,
+      long at) {}
+
+  private static final List<Echo> echoes = new ArrayList<>();
   private static final Map<UUID, Mark> marks = new HashMap<>();
   private static final Map<UUID, Frost> frost = new HashMap<>();
   private static final List<Pulse> pulses = new ArrayList<>();
@@ -44,6 +53,7 @@ public final class BladeArts {
     marks.clear();
     frost.clear();
     pulses.clear();
+    echoes.clear();
   }
 
   public static void tick(MinecraftServer server) {
@@ -57,6 +67,16 @@ public final class BladeArts {
       if (pulse.level.getGameTime() < pulse.at) continue;
       it.remove();
       frostPulse(pulse);
+    }
+    for (var it = echoes.iterator(); it.hasNext(); ) {
+      Echo echo = it.next();
+      if (echo.owner.isRemoved() || !echo.owner.isAlive() || echo.owner.level() != echo.level) {
+        it.remove();
+        continue;
+      }
+      if (echo.level.getGameTime() < echo.at) continue;
+      it.remove();
+      echo(echo);
     }
     if (now % 20 == 0) {
       marks.values().removeIf(m -> m.until < now);
@@ -93,6 +113,51 @@ public final class BladeArts {
         .8f,
         1.5f);
     return true;
+  }
+
+  // ----- 胧影 · 残月 -----
+
+  /** The tachi's shadow repeats a finished cut on the enemies it struck, a moment later. */
+  public static void scheduleEcho(
+      ServerPlayer owner, ItemStack blade, List<LivingEntity> targets, float damage, int delay) {
+    if (!enabled() || targets.isEmpty() || echoes.size() >= MAX_PULSES) return;
+    echoes.add(
+        new Echo(
+            owner,
+            (ServerLevel) owner.level(),
+            blade,
+            List.copyOf(targets),
+            damage,
+            owner.level().getGameTime() + delay));
+  }
+
+  private static void echo(Echo echo) {
+    ServerPlayer p = echo.owner;
+    int processed = 0;
+    for (LivingEntity target : echo.targets) {
+      if (processed >= ServerConfig.get().maxTargetsPerWindow) break;
+      if (!target.isAlive()
+          || target.isRemoved()
+          || target.level() != echo.level
+          || target.distanceToSqr(p) > 12 * 12
+          || !TargetRules.allowed(p, target)) continue;
+      processed++;
+      Vec3 c = target.getBoundingBox().getCenter();
+      oborokage.compat.Compat.resetHurtCooldown(target);
+      if (WeaponDamage.apply(p, target, echo.blade, echo.damage, false))
+        DualCombat.reward(p, target, ServerConfig.get().hitIntent);
+      Vec3 away = c.subtract(p.position()).multiply(1, 0, 1);
+      if (away.lengthSqr() < 1e-4) away = p.getLookAngle();
+      TechniqueEvent.send(p, TechniqueEvent.ECHO, c, c.add(away.normalize()), 1);
+    }
+    if (processed > 0)
+      echo.level.playSound(
+          null,
+          p.blockPosition(),
+          SoundEvents.AMETHYST_CLUSTER_BREAK,
+          SoundSource.PLAYERS,
+          .8f,
+          1.3f);
   }
 
   // ----- 霜轮 · 霜蚀 -----
@@ -211,6 +276,7 @@ public final class BladeArts {
       if (!WeaponDamage.apply(p, target, blade, damage, false)) continue;
       arcs++;
       line(level, ParticleTypes.ELECTRIC_SPARK, origin, to, 10);
+      TechniqueEvent.send(p, TechniqueEvent.ARC, origin, to, 1);
     }
     if (arcs > 0)
       level.playSound(
@@ -257,6 +323,8 @@ public final class BladeArts {
       if (WeaponDamage.apply(p, target, blade, damage, false)) hits++;
     }
     line(level, VOID_DUST, origin.add(dir.scale(1.2)), end, (int) Math.min(28, distance * 4));
+    if (distance > 1.4)
+      TechniqueEvent.send(p, TechniqueEvent.EDGE, origin.add(dir.scale(1.2)), end, 1);
     level.playSound(
         null,
         p.blockPosition(),

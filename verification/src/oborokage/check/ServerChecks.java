@@ -31,6 +31,7 @@ public final class ServerChecks implements ModInitializer {
   List<String> results = new ArrayList<>();
   ExpansionChecks expansion;
   UltimateChecks ultimates;
+  SoloChecks solo;
 
   @Override
   public void onInitialize() {
@@ -206,7 +207,11 @@ public final class ServerChecks implements ModInitializer {
       age = 0;
       return;
     }
-    if (stage == 2 && age == 30) {
+    if (stage == 2 && age == 20)
+      check(
+          target.isAlive() && target.hits == 0,
+          "Full dash marks the target; it stands until the sheath");
+    if (stage == 2 && age == 40) {
       check(
           player.getZ() < 4.71,
           "Swept player collision stops before solid wall: z=" + player.getZ());
@@ -227,7 +232,7 @@ public final class ServerChecks implements ModInitializer {
       age = 0;
       return;
     }
-    if (stage == 3 && age == 42) {
+    if (stage == 3 && age == 48) {
       var a = server.getAdvancements().get(Oborokage.id("moon_still_hangs"));
       check(
           player.getAdvancements().getOrStartProgress(a).isDone(),
@@ -245,7 +250,7 @@ public final class ServerChecks implements ModInitializer {
       age = 0;
       return;
     }
-    if (stage == 4 && age == 42) {
+    if (stage == 4 && age == 48) {
       var a = server.getAdvancements().get(Oborokage.id("moon_still_hangs"));
       check(
           !player.getAdvancements().getOrStartProgress(a).isDone(),
@@ -477,6 +482,12 @@ public final class ServerChecks implements ModInitializer {
       return;
     }
     if (stage == 17 && ultimates.tick()) {
+      solo = new SoloChecks(this);
+      stage = 18;
+      age = 0;
+      return;
+    }
+    if (stage == 18 && solo.tick()) {
       flawlessWindowBoundary();
       ReviewChecks.run(this);
       finish();

@@ -78,5 +78,13 @@
   "advancement.oborokage.all_ultimates.description": "施展全部五把刀的奥义。",
   "advancement.oborokage.shake_heavens.title": "惊神泣鬼",
   "advancement.oborokage.shake_heavens.description": "以奥义斩杀一个生命值不低于一百五十的强敌。",
-  "ui.oborokage.zanshin": "残心"
+  "ui.oborokage.zanshin": "残心",
+  "ui.oborokage.stage.1": "壹",
+  "ui.oborokage.stage.2": "贰",
+  "ui.oborokage.stage.3": "叁",
+  "tooltip.oborokage.solo.tachi": "单持左键 · 三段连斩；终式「残月」：刀影随后再斩一次",
+  "tooltip.oborokage.solo.moon": "单持左键 · 三段连斩；终式「落花」：回身一周，命中后步履轻快",
+  "tooltip.oborokage.solo.storm": "单持左键 · 三段连斩；终式「雷闪」：雷光跳向射程外的敌人",
+  "tooltip.oborokage.solo.frost": "单持左键 · 三段连斩；每斩叠霜，终式「霜华」：冰环迟滞",
+  "tooltip.oborokage.solo.void": "单持左键 · 三段连斩；终式「虚刃」：剑气贯穿后排"
 }

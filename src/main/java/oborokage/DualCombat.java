@@ -133,8 +133,10 @@ public final class DualCombat {
       s.requestsThisTick = 0;
     }
     if (++s.requestsThisTick > 8) return;
-    // The ultimate belongs to whichever blade is drawn; every other action needs both blades.
-    if (!(request.action() == 4 ? holdsBlade(p) : equipped(p))
+    // The ultimate and the plain chain belong to whichever blade is drawn; guard and step need
+    // both.
+    boolean dual = equipped(p);
+    if (!((request.action() == 4 || request.action() == 0) ? holdsBlade(p) : dual)
         || !p.isAlive()
         || p.isSpectator()
         || p.isPassenger()
@@ -155,16 +157,16 @@ public final class DualCombat {
           } else reject(s, request.sequence());
           return;
         }
-        if (now < s.counterUntil && s.counterSource != null) {
+        if (dual && now < s.counterUntil && s.counterSource != null) {
           begin(s, Move.COUNTER);
           return;
         }
         if (now > s.comboUntil) {
-          s.nextCombo = Move.MAIN;
+          s.nextCombo = dual ? Move.MAIN : Move.SOLO_1;
           s.chainHands = 0;
           s.chainId = ++nextAction;
         }
-        begin(s, s.nextCombo);
+        begin(s, Move.follow(s.nextCombo, dual));
       }
       case 1 -> {
         s.guardHeartbeat = now;
@@ -211,7 +213,7 @@ public final class DualCombat {
   }
 
   private static void begin(State s, int id, int sequence) {
-    if (id == Move.MAIN) {
+    if (id == Move.MAIN || id == Move.SOLO_1) {
       s.chainHands = 0;
       s.chainId = ++nextAction;
     }
@@ -267,8 +269,8 @@ public final class DualCombat {
         continue;
       }
       live.add(p.getUUID());
-      boolean ultimate = s.move != null && Move.ultimate(s.move.id());
-      if (!(ultimate ? holdsBlade(p) : equipped(p))
+      boolean single = s.move != null && (Move.ultimate(s.move.id()) || Move.solo(s.move.id()));
+      if (!(single ? holdsBlade(p) : equipped(p))
           || p.isPassenger()
           || p.isFallFlying()
           || p.isUsingItem()
@@ -306,23 +308,24 @@ public final class DualCombat {
         }
         if (id == Move.DODGE && age >= 0 && age < 5)
           move(s, s.direction.scale(ServerConfig.get().dodgeDistance / 5));
-        if (id == Move.DODGE && age == 5 || id == Move.ULTIMATE && age == 11) stopMotion(s);
+        if (id == Move.DODGE && age == 5
+            || id == Move.ULTIMATE && age == 11
+            || id == Move.SOLO_3 && age == 6) stopMotion(s);
         if (id == Move.ULTIMATE && age >= 7 && age < 11) move(s, s.direction.scale(.9));
+        // The single-blade finisher steps into its cut.
+        if (id == Move.SOLO_3 && age >= 3 && age < 6) move(s, s.direction.scale(.3));
         if (Move.ultimate(id)) Ultimates.tick(s, age);
         for (int i = 0; i < s.move.hits().length; i++) if (age == s.move.hits()[i]) hit(s, i);
         if (age >= s.move.length()) {
           if (Move.ultimate(id)) Ultimates.finish(s);
           if (id == Move.DODGE && s.dodgeDistance >= 2 && !s.blocked) s.stepFollowUntil = now + 12;
           s.move = null;
-          s.nextCombo =
-              id == Move.MAIN || id == Move.DODGE
-                  ? Move.OFF
-                  : id == Move.OFF ? Move.CROSS : Move.MAIN;
+          s.nextCombo = Move.next(id);
           s.comboUntil = now + 20;
           boolean next = s.buffered && now <= s.bufferedUntil;
           s.buffered = false;
           if (next) {
-            begin(s, s.nextCombo, s.bufferedSequence);
+            begin(s, Move.follow(s.nextCombo, equipped(p)), s.bufferedSequence);
           }
         }
       }
@@ -379,6 +382,9 @@ public final class DualCombat {
     Item style = s.main.getItem();
     boolean arts = BladeArts.enabled();
     float reach = m.id() == Move.ULTIMATE ? (float) cfg.ultimateReach : m.reach();
+    boolean solo = Move.solo(m.id());
+    // 胧月 · 落花: alone in the hand, the short blade's finisher is a full turn.
+    float arc = arts && m.id() == Move.SOLO_3 && style == Oborokage.WAKIZASHI ? 360 : m.arc();
     float baseDamage =
         WeaponDamage.scaled(s.p, blade, m.damage()) * BladeStyle.power(blade) * m.weights()[window];
     if (riposte) baseDamage *= (float) cfg.riposteMultiplier;
@@ -394,6 +400,7 @@ public final class DualCombat {
         SoundSource.PLAYERS,
         .75f,
         ultimate ? .65f + .05f * window : hand == 1 ? 1.4f : 1f);
+    if (solo) soloSound(s, style, m.id() == Move.SOLO_3);
     for (LivingEntity target :
         s.level.getEntitiesOfClass(
             LivingEntity.class,
@@ -411,8 +418,7 @@ public final class DualCombat {
       if (d.lengthSqr() > reach * reach || Math.abs(d.y) > 2.2) continue;
       Vec3 horizontal = new Vec3(d.x, 0, d.z);
       if (horizontal.lengthSqr() > .15
-          && horizontal.normalize().dot(s.direction) < Math.cos(Math.toRadians(m.arc() / 2)))
-        continue;
+          && horizontal.normalize().dot(s.direction) < Math.cos(Math.toRadians(arc / 2))) continue;
       if (s.level
               .clip(
                   new ClipContext(
@@ -437,7 +443,15 @@ public final class DualCombat {
                 * (broken ? 1.3f : 1)
                 * (marked ? (float) cfg.voidMarkBonus : 1)
                 * (ultimate ? Ultimates.windowScale(s, target) : 1),
-            m.id() == Move.CROSS || ultimate);
+            m.id() == Move.CROSS || m.id() == Move.SOLO_3 || ultimate);
+        if (m.id() == Move.SOLO_3 && target.isAlive())
+          oborokage.compat.Compat.knockback(
+              target,
+              .45,
+              -s.direction.x,
+              -s.direction.z,
+              s.p.damageSources().playerAttack(s.p),
+              baseDamage);
       }
       if (ultimate) Ultimates.afterStrike(s, target);
       boolean useful =
@@ -481,6 +495,7 @@ public final class DualCombat {
       send(s, ActionEvent.IMPACT, target.position().add(0, target.getBbHeight() * .5, 0));
     }
     if (arts && finalCross) crossArt(s, style, baseDamage, struck, struckIds);
+    if (arts && m.id() == Move.SOLO_3) soloArt(s, style, baseDamage, struck, struckIds);
     if (riposte && targets > 0) {
       s.riposteUntil = 0;
       s.level.playSound(
@@ -509,6 +524,61 @@ public final class DualCombat {
       // 空弦 · 虚刃: a short sword-qi line reaches the rank behind the first.
       BladeArts.voidEdge(s.p, s.main, s.direction, baseDamage * .5f, struckIds);
     }
+  }
+
+  /** The single-blade finisher takes on the drawn blade's character. */
+  private static void soloArt(
+      State s, Item style, float baseDamage, List<LivingEntity> struck, Set<UUID> struckIds) {
+    if (style == Oborokage.TACHI) {
+      // 胧影 · 残月: the blade's hazy shadow cuts everything it struck once more.
+      BladeArts.scheduleEcho(s.p, s.main, struck, baseDamage * .45f, 6);
+    } else if (style == Oborokage.WAKIZASHI) {
+      // 胧月 · 落花: landing the turn lightens the feet for the next exchange.
+      if (!struck.isEmpty())
+        s.p.addEffect(new MobEffectInstance(MobEffects.SPEED, 40, 0, false, false, true));
+    } else if (style == Oborokage.RAIKIRI) {
+      // 赤霆 · 雷闪: lightning leaps on from each struck enemy, four arcs at most.
+      int arcs = 0;
+      for (LivingEntity from : struck) {
+        if (arcs >= 4) break;
+        arcs += BladeArts.thunderChain(s.p, s.main, from, baseDamage * .4f, struckIds);
+      }
+    } else if (style == Oborokage.FROSTMOON) {
+      // 霜轮 · 霜华: the finisher's frost bites deeper and rings out around the blade.
+      for (LivingEntity e : struck)
+        if (e.isAlive()) e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 1), s.p);
+      // Ring events are placed like the frost pulse: the drawn ring sits 1.5 below the origin.
+      Vec3 c = s.p.position().add(0, 1.6, 0);
+      TechniqueEvent.send(s.p, TechniqueEvent.RING, c, c.add(3.2, 0, 0), .6f);
+    } else if (style == Oborokage.VOIDSTRING) {
+      // 空弦 · 虚刃: the line runs on to the rank behind.
+      BladeArts.voidEdge(s.p, s.main, s.direction, baseDamage * .5f, struckIds);
+    }
+  }
+
+  /** Each blade's voice over the plain sweep of a single-blade cut. */
+  private static void soloSound(State s, Item style, boolean finisher) {
+    SoundEvent sound;
+    float volume = finisher ? .7f : .4f, pitch;
+    if (style == Oborokage.WAKIZASHI) {
+      sound = SoundEvents.AMETHYST_BLOCK_CHIME;
+      pitch = finisher ? 1.5f : 1.9f;
+    } else if (style == Oborokage.RAIKIRI) {
+      sound = SoundEvents.LIGHTNING_BOLT_IMPACT;
+      volume *= .5f;
+      pitch = finisher ? 1.5f : 1.9f;
+    } else if (style == Oborokage.FROSTMOON) {
+      sound = finisher ? SoundEvents.PLAYER_HURT_FREEZE : SoundEvents.GLASS_BREAK;
+      volume *= .7f;
+      pitch = finisher ? 1.1f : 1.7f;
+    } else if (style == Oborokage.VOIDSTRING) {
+      sound = SoundEvents.ILLUSIONER_MIRROR_MOVE;
+      pitch = finisher ? 1.1f : 1.6f;
+    } else {
+      sound = finisher ? SoundEvents.AMETHYST_CLUSTER_BREAK : SoundEvents.AMETHYST_BLOCK_RESONATE;
+      pitch = finisher ? .9f : 1.6f;
+    }
+    s.level.playSound(null, s.p.blockPosition(), sound, SoundSource.PLAYERS, volume, pitch);
   }
 
   /** Intent for a useful hit on an enemy by any blade action, throttled per target. */

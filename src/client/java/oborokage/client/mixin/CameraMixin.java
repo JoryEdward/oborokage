@@ -33,7 +33,12 @@ public abstract class CameraMixin {
   @Inject(method = "alignWithEntity", at = @At("TAIL"))
   private void frameUltimate(float partial, CallbackInfo ci) {
     var c = Minecraft.getInstance();
-    if (!Cinematics.cameraActive() || c.player == null) return;
+    if (c.player == null) return;
+    if (!Cinematics.cameraActive()) {
+      float[] kick = Cinematics.kickOffset(partial);
+      if (kick != null) setRotation(yRot() + kick[0], xRot() + kick[1]);
+      return;
+    }
     float[] shot = Cinematics.shot(partial);
     setPosition(c.player.getPosition(partial).add(0, shot[3], 0));
     setRotation(shot[0], shot[1]);

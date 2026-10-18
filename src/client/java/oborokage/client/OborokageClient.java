@@ -9,7 +9,6 @@ import net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.*;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
 import oborokage.*;
 
@@ -21,6 +20,9 @@ public final class OborokageClient implements ClientModInitializer {
   private static Object lastLevel;
   public static boolean thirdPersonUltimate = true;
 
+  /** A full-charge draw's presentation: windup, dash, stillness, the sheath at 34, aftermath. */
+  static final int FULL_LENGTH = 64;
+
   public static void cancelPresentation(int id) {
     scenes.removeIf(s -> s.p.owner() == id);
     var c = Minecraft.getInstance();
@@ -31,14 +33,13 @@ public final class OborokageClient implements ClientModInitializer {
     }
   }
 
-  /** Full-charge iaido scenes for the world effects: owner, origin, yaw, age. */
+  /** Iaido scenes for the world effects: owner, origin, yaw, charge, age. */
   public interface IaidoSink {
-    void accept(int owner, Vec3 origin, float yaw, float age);
+    void accept(int owner, Vec3 origin, float yaw, float charge, float age);
   }
 
-  public static void forEachFullIaido(IaidoSink sink) {
-    for (Scene s : scenes)
-      if (s.p.charge() >= 1) sink.accept(s.p.owner(), s.p.origin(), s.p.yaw(), s.age);
+  public static void forEachIaido(IaidoSink sink) {
+    for (Scene s : scenes) sink.accept(s.p.owner(), s.p.origin(), s.p.yaw(), s.p.charge(), s.age);
   }
 
   public static int sceneDelay(int entityId) {
@@ -91,6 +92,9 @@ public final class OborokageClient implements ClientModInitializer {
                       new FxParticle(l, x, y, z, dx, dy, dz, kind, sprites.first()));
     }
     UltimateFx.init();
+    ClientTickEvents.END_CLIENT_TICK.register(ChargeFx::tick);
+    net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(
+        ChargeFx::submit);
     ClientPlayNetworking.registerGlobalReceiver(
         SlashPayload.TYPE, (p, context) -> context.client().execute(() -> receive(p)));
     ClientTickEvents.END_CLIENT_TICK.register(OborokageClient::tick);
@@ -99,25 +103,9 @@ public final class OborokageClient implements ClientModInitializer {
         (g, delta) -> {
           Minecraft c = Minecraft.getInstance();
           if (c.player == null) return;
-          int w = g.guiWidth(), h = g.guiHeight();
-          if (c.player.isUsingItem() && Oborokage.mainBlade(c.player.getUseItem())) {
-            float q = Math.min(1, c.player.getTicksUsingItem() / (float) fullChargeTicks(c.player));
-            int y = h - 64;
-            g.fill(w / 2 - 51, y - 2, w / 2 + 51, y + 5, 0xb5100e1e);
-            g.fill(
-                w / 2 - 49,
-                y,
-                w / 2 - 49 + (int) (98 * q),
-                y + 2,
-                q >= 1 ? 0xfff1ddff : 0xffa79cff);
-            g.centeredText(
-                c.font,
-                Component.translatable(q >= 1 ? "ui.oborokage.ready" : "ui.oborokage.charge"),
-                w / 2,
-                y - 14,
-                q >= 1 ? 0xfff2e5ff : 0xffc0b0d9);
-          }
-          Cinematics.overlay(g, delta.getGameTimeDeltaPartialTick(false));
+          float partial = delta.getGameTimeDeltaPartialTick(false);
+          ChargeFx.hud(g, partial);
+          Cinematics.overlay(g, partial);
         });
   }
 
@@ -133,8 +121,30 @@ public final class OborokageClient implements ClientModInitializer {
     Minecraft c = Minecraft.getInstance();
     if (c.level == null || c.player == null) return;
     if (p.kind() == 1) {
+      // The blade passes through: a full draw only marks the enemy, the cut lands at the sheath.
       streak(p.origin(), p.charge() >= 1 ? 1.6f : .9f, 28);
       streak(p.origin(), 1, -55);
+      if (p.charge() >= 1) UltimateFx.impact(p.owner(), p.origin());
+      return;
+    }
+    if (p.kind() == 2) {
+      // The sheath clicks and the marked enemy falls.
+      arc(p.origin(), p.yaw() + 90, 2.6f, 40);
+      streak(p.origin(), 2.2f, 35);
+      var r = c.level.getRandom();
+      for (int i = 0; i < 26; i++) {
+        double a = r.nextDouble() * Math.PI * 2;
+        c.level.addParticle(
+            i % 3 == 0 ? ParticleTypes.END_ROD : Oborokage.PETAL,
+            true,
+            true,
+            p.origin().x,
+            p.origin().y,
+            p.origin().z,
+            Math.cos(a) * .3,
+            .05 + r.nextDouble() * .2,
+            Math.sin(a) * .3);
+      }
       return;
     }
     DualClient.scenes.remove(p.owner());
@@ -150,17 +160,17 @@ public final class OborokageClient implements ClientModInitializer {
 
   private static void tick(Minecraft c) {
     if (c.level != lastLevel) {
-      Cinematics.cancel();
+      Cinematics.reset();
       lastLevel = c.level;
       scenes.clear();
       localAge = -1;
     }
     if (c.level == null || c.player == null) {
-      Cinematics.cancel();
+      Cinematics.reset();
       return;
     }
     Cinematics.tick(c);
-    if (localAge >= 0 && ++localAge > 48) localAge = -1;
+    if (localAge >= 0 && ++localAge > (localFull ? FULL_LENGTH : 48)) localAge = -1;
     for (var player : c.level.players()) {
       if (!player.isUsingItem()
           || !Oborokage.mainBlade(player.getUseItem())
@@ -172,12 +182,20 @@ public final class OborokageClient implements ClientModInitializer {
       var style = BladeStyle.of(player.getUseItem());
       int dim = style == null ? 0x8171c4 : style.secondary,
           bright = style == null ? 0xe4dbff : style.primary;
-      for (int i = 0; i < 4; i++) {
-        double a = phase + i * Math.PI / 2;
-        double radius = 1.2 - .8 * q;
-        Vec3 pos = base.add(Math.cos(a) * radius, .15 * Math.sin(a * 2), Math.sin(a) * radius);
-        dust(pos, q >= 1 ? bright : dim, .55f);
+      // More motes gather with every quarter of the charge. They keep below the eyes and out of
+      // arm's reach, so a first-person view is not filled with them.
+      int stage = ChargeFx.stage(q), motes = 3 + stage * 2;
+      for (int i = 0; i < motes; i++) {
+        double a = phase + i * Math.PI * 2 / motes;
+        double radius = 1.25 - .45 * q;
+        Vec3 pos =
+            base.add(
+                Math.cos(a) * radius,
+                .15 * Math.sin(a * 2) + .1 * stage * ((i % 3) / 2.0) - .3,
+                Math.sin(a) * radius);
+        dust(pos, stage >= 2 ? bright : dim, .4f + .04f * stage);
       }
+      double ring = player.getRandom().nextDouble() * Math.PI * 2;
       if (q >= 1 && style != null && player.tickCount % 3 == 0)
         c.level.addParticle(
             switch (style) {
@@ -186,9 +204,9 @@ public final class OborokageClient implements ClientModInitializer {
               case VOIDSTRING -> Oborokage.MOTE;
               default -> Oborokage.PETAL;
             },
-            base.x + (player.getRandom().nextDouble() - .5) * 1.4,
-            base.y + player.getRandom().nextDouble() * 1.2,
-            base.z + (player.getRandom().nextDouble() - .5) * 1.4,
+            base.x + Math.cos(ring) * 1.3,
+            base.y - .6 + player.getRandom().nextDouble() * .9,
+            base.z + Math.sin(ring) * 1.3,
             0,
             .02,
             0);
@@ -223,7 +241,7 @@ public final class OborokageClient implements ClientModInitializer {
         Vec3 at = (e == null ? s.p.origin() : e.position()).add(0, 1, 0);
         streak(at, .8f, 0);
       }
-      if (t > 47) it.remove();
+      if (t > (full ? FULL_LENGTH : 47)) it.remove();
     }
   }
 
