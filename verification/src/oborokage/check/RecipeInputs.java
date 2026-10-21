@@ -1,71 +1,52 @@
 package oborokage.check;
 
+import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.CraftingInput;
 
-/** 0.5.0 crafting grids (netherite + diamond blocks), mirrored from data/oborokage/recipe. */
+/**
+ * 1.0.0-beta crafting grids, mirrored from data/oborokage/recipe: every long blade is forged from a
+ * kazuuchi; 胧影 also takes a nether star, two diamond blocks, two netherite ingots, two amethyst
+ * blocks and a blaze rod; the themed blades three diamonds, a netherite ingot and two themes.
+ */
 final class RecipeInputs {
   static CraftingInput of(String blade) {
-    List<ItemStack> cells =
+    String[] rows =
         switch (blade) {
-          case "tachi" ->
-              List.of(
-                  ItemStack.EMPTY,
-                  ItemStack.EMPTY,
-                  item("diamond_block"),
-                  ItemStack.EMPTY,
-                  item("netherite_ingot"),
-                  item("diamond_block"),
-                  item("blaze_rod"),
-                  item("amethyst_block"),
-                  ItemStack.EMPTY);
-          case "wakizashi" ->
-              List.of(
-                  ItemStack.EMPTY,
-                  ItemStack.EMPTY,
-                  item("netherite_ingot"),
-                  ItemStack.EMPTY,
-                  item("diamond_block"),
-                  item("amethyst_block"),
-                  item("blaze_rod"),
-                  ItemStack.EMPTY,
-                  ItemStack.EMPTY);
-          case "raikiri" ->
-              List.of(
-                  ItemStack.EMPTY,
-                  item("redstone_block"),
-                  item("diamond_block"),
-                  ItemStack.EMPTY,
-                  item("netherite_ingot"),
-                  item("diamond_block"),
-                  item("blaze_rod"),
-                  item("lightning_rod"),
-                  ItemStack.EMPTY);
-          case "frostmoon" ->
-              List.of(
-                  ItemStack.EMPTY,
-                  item("blue_ice"),
-                  item("diamond_block"),
-                  ItemStack.EMPTY,
-                  item("netherite_ingot"),
-                  item("diamond_block"),
-                  item("blaze_rod"),
-                  item("prismarine_crystals"),
-                  ItemStack.EMPTY);
-          case "voidstring" ->
-              List.of(
-                  ItemStack.EMPTY,
-                  item("ender_eye"),
-                  item("diamond_block"),
-                  ItemStack.EMPTY,
-                  item("netherite_ingot"),
-                  item("diamond_block"),
-                  item("blaze_rod"),
-                  item("shulker_shell"),
-                  ItemStack.EMPTY);
+          case "tachi" -> new String[] {"DSD", "NKN", "ABA"};
+          case "wakizashi" -> new String[] {"  d", " d ", "NA "};
+          case "raikiri", "frostmoon", "voidstring" -> new String[] {"XdY", "dKd", " N "};
           default -> throw new IllegalArgumentException(blade);
         };
+    String x =
+        switch (blade) {
+          case "raikiri" -> "redstone_block";
+          case "frostmoon" -> "blue_ice";
+          default -> "ender_eye";
+        };
+    String y =
+        switch (blade) {
+          case "raikiri" -> "lightning_rod";
+          case "frostmoon" -> "prismarine_crystals";
+          default -> "shulker_shell";
+        };
+    List<ItemStack> cells = new ArrayList<>();
+    for (String row : rows)
+      for (char c : row.toCharArray())
+        cells.add(
+            switch (c) {
+              case 'D' -> item("diamond_block");
+              case 'd' -> item("diamond");
+              case 'S' -> item("nether_star");
+              case 'N' -> item("netherite_ingot");
+              case 'K' -> new ItemStack(oborokage.Oborokage.KAZUUCHI);
+              case 'A' -> item("amethyst_block");
+              case 'B' -> item("blaze_rod");
+              case 'X' -> item(x);
+              case 'Y' -> item(y);
+              default -> ItemStack.EMPTY;
+            });
     return CraftingInput.of(3, 3, cells);
   }
 

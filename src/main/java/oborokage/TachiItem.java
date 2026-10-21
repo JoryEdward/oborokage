@@ -56,8 +56,8 @@ public class TachiItem extends Item {
 
   @Override
   public InteractionResult use(Level l, Player p, InteractionHand h) {
-    if (Combat.active(p.getUUID()) || p.isPassenger() || p.isFallFlying())
-      return InteractionResult.FAIL;
+    // The draw can be gathered anywhere: on foot, mounted, gliding or in creative flight.
+    if (Combat.active(p.getUUID())) return InteractionResult.FAIL;
     if (p instanceof ServerPlayer server) DualCombat.cancel(server);
     p.startUsingItem(h);
     return InteractionResult.CONSUME;
@@ -80,6 +80,9 @@ public class TachiItem extends Item {
   public boolean releaseUsing(ItemStack s, Level l, LivingEntity e, int remaining) {
     if (!(e instanceof ServerPlayer p) || 72000 - remaining < 4) return false;
     float q = Math.min(1f, (72000 - remaining) / 40f);
+    // 胧影 · 月相: under a full moon any draw is a full draw, and the moon returns to new.
+    boolean moon = !p.isShiftKeyDown() && Moon.full(s) && BladeArts.enabled(p);
+    if (moon) q = 1;
     if (p.isShiftKeyDown()) {
       if (!TerrainCut.start(p, q)) return false;
       p.getCooldowns().addCooldown(s, q >= 1 ? 45 : 18);
@@ -92,6 +95,11 @@ public class TachiItem extends Item {
       return true;
     }
     if (!Combat.start(p, q)) return false;
+    if (moon) {
+      Moon.spend(s);
+      l.playSound(null, p.blockPosition(), SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 1, 1.4f);
+    }
+    Vigor.spend(p, Vigor.iaido(q));
     p.getCooldowns().addCooldown(s, q >= 1 ? 45 : 18);
     s.hurtAndBreak(
         q >= 1 ? 8 : 2,

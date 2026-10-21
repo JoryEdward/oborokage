@@ -257,13 +257,14 @@ final class SoloChecks {
     if (step == 10 && age == 24) {
       t.check(probes.get(0).hits == 1, "Looking up, 霜轮's cut reaches the enemy overhead too");
       clearProbes();
-      // Riding, gliding and spectating keep the vanilla attack instead of a refused chain.
+      // Since the second 1.0.0-beta play test the chain cuts while gliding too; spectating keeps
+      // the vanilla click.
       single(Oborokage.TACHI);
       var zombie = probe(0, 2.6);
       t.check(DualCombat.ownsAttack(p, zombie), "Standing with a blade, the chain owns the click");
       t.check(!DualCombat.ownsAttack(p, null), "Non-living targets keep the vanilla attack");
       p.startFallFlying();
-      t.check(!DualCombat.ownsAttack(p, zombie), "Gliding keeps the vanilla attack");
+      t.check(DualCombat.ownsAttack(p, zombie), "Gliding, the blade chain owns the click");
       p.stopFallFlying();
       p.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
       t.check(!DualCombat.ownsAttack(p, zombie), "Spectating keeps the vanilla click");

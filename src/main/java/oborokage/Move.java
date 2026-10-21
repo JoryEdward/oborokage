@@ -27,7 +27,9 @@ public record Move(
       ULT_VOID = 15,
       SOLO_1 = 16,
       SOLO_2 = 17,
-      SOLO_3 = 18;
+      SOLO_3 = 18,
+      PLUNGE = 19,
+      STRING_DASH = 20;
 
   public Move(int id, int length, int[] hits, int[] hands, float damage, float reach, float arc) {
     this(id, length, hits, hands, damage, reach, arc, ones(hits.length));
@@ -73,7 +75,11 @@ public record Move(
     // One blade drawn: a falling diagonal cut, a rising cut, then a stepping full-width finisher.
     new Move(SOLO_1, 10, new int[] {3}, new int[] {0}, 16, 3.9f, 120),
     new Move(SOLO_2, 10, new int[] {3}, new int[] {0}, 18, 3.9f, 130),
-    new Move(SOLO_3, 16, new int[] {6}, new int[] {0}, 28, 4.4f, 160)
+    new Move(SOLO_3, 16, new int[] {6}, new int[] {0}, 28, 4.4f, 160),
+    // 1.0: the aerial plunge lasts until it lands (scripted, at most 40 ticks) and hits on landing.
+    new Move(PLUNGE, 40, new int[0], new int[0], 20, 3.2f, 360),
+    // 空弦's string dash: along the string to its target, one cut on arrival.
+    new Move(STRING_DASH, 8, new int[0], new int[0], 22, 3, 360)
   };
 
   public static Move of(int id) {
@@ -86,6 +92,11 @@ public record Move(
 
   public static boolean ultimate(int id) {
     return id == ULTIMATE || id >= ULT_MOON && id <= ULT_VOID;
+  }
+
+  /** Moves a single drawn blade can make (two blades are not needed). */
+  public static boolean single(int id) {
+    return ultimate(id) || solo(id) || id == PLUNGE || id == STRING_DASH;
   }
 
   /** The single-blade chain. */

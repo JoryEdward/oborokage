@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " H ",
+    "SHS",
+    " S "
+  ],
+  "key": {
+    "H": "minecraft:hay_block",
+    "S": "minecraft:stick"
+  },
+  "result": {
+    "id": "oborokage:training_dummy"
+  }
+}

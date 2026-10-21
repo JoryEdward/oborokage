@@ -2,15 +2,17 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "pattern": [
-    "  D",
-    " ND",
-    "BA "
+    "DSD",
+    "NKN",
+    "ABA"
   ],
   "key": {
     "D": "minecraft:diamond_block",
+    "S": "minecraft:nether_star",
     "N": "minecraft:netherite_ingot",
-    "B": "minecraft:blaze_rod",
-    "A": "minecraft:amethyst_block"
+    "K": "oborokage:kazuuchi",
+    "A": "minecraft:amethyst_block",
+    "B": "minecraft:blaze_rod"
   },
   "result": {
     "id": "oborokage:tachi"

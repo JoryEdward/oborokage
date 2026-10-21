@@ -2,16 +2,16 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "pattern": [
-    " ED",
-    " ND",
-    "BS "
+    "XDY",
+    "DKD",
+    " N "
   ],
   "key": {
-    "E": "minecraft:ender_eye",
-    "D": "minecraft:diamond_block",
-    "N": "minecraft:netherite_ingot",
-    "B": "minecraft:blaze_rod",
-    "S": "minecraft:shulker_shell"
+    "X": "minecraft:ender_eye",
+    "Y": "minecraft:shulker_shell",
+    "D": "minecraft:diamond",
+    "K": "oborokage:kazuuchi",
+    "N": "minecraft:netherite_ingot"
   },
   "result": {
     "id": "oborokage:voidstring"

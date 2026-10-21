@@ -245,6 +245,40 @@ public final class ClientSmokeChecks implements ClientModInitializer {
       onServer(c, p -> soloDamage = soloTarget.getMaxHealth() - soloTarget.getHealth());
     if (ticks == 484) {
       check(soloDamage > 40, "The single-blade chain damaged its target: " + soloDamage);
+      // 1.0: the swordsman and the training dummy render beside the player, the codex opens.
+      onServer(
+          c,
+          p -> {
+            var level = (net.minecraft.server.level.ServerLevel) p.level();
+            var s = Content.SWORDSMAN.create(level, EntitySpawnReason.COMMAND);
+            s.setPos(p.getX() + 2, p.getY(), p.getZ() + 3);
+            s.setNoAi(true);
+            level.addFreshEntity(s);
+            var d = Content.TRAINING_DUMMY.create(level, EntitySpawnReason.COMMAND);
+            d.setPos(p.getX() - 2, p.getY(), p.getZ() + 3);
+            level.addFreshEntity(d);
+          });
+    }
+    if (ticks == 492) {
+      check(
+          c.level.getEntitiesOfClass(Swordsman.class, c.player.getBoundingBox().inflate(8)).size()
+                  == 1
+              && c.level
+                      .getEntitiesOfClass(TrainingDummy.class, c.player.getBoundingBox().inflate(8))
+                      .size()
+                  == 1,
+          "The swordsman and the training dummy reach the client");
+      oborokage.client.compat.ClientCompat.openScreen(c, CodexScreen.open());
+    }
+    if (ticks == 497) screenshot(c, "smoke-codex");
+    if (ticks == 500) {
+      check(
+          oborokage.client.compat.ClientCompat.screenOpen(c),
+          "The move codex opens and draws on this version");
+      oborokage.client.compat.ClientCompat.openScreen(c, null);
+    }
+    if (ticks == 506) {
+      screenshot(c, "smoke-swordsman-dummy");
       check(
           !oborokage.client.compat.ClientCompat.screenOpen(c),
           "No error screen interrupted the run");

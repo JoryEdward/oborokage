@@ -37,6 +37,8 @@ final class ChargeFx {
   /** Charge fraction of a player drawing a blade, or -1 when not charging. */
   static float charge(Player p) {
     if (!p.isUsingItem() || !Oborokage.mainBlade(p.getUseItem())) return -1;
+    // Under 胧影's full moon any draw is a full draw: the build-up shows it from the start.
+    if (!p.isShiftKeyDown() && Moon.full(p.getUseItem())) return 1;
     return Math.min(1, p.getTicksUsingItem() / (float) OborokageClient.fullChargeTicks(p));
   }
 

@@ -37,6 +37,21 @@ public final class Oborokage implements ModInitializer {
                   .durability(2560)
                   .rarity(Rarity.EPIC)
                   .fireResistant()));
+
+  /** 数打太刀: an iron blank, the base of every named blade's recipe and the swordsmen's weapon. */
+  public static final ResourceKey<Item> KAZUUCHI_KEY =
+      ResourceKey.create(Registries.ITEM, id("kazuuchi"));
+
+  public static final Item KAZUUCHI =
+      Registry.register(
+          BuiltInRegistries.ITEM,
+          KAZUUCHI_KEY,
+          new KazuuchiItem(
+              new Item.Properties()
+                  .setId(KAZUUCHI_KEY)
+                  .sword(ToolMaterial.IRON, 4, -2.6f)
+                  .durability(512)));
+
   // Netherite-forged since 0.5.0: about a third more melee damage than the 0.4 diamond blades.
   public static final Item RAIKIRI = blade("raikiri", StyleBladeItem.Style.STORM, 8, -2.0f);
   public static final Item FROSTMOON = blade("frostmoon", StyleBladeItem.Style.FROST, 11, -2.7f);
@@ -58,7 +73,11 @@ public final class Oborokage implements ModInitializer {
   }
 
   public static boolean mainBlade(ItemStack stack) {
-    return stack.is(TACHI) || stack.is(RAIKIRI) || stack.is(FROSTMOON) || stack.is(VOIDSTRING);
+    return stack.is(TACHI)
+        || stack.is(RAIKIRI)
+        || stack.is(FROSTMOON)
+        || stack.is(VOIDSTRING)
+        || stack.is(KAZUUCHI);
   }
 
   public static final CreativeModeTab EQUIPMENT =
@@ -77,6 +96,16 @@ public final class Oborokage implements ModInitializer {
                     output.accept(RAIKIRI);
                     output.accept(FROSTMOON);
                     output.accept(VOIDSTRING);
+                    output.accept(KAZUUCHI);
+                    output.accept(Content.WHETSTONE_ITEM);
+                    output.accept(Content.TRAINING_DUMMY_ITEM);
+                    output.accept(Content.INTENT_CRYSTAL);
+                    Content.STONES.values().forEach(output::accept);
+                    output.accept(Content.BLADE_SOUL);
+                    Content.RELICS.values().forEach(output::accept);
+                    output.accept(Content.SWORDSMAN_SPAWN_EGG);
+                    output.accept(Content.BLOSSOM_ONI_SPAWN_EGG);
+                    output.accept(Content.PETAL_LORD_SPAWN_EGG);
                   })
               .build());
   public static final net.minecraft.core.particles.SimpleParticleType CRESCENT =
@@ -114,6 +143,7 @@ public final class Oborokage implements ModInitializer {
     PayloadTypeRegistry.clientboundPlay().register(SlashPayload.TYPE, SlashPayload.CODEC);
     PayloadTypeRegistry.serverboundPlay().register(ActionRequest.TYPE, ActionRequest.CODEC);
     PayloadTypeRegistry.clientboundPlay().register(ActionEvent.TYPE, ActionEvent.CODEC);
+    PayloadTypeRegistry.clientboundPlay().register(TetherEvent.TYPE, TetherEvent.CODEC);
     net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(
         ActionRequest.TYPE,
         (message, context) ->
@@ -143,6 +173,8 @@ public final class Oborokage implements ModInitializer {
     net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register(
         (handler, server) -> DualCombat.remove(handler.player));
     ServerConfig.load();
+    Components.init();
+    Content.init();
     ConfigIO.LOG.info(
         "Oborokage {} built for Minecraft {}",
         net.fabricmc.loader.api.FabricLoader.getInstance()
@@ -168,6 +200,12 @@ public final class Oborokage implements ModInitializer {
             DualCombat.damaged(p);
             DualCombat.remove(p);
           }
+          // 饮露: each enemy an inscribed blade fells restores a food point.
+          if (source.getEntity() instanceof net.minecraft.server.level.ServerPlayer killer
+              && Feats.enemy(entity)
+              && BladeArts.enabled()
+              && Inscription.has(killer.getMainHandItem(), Inscription.DEW))
+            killer.getFoodData().eat(1, .2f);
         });
     ServerTickEvents.END_SERVER_TICK.register(Combat::tick);
     ServerLifecycleEvents.SERVER_STOPPED.register(s -> Combat.clear());

@@ -1,60 +1,130 @@
 {
   "model": {
     "type": "minecraft:select",
-    "property": "minecraft:display_context",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
     "cases": [
       {
-        "when": "gui",
+        "when": "ancient",
         "model": {
-          "type": "minecraft:model",
-          "model": "oborokage:item/voidstring_icon"
+          "type": "minecraft:select",
+          "property": "minecraft:display_context",
+          "cases": [
+            {
+              "when": "gui",
+              "model": {
+                "type": "minecraft:model",
+                "model": "oborokage:item/ancient_voidstring_icon"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:condition",
+            "property": "minecraft:using_item",
+            "on_false": {
+              "type": "minecraft:model",
+              "model": "oborokage:item/ancient_voidstring_tachi"
+            },
+            "on_true": {
+              "type": "minecraft:range_dispatch",
+              "property": "minecraft:use_duration",
+              "scale": 1,
+              "entries": [
+                {
+                  "threshold": 10,
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "oborokage:item/ancient_voidstring_charged4"
+                  }
+                },
+                {
+                  "threshold": 20,
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "oborokage:item/ancient_voidstring_charged8"
+                  }
+                },
+                {
+                  "threshold": 30,
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "oborokage:item/ancient_voidstring_charged12"
+                  }
+                },
+                {
+                  "threshold": 40,
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "oborokage:item/ancient_voidstring_charged15"
+                  }
+                }
+              ],
+              "fallback": {
+                "type": "minecraft:model",
+                "model": "oborokage:item/ancient_voidstring_sheathed"
+              }
+            }
+          }
         }
       }
     ],
     "fallback": {
-      "type": "minecraft:condition",
-      "property": "minecraft:using_item",
-      "on_false": {
-        "type": "minecraft:model",
-        "model": "oborokage:item/voidstring_tachi"
-      },
-      "on_true": {
-        "type": "minecraft:range_dispatch",
-        "property": "minecraft:use_duration",
-        "scale": 1,
-        "entries": [
-          {
-            "threshold": 10,
-            "model": {
-              "type": "minecraft:model",
-              "model": "oborokage:item/voidstring_charged4"
-            }
-          },
-          {
-            "threshold": 20,
-            "model": {
-              "type": "minecraft:model",
-              "model": "oborokage:item/voidstring_charged8"
-            }
-          },
-          {
-            "threshold": 30,
-            "model": {
-              "type": "minecraft:model",
-              "model": "oborokage:item/voidstring_charged12"
-            }
-          },
-          {
-            "threshold": 40,
-            "model": {
-              "type": "minecraft:model",
-              "model": "oborokage:item/voidstring_charged15"
-            }
+      "type": "minecraft:select",
+      "property": "minecraft:display_context",
+      "cases": [
+        {
+          "when": "gui",
+          "model": {
+            "type": "minecraft:model",
+            "model": "oborokage:item/voidstring_icon"
           }
-        ],
-        "fallback": {
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:condition",
+        "property": "minecraft:using_item",
+        "on_false": {
           "type": "minecraft:model",
-          "model": "oborokage:item/voidstring_sheathed"
+          "model": "oborokage:item/voidstring_tachi"
+        },
+        "on_true": {
+          "type": "minecraft:range_dispatch",
+          "property": "minecraft:use_duration",
+          "scale": 1,
+          "entries": [
+            {
+              "threshold": 10,
+              "model": {
+                "type": "minecraft:model",
+                "model": "oborokage:item/voidstring_charged4"
+              }
+            },
+            {
+              "threshold": 20,
+              "model": {
+                "type": "minecraft:model",
+                "model": "oborokage:item/voidstring_charged8"
+              }
+            },
+            {
+              "threshold": 30,
+              "model": {
+                "type": "minecraft:model",
+                "model": "oborokage:item/voidstring_charged12"
+              }
+            },
+            {
+              "threshold": 40,
+              "model": {
+                "type": "minecraft:model",
+                "model": "oborokage:item/voidstring_charged15"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "oborokage:item/voidstring_sheathed"
+          }
         }
       }
     }

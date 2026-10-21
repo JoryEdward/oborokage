@@ -7,7 +7,11 @@
     "LivingDamageAccess",
     "ArrowGuardMixin",
     "AdvancementChatMixin",
-    "TerrainToolMixin"
+    "TerrainToolMixin",
+    "AnvilInscriptionMixin",
+    "MobGoalsAccess",
+    "TombChestMixin",
+    "TombOpenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

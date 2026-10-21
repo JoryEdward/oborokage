@@ -92,6 +92,26 @@ public final class OborokageClient implements ClientModInitializer {
                       new FxParticle(l, x, y, z, dx, dy, dz, kind, sprites.first()));
     }
     UltimateFx.init();
+    TetherFx.init();
+    ClientTickEvents.END_CLIENT_TICK.register(TetherFx::tick);
+    ClientTickEvents.END_CLIENT_TICK.register(OborokageClient::notice);
+    net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(
+        TetherFx::submit);
+    net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(
+        Content.SWORDSMAN,
+        ctx -> new BladeHumanoidRenderer<>(ctx, Oborokage.id("textures/entity/swordsman.png")));
+    net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(
+        Content.BLOSSOM_ONI, BlossomOniRenderer::new);
+    net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(
+        Content.PETAL_LORD,
+        ctx ->
+            new BladeHumanoidRenderer<>(ctx, Oborokage.id("textures/entity/petal_lord.png"), 1.1f));
+    net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry.registerModelLayer(
+        TrainingDummyRenderer.LAYER, TrainingDummyRenderer.Model::create);
+    net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(
+        Content.TRAINING_DUMMY, TrainingDummyRenderer::new);
+    net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback.EVENT.register(
+        (stack, context, flag, lines) -> BladeTooltip.append(stack, lines));
     ClientTickEvents.END_CLIENT_TICK.register(ChargeFx::tick);
     net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(
         ChargeFx::submit);
@@ -154,10 +174,41 @@ public final class OborokageClient implements ClientModInitializer {
     if (scenes.size() > 40) scenes.removeFirst();
     scenes.add(new Scene(p));
     if (p.owner() == c.player.getId()) {
+      Codex.see("tachi_iaido");
       localAge = 0;
       localFull = p.charge() >= 1;
       if (localFull) Cinematics.begin(Cinematics.IAIDO, p.yaw(), 0);
       else Cinematics.cancel();
+    }
+  }
+
+  /** Once a second: note in the codex what the player has come across. */
+  private static void notice(Minecraft c) {
+    if (c.player == null || c.level == null || c.player.tickCount % 20 != 0) return;
+    var main = c.player.getMainHandItem();
+    if (Moon.full(main)) Codex.see("tachi_moon");
+    if (Inscription.of(main) != null) Codex.see("inscription");
+    if (Hone.honed(main, c.level.getGameTime())) Codex.see("whetstone");
+    if (DualClient.intent >= 100) Codex.see("intent");
+    if (main.is(Oborokage.KAZUUCHI)) Codex.see("kazuuchi");
+    if (BladeStyle.of(main) != null
+        && (DualCombat.mounted(c.player) || c.player.getAbilities().flying)) Codex.see("mounted");
+    if (Vigor.fatigued(c.player)) Codex.see("vigor");
+    for (var item : Content.RELICS.values())
+      if (c.player.getInventory().contains(new net.minecraft.world.item.ItemStack(item))) {
+        Codex.see("tomb");
+        break;
+      }
+    for (var e :
+        c.level.getEntitiesOfClass(
+            net.minecraft.world.entity.Mob.class, c.player.getBoundingBox().inflate(12))) {
+      if (e.getType() == Content.SWORDSMAN) Codex.see("swordsman");
+      if (e instanceof BlossomOni) Codex.see("blossom_oni");
+      if (e instanceof PetalLord) {
+        Codex.see("petal_lord");
+        Codex.see("dojo");
+      }
+      if (e instanceof TrainingDummy) Codex.see("dummy");
     }
   }
 

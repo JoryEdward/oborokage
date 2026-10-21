@@ -2,15 +2,14 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "pattern": [
-    "  N",
-    " DA",
-    "B  "
+    "  D",
+    " D ",
+    "NA "
   ],
   "key": {
+    "D": "minecraft:diamond",
     "N": "minecraft:netherite_ingot",
-    "D": "minecraft:diamond_block",
-    "A": "minecraft:amethyst_block",
-    "B": "minecraft:blaze_rod"
+    "A": "minecraft:amethyst_block"
   },
   "result": {
     "id": "oborokage:wakizashi"

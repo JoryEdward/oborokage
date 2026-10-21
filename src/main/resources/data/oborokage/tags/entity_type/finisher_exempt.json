@@ -1,1 +1,7 @@
-{"replace":false,"values":[]}
+{
+  "replace": false,
+  "values": [
+    "oborokage:training_dummy",
+    "oborokage:petal_lord"
+  ]
+}

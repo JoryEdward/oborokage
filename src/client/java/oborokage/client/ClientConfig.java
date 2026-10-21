@@ -1,8 +1,10 @@
 package oborokage.client;
 
-import java.util.Properties;
+import java.nio.file.*;
+import java.util.*;
 import net.fabricmc.loader.api.FabricLoader;
 import oborokage.ConfigIO;
+import oborokage.ModLanguage;
 
 public final class ClientConfig {
   public static final class Values {
@@ -20,6 +22,7 @@ public final class ClientConfig {
     public int trailSegments = 32;
     public int trailVertexBudget = 16384;
     public int trailDistance = 48;
+    public String language = "auto";
   }
 
   private static volatile Values current = new Values();
@@ -28,11 +31,18 @@ public final class ClientConfig {
     return current;
   }
 
+  private static Path file() {
+    return FabricLoader.getInstance().getConfigDir().resolve("oborokage-client.properties");
+  }
+
   public static void load() {
     Properties p =
         ConfigIO.read(
-            FabricLoader.getInstance().getConfigDir().resolve("oborokage-client.properties"),
-            "# Oborokage client settings. Restart the client after changing.\n"
+            file(),
+            "# Oborokage client settings. Restart the client after changing (except language).\n"
+                + "# Language of this mod's text: auto (follow the game), zh_cn, en_us or ja_jp.\n"
+                + "# Also set in game: move codex (K) or Mod Menu.\n"
+                + "language=auto\n"
                 + "cinematic=true\n"
                 + "screenShake=true\n"
                 + "thirdPersonUltimate=true\n"
@@ -63,7 +73,35 @@ public final class ClientConfig {
     next.trailVertexBudget =
         (int) ConfigIO.number(p, "trailVertexBudget", next.trailVertexBudget, 512, 65536);
     next.trailDistance = (int) ConfigIO.number(p, "trailDistance", next.trailDistance, 8, 96);
+    next.language = p.getProperty("language", next.language).trim();
+    if (!ModLanguage.CHOICES.contains(next.language)) {
+      ConfigIO.LOG.warn("Invalid language={}, using auto", next.language);
+      next.language = "auto";
+    }
     current = next;
+    ModLanguage.choose(next.language);
+  }
+
+  /**
+   * Switches the mod's language now and keeps it in the file (other lines are left as they are).
+   */
+  public static void setLanguage(String language) {
+    current.language = language;
+    ModLanguage.choose(language);
+    try {
+      List<String> lines =
+          Files.exists(file()) ? new ArrayList<>(Files.readAllLines(file())) : new ArrayList<>();
+      boolean found = false;
+      for (int i = 0; i < lines.size(); i++)
+        if (lines.get(i).trim().startsWith("language=")) {
+          lines.set(i, "language=" + language);
+          found = true;
+        }
+      if (!found) lines.add("language=" + language);
+      Files.write(file(), lines);
+    } catch (Exception e) {
+      ConfigIO.LOG.warn("Cannot save the language setting: {}", e.toString());
+    }
   }
 
   private ClientConfig() {}

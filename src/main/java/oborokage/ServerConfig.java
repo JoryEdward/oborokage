@@ -48,6 +48,13 @@ public final class ServerConfig {
     public int zanshinTicks = 100;
     public int techniqueIntent = 6;
     public int iaidoIntent = 10;
+    // 1.0: blade abilities cost hunger; at or below this food level the blade's arts fall silent.
+    public double hungerCost = 1.0;
+    public int fatigueFoodLevel = 6;
+    public int plungeCooldownTicks = 20;
+    public int stringDashCooldownTicks = 40;
+    public int honeTicks = 6000;
+    public boolean swordsmanSpawns = true;
   }
 
   private static volatile Values current = new Values();
@@ -101,6 +108,12 @@ public final class ServerConfig {
                 + "zanshinTicks=100\n"
                 + "techniqueIntent=6\n"
                 + "iaidoIntent=10\n"
+                + "hungerCost=1.0\n"
+                + "fatigueFoodLevel=6\n"
+                + "plungeCooldownTicks=20\n"
+                + "stringDashCooldownTicks=40\n"
+                + "honeTicks=6000\n"
+                + "swordsmanSpawns=true\n"
                 + "terrainCutEnabled=true\n"
                 + "terrainMaxBlocks=32\n"
                 + "terrainBlocksPerTick=4\n"
@@ -165,6 +178,15 @@ public final class ServerConfig {
     next.techniqueIntent =
         (int) ConfigIO.number(p, "techniqueIntent", next.techniqueIntent, 0, 100);
     next.iaidoIntent = (int) ConfigIO.number(p, "iaidoIntent", next.iaidoIntent, 0, 100);
+    next.hungerCost = (double) ConfigIO.number(p, "hungerCost", next.hungerCost, 0, 10);
+    next.fatigueFoodLevel =
+        (int) ConfigIO.number(p, "fatigueFoodLevel", next.fatigueFoodLevel, -1, 20);
+    next.plungeCooldownTicks =
+        (int) ConfigIO.number(p, "plungeCooldownTicks", next.plungeCooldownTicks, 0, 200);
+    next.stringDashCooldownTicks =
+        (int) ConfigIO.number(p, "stringDashCooldownTicks", next.stringDashCooldownTicks, 0, 400);
+    next.honeTicks = (int) ConfigIO.number(p, "honeTicks", next.honeTicks, 0, 72000);
+    next.swordsmanSpawns = ConfigIO.bool(p, "swordsmanSpawns", next.swordsmanSpawns);
     next.terrainCutEnabled = ConfigIO.bool(p, "terrainCutEnabled", true);
     next.terrainMaxBlocks = (int) ConfigIO.number(p, "terrainMaxBlocks", 32, 1, 128);
     next.terrainBlocksPerTick = (int) ConfigIO.number(p, "terrainBlocksPerTick", 4, 1, 8);

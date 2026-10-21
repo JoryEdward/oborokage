@@ -1,0 +1,23 @@
+{
+  "entity.blossom_oni.ambient": {
+    "subtitle": "subtitles.oborokage.entity.blossom_oni.ambient",
+    "sounds": [
+      "oborokage:blossom_oni/ambient1",
+      "oborokage:blossom_oni/ambient2"
+    ]
+  },
+  "entity.blossom_oni.hurt": {
+    "subtitle": "subtitles.oborokage.entity.blossom_oni.hurt",
+    "sounds": [
+      "oborokage:blossom_oni/hurt1",
+      "oborokage:blossom_oni/hurt2",
+      "oborokage:blossom_oni/hurt3"
+    ]
+  },
+  "entity.blossom_oni.death": {
+    "subtitle": "subtitles.oborokage.entity.blossom_oni.death",
+    "sounds": [
+      "oborokage:blossom_oni/death1"
+    ]
+  }
+}

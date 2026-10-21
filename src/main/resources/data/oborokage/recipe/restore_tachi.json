@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "oborokage:broken_tachi",
+    "minecraft:netherite_ingot",
+    "minecraft:amethyst_block"
+  ],
+  "result": {
+    "id": "oborokage:tachi",
+    "components": {
+      "oborokage:inscription": "ancient",
+      "minecraft:custom_model_data": {
+        "strings": [
+          "ancient"
+        ]
+      }
+    }
+  }
+}

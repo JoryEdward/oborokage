@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "oborokage:broken_voidstring",
+    "minecraft:netherite_ingot",
+    "minecraft:ender_eye"
+  ],
+  "result": {
+    "id": "oborokage:voidstring",
+    "components": {
+      "oborokage:inscription": "ancient",
+      "minecraft:custom_model_data": {
+        "strings": [
+          "ancient"
+        ]
+      }
+    }
+  }
+}

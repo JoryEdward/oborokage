@@ -36,6 +36,8 @@ loom {
 
 sourceSets {
 	client {
+		// Mod Menu's API as compile-time stubs, left out of the JARs below.
+		java.srcDir "src/modmenu-api/java"
 		java.srcDir "versions/${target}/client/java"
 		resources.srcDir "versions/${target}/client/resources"
 	}
@@ -73,6 +75,11 @@ java {
 
 tasks.named('jar') {
     from('LICENSE')
+    exclude('com/terraformersmc/**')
+}
+
+tasks.named('sourcesJar') {
+    exclude('com/terraformersmc/**')
 }
 
 // Pinned formatter, kept outside the release JAR. Java 25 is the supported toolchain.

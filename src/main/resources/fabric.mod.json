@@ -16,6 +16,9 @@
     ],
     "client": [
       "oborokage.client.OborokageClient"
+    ],
+    "modmenu": [
+      "oborokage.client.ModMenuEntry"
     ]
   },
   "mixins": [
@@ -23,7 +26,11 @@
       "config": "oborokage.client.mixins.json",
       "environment": "client"
     },
-    "oborokage.mixins.json"
+    "oborokage.mixins.json",
+    {
+      "config": "oborokage.compat.mixins.json",
+      "environment": "client"
+    }
   ],
   "depends": {
     "fabricloader": "${loader_dependency}",

@@ -30,11 +30,14 @@ public final class WeaponDamage {
             normal.addTransientModifier(m);
           }
         });
+    // A whetstone's edge cuts 5% harder while it lasts.
+    float hone = Hone.honed(blade, p.level().getGameTime()) ? Hone.BONUS : 1;
     return (float)
         (base
             * Math.max(0, actual.getValue())
             / Math.max(1, normal.getValue())
-            * ServerConfig.get().dualDamageMultiplier);
+            * ServerConfig.get().dualDamageMultiplier
+            * hone);
   }
 
   public static boolean apply(

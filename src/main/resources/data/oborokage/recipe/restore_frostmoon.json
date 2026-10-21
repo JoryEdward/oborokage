@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "oborokage:broken_frostmoon",
+    "minecraft:netherite_ingot",
+    "minecraft:blue_ice"
+  ],
+  "result": {
+    "id": "oborokage:frostmoon",
+    "components": {
+      "oborokage:inscription": "ancient",
+      "minecraft:custom_model_data": {
+        "strings": [
+          "ancient"
+        ]
+      }
+    }
+  }
+}

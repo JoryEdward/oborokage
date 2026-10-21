@@ -30,13 +30,16 @@ public final class DualClient {
   private static int heartbeat;
   private static int comboCount;
   private static long comboShownUntil, riposteShownUntil;
-  private static KeyMapping guard, step, ultimate;
+  private static KeyMapping guard, step, ultimate, codex;
+  private static long plungeUntil, stringUntil;
 
   public static final class Scene {
     public ActionEvent event;
     public float age;
     public boolean predicted;
     float stopAt = -99, stopLen;
+    // The aerial plunge's landing, in scene ticks (-1 while still falling).
+    float landAt = -1;
     // Per-cut heading and pitch the light is drawn with (see SlashFx).
     float[] cutYaw, cutPitch;
 
@@ -68,6 +71,7 @@ public final class DualClient {
     var c = Minecraft.getInstance();
     if (c.level == null) return;
     int move = Move.STORM + e.style();
+    if (c.player != null && e.actor() == c.player.getId()) Codex.sawMove(move, bladeKey(c.player));
     long now = c.level.getGameTime();
     float yaw =
         (float) (Math.toDegrees(Math.atan2(-(e.end().x - e.origin().x), e.end().z - e.origin().z)));
@@ -105,6 +109,13 @@ public final class DualClient {
                 "key.oborokage.step",
                 oborokage.client.compat.ClientCompat.keyboard(),
                 InputConstants.KEY_V,
+                cat));
+    codex =
+        KeyMappingHelper.registerKeyMapping(
+            new KeyMapping(
+                "key.oborokage.codex",
+                oborokage.client.compat.ClientCompat.keyboard(),
+                InputConstants.KEY_K,
                 cat));
     ultimate =
         KeyMappingHelper.registerKeyMapping(
@@ -160,16 +171,40 @@ public final class DualClient {
               x,
               y + 10,
               0xffe2d6ef);
-          // Guard and step need both blades; a single blade only adds the ultimate key.
+          // Guard and step need both blades; a single blade only adds the ultimate key, and the
+          // kazuuchi has no ultimate at all.
+          BladeStyle held = BladeStyle.of(c.player.getMainHandItem());
+          String ult =
+              held == null || held.hasUltimate()
+                  ? ultimate.getTranslatedKeyMessage().getString()
+                  : "";
           String controls =
               DualCombat.equipped(c.player)
                   ? guard.getTranslatedKeyMessage().getString()
                       + " · "
                       + step.getTranslatedKeyMessage().getString()
-                      + " · "
-                      + ultimate.getTranslatedKeyMessage().getString()
-                  : ultimate.getTranslatedKeyMessage().getString();
+                      + (ult.isEmpty() ? "" : " · " + ult)
+                  : ult;
           g.text(c.font, controls, x, y - 12, 0xffb7a6d5);
+          // 胧影's moon: eight phases, new to full.
+          if (c.player.getMainHandItem().is(Oborokage.TACHI)) {
+            int phase = Moon.phase(c.player.getMainHandItem());
+            StringBuilder dots = new StringBuilder();
+            for (int i = 0; i < Moon.FULL; i++) dots.append(i < phase ? "●" : "○");
+            g.text(
+                c.font,
+                Component.translatable("ui.oborokage.moon").append(" " + dots),
+                x,
+                y + 20,
+                phase >= Moon.FULL ? 0xfffff2c0 : 0xffd8c8ff);
+          }
+          if (Vigor.fatigued(c.player))
+            g.text(
+                c.font,
+                Component.translatable("ui.oborokage.fatigued"),
+                x,
+                y + (c.player.getMainHandItem().is(Oborokage.TACHI) ? 30 : 20),
+                0xffff8a7a);
           long now = c.level == null ? 0 : c.level.getGameTime();
           if (comboCount >= 2 && now <= comboShownUntil) {
             int fade = (int) (255 * Math.min(1, (comboShownUntil - now) / 20f));
@@ -210,7 +245,7 @@ public final class DualClient {
     if (ClientConfig.get().localPrediction
         && c.player != null
         && c.level != null
-        && (action == 4 || action == 0
+        && (action == 4 || action == 0 || action == 3 && stringReady(c)
             ? DualCombat.holdsBlade(c.player)
             : DualCombat.equipped(c.player))
         && !c.player.isUsingItem()) {
@@ -221,6 +256,8 @@ public final class DualClient {
       int move =
           switch (action) {
             case 0 -> {
+              if (DualCombat.airborne(c.player))
+                yield now >= plungeUntil && !Vigor.fatigued(c.player) ? Move.PLUNGE : 0;
               boolean dual = DualCombat.equipped(c.player);
               if (dual && now < counterUntil) yield Move.COUNTER;
               yield now > comboUntil
@@ -228,11 +265,17 @@ public final class DualClient {
                   : Move.follow(nextCombo, dual);
             }
             case 1 -> guardPredictionRejected ? 0 : Move.GUARD;
-            case 3 -> now >= stepUntil ? Move.DODGE : 0;
-            case 4 ->
-                intent >= 100 && now >= ultimateUntil
-                    ? BladeStyle.of(c.player.getMainHandItem()).ultimate
-                    : 0;
+            case 3 ->
+                stringReady(c)
+                    ? now >= stringUntil && !Vigor.fatigued(c.player) ? Move.STRING_DASH : 0
+                    : now >= stepUntil ? Move.DODGE : 0;
+            case 4 -> {
+              // The kazuuchi has no ultimate (-1): predict nothing and let the server refuse.
+              BladeStyle drawn = BladeStyle.of(c.player.getMainHandItem());
+              yield intent >= 100 && now >= ultimateUntil && drawn != null && drawn.hasUltimate()
+                  ? drawn.ultimate
+                  : 0;
+            }
             default -> 0;
           };
       if (action == 0
@@ -243,6 +286,8 @@ public final class DualClient {
       else if (move != 0 && (old == null || action == 0 && old.event.move() == Move.GUARD)) {
         predict(c, move, seq);
         if (move == Move.DODGE) stepUntil = now + 16;
+        if (move == Move.PLUNGE) plungeUntil = now + 20;
+        if (move == Move.STRING_DASH) stringUntil = now + 40;
         if (Move.ultimate(move)) ultimateUntil = now + 100;
       }
     }
@@ -267,6 +312,7 @@ public final class DualClient {
     Scene scene = new Scene(event, 0);
     scene.predicted = true;
     scenes.put(c.player.getId(), scene);
+    Codex.sawMove(move, bladeKey(c.player));
     if (Move.ultimate(move)) Cinematics.begin(move, event.yaw(), 0);
   }
 
@@ -421,6 +467,7 @@ public final class DualClient {
         e.actor(),
         new Scene(
             e, Math.clamp(elapsed, 0, e.move() == Move.GUARD ? 600 : Move.of(e.move()).length())));
+    if (local) Codex.sawMove(e.move(), bladeKey(c.player));
     if (local && Move.ultimate(e.move()))
       Cinematics.begin(
           e.move(), e.yaw(), (int) Math.clamp(elapsed, 0, Move.of(e.move()).length() - 1));
@@ -489,8 +536,11 @@ public final class DualClient {
       heartbeat = 0;
     }
     while (step.consumeClick())
-      if (!oborokage.client.compat.ClientCompat.screenOpen(c) && DualCombat.equipped(c.player))
-        request(3);
+      if (!oborokage.client.compat.ClientCompat.screenOpen(c)
+          && (DualCombat.equipped(c.player) || stringReady(c))) request(3);
+    while (codex.consumeClick())
+      if (!oborokage.client.compat.ClientCompat.screenOpen(c))
+        oborokage.client.compat.ClientCompat.openScreen(c, CodexScreen.open());
     while (ultimate.consumeClick())
       if (!oborokage.client.compat.ClientCompat.screenOpen(c) && DualCombat.holdsBlade(c.player))
         request(4);
@@ -506,7 +556,7 @@ public final class DualClient {
       boolean local = scene.event.actor() == c.player.getId();
       int sm = scene.event.move();
       boolean held =
-          Move.ultimate(sm) || Move.solo(sm)
+          Move.single(sm)
               ? DualCombat.holdsBlade(c.player)
               : sm >= Move.STORM && sm <= Move.TERRAIN
                   ? Oborokage.mainBlade(c.player.getMainHandItem())
@@ -524,6 +574,9 @@ public final class DualClient {
       float before = scene.age;
       scene.age++;
       if (local) contact(c, scene, before);
+      if (sm == Move.PLUNGE && scene.landAt < 0 && scene.age > 2 && entity.onGround())
+        landed(scene, local);
+      if (sm == Move.PLUNGE && scene.landAt < 0 && entity.isAlive()) plungeTrail(c, entity);
       if (!scene.predicted) {
         long elapsed = c.level.getGameTime() - scene.event.startTick();
         if (elapsed >= 0 && elapsed < 80) {
@@ -531,7 +584,11 @@ public final class DualClient {
           if (Math.abs(gap) > 1) scene.age += Math.clamp(gap, -.25f, .25f);
         }
       }
-      if (scene.age > Move.of(scene.event.move()).length()) {
+      float length =
+          sm == Move.PLUNGE && scene.landAt >= 0
+              ? scene.landAt + 8
+              : Move.of(scene.event.move()).length();
+      if (scene.age > length) {
         if (local) {
           int id = scene.event.move();
           nextCombo = Move.next(id);
@@ -586,6 +643,53 @@ public final class DualClient {
     return false;
   }
 
+  /** 空弦's string is drawn from the local player: the step key becomes the string dash. */
+  private static boolean stringReady(Minecraft c) {
+    return BladeStyle.of(c.player.getMainHandItem()) == BladeStyle.VOIDSTRING
+        && TetherFx.active(c.player.getId());
+  }
+
+  static String bladeKey(net.minecraft.world.entity.player.Player p) {
+    BladeStyle st = BladeStyle.of(p.getMainHandItem());
+    return st == null ? "tachi" : st.key;
+  }
+
+  /** The plunge touched down: hold the pose a beat, and kick the local camera hard. */
+  static void landed(Scene scene, boolean local) {
+    if (scene.landAt >= 0) return;
+    scene.landAt = scene.age;
+    if (!local) return;
+    var c = Minecraft.getInstance();
+    var style = BladeStyle.of(c.player.getMainHandItem());
+    Cinematics.kick(2.4f, 1, style == null ? 0xbca6f4 : style.primary);
+    plungeUntil = c.level.getGameTime() + 20;
+  }
+
+  /** The server's landing event for an actor's plunge. */
+  static void landed(int actor) {
+    Scene s = scenes.get(actor);
+    var c = Minecraft.getInstance();
+    if (s != null && s.event.move() == Move.PLUNGE)
+      landed(s, c.player != null && actor == c.player.getId());
+  }
+
+  private static void plungeTrail(Minecraft c, net.minecraft.world.entity.Entity e) {
+    var style =
+        e instanceof net.minecraft.world.entity.player.Player pl
+            ? BladeStyle.of(pl.getMainHandItem())
+            : null;
+    int rgb = style == null ? 0xbca6f4 : style.primary;
+    for (int i = 0; i < 3; i++)
+      c.level.addParticle(
+          new DustParticleOptions(rgb, .8f),
+          e.getX() + (c.level.getRandom().nextDouble() - .5) * .5,
+          e.getY() + .4 + c.level.getRandom().nextDouble() * 1.4,
+          e.getZ() + (c.level.getRandom().nextDouble() - .5) * .5,
+          0,
+          .25,
+          0);
+  }
+
   public static float cut(Scene s, float partial, int hand) {
     float t = s.time(partial);
     int move = s.event.move();
@@ -623,6 +727,31 @@ public final class DualClient {
     }
     if (Move.solo(move)) {
       SoloPose.thirdPerson(model, main, off, sign, move, s.time(partial));
+      return true;
+    }
+    if (move == Move.PLUNGE) {
+      // Both hands overhead on the way down, then the blade driven into the ground.
+      float t = s.time(partial);
+      float slam = s.landAt < 0 ? 0 : ease((t - s.landAt) / 2.5f);
+      float rise = s.landAt < 0 ? 0 : ease((t - s.landAt - 4) / 4);
+      main.xRot = -2.9f + 2.4f * slam - .4f * rise;
+      main.yRot = sign * -.2f;
+      off.xRot = -2.8f + 2.3f * slam - .4f * rise;
+      off.yRot = sign * -.55f;
+      model.body.xRot = -.12f + .62f * slam * (1 - rise);
+      model.rightLeg.xRot = s.landAt < 0 ? -.6f : -.35f * (1 - rise);
+      model.leftLeg.xRot = s.landAt < 0 ? .3f : .35f * (1 - rise);
+      return true;
+    }
+    if (move == Move.STRING_DASH) {
+      // A long thrust along the string.
+      float k = 1 - ease((s.time(partial) - 3) / 5);
+      main.xRot = -1.55f * k - .3f;
+      main.yRot = sign * .1f;
+      off.xRot = .4f * k;
+      model.body.xRot = .35f * k;
+      model.rightLeg.xRot = -.7f * k;
+      model.leftLeg.xRot = .6f * k;
       return true;
     }
     if (Move.ultimate(move) && move != Move.ULTIMATE) {
@@ -776,6 +905,21 @@ public final class DualClient {
     if (s == null) return;
     float side = hand == InteractionHand.MAIN_HAND ? 1 : -1;
     if (c.player.getMainArm() == HumanoidArm.LEFT) side = -side;
+    if (s.event.move() == Move.PLUNGE) {
+      if (hand != InteractionHand.MAIN_HAND) return;
+      float t = s.time(partial);
+      float slam = s.landAt < 0 ? 0 : ease((t - s.landAt) / 2.5f);
+      float settle = s.landAt < 0 ? 1 : 1 - ease((t - s.landAt - 3) / 5);
+      pose.translate(0, (.28 - .5 * slam) * settle, (.1 - .35 * slam) * settle);
+      oborokage.client.compat.ClientCompat.rotate(pose, Axis.XP, (40 - 85 * slam) * settle);
+      return;
+    }
+    if (s.event.move() == Move.STRING_DASH) {
+      if (hand != InteractionHand.MAIN_HAND) return;
+      float k = 1 - ease((s.time(partial) - 3) / 5);
+      pose.translate(-side * .08 * k, -.04 * k, -.38 * k);
+      return;
+    }
     if (Move.solo(s.event.move())) {
       if (hand == InteractionHand.MAIN_HAND)
         SoloPose.firstPerson(pose, side, s.event.move(), s.time(partial));

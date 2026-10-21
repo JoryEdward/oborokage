@@ -8,6 +8,15 @@ import net.minecraft.client.Minecraft;
 
 /** Minecraft 26.2 client bindings for APIs whose shape differs across the 26.x line. */
 public final class ClientCompat {
+  public static void openScreen(Minecraft c, net.minecraft.client.gui.screens.Screen screen) {
+    c.gui.setScreen(screen);
+  }
+
+  /** Whether the GUI is hidden (F1); name tags and the post's readout hide with it. */
+  public static boolean hudHidden(Minecraft c) {
+    return c.gui.hud.isHidden();
+  }
+
   public static boolean screenOpen(Minecraft c) {
     return c.gui.screen() != null;
   }

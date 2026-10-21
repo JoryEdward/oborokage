@@ -37,6 +37,8 @@ public final class StyleTechniques {
       end = wall.getLocation();
     double distance = origin.distanceTo(end);
     int processed = 0, frozen = 0, kills = 0;
+    LivingEntity farthest = null;
+    double farthestSq = -1;
     boolean full = charge >= 1;
     float base =
         (style == StyleBladeItem.Style.STORM ? 28 : style == StyleBladeItem.Style.FROST ? 22 : 36)
@@ -70,6 +72,11 @@ public final class StyleTechniques {
           WeaponDamage.apply(p, target, blade, scaled, style == StyleBladeItem.Style.FROST);
       if (hit && !target.isAlive() && Feats.enemy(target)) kills++;
       if (hit) DualCombat.reward(p, target, ServerConfig.get().techniqueIntent);
+      if (hit && target.isAlive()) BladeArts.thunderMark(p, blade, target);
+      if (hit && target.isAlive() && Feats.enemy(target) && delta.lengthSqr() > farthestSq) {
+        farthest = target;
+        farthestSq = delta.lengthSqr();
+      }
       if (hit && style == StyleBladeItem.Style.FROST) {
         target.addEffect(
             new MobEffectInstance(MobEffects.SLOWNESS, (int) (30 + charge * 50), 2), p);
@@ -84,7 +91,7 @@ public final class StyleTechniques {
           && delta.lengthSqr() >= 256
           && Feats.enemy(target)) Feats.award(p, "far_bank");
     }
-    if (style == StyleBladeItem.Style.STORM) {
+    if (style == StyleBladeItem.Style.STORM && !DualCombat.mounted(p)) {
       Vec3 velocity =
           LivingEntity.collideBoundingBox(
               p,
@@ -119,9 +126,16 @@ public final class StyleTechniques {
           .025,
           .015);
     }
-    // 霜轮 · 回霜: a full-charge ring answers itself half a second later.
-    if (full && style == StyleBladeItem.Style.FROST)
+    // 霜轮 · 回霜: a full-charge ring answers itself half a second later, and the ground stays
+    // glazed with ice (霜轮 · 冰面).
+    if (full && style == StyleBladeItem.Style.FROST) {
       BladeArts.schedulePulse(p, blade, p.position().add(0, .9, 0), range, scaled * .6f, 10);
+      BladeArts.iceFloor(p, p.position(), range);
+    }
+    // 空弦 · 弦线: a full line that strikes leaves a string to the farthest enemy it struck.
+    if (full && style == StyleBladeItem.Style.VOID && farthest != null)
+      BladeArts.tether(p, farthest);
+    Vigor.spend(p, Vigor.technique(charge));
     TechniqueEvent.send(p, style.ordinal(), origin, end, charge);
     oborokage.compat.Compat.swing(p, p.getUsedItemHand());
     level.playSound(

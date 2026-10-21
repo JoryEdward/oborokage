@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "oborokage:intent_crystal",
+          "condition": {
+            "type": "minecraft:random_chance",
+            "chance": 0.01
+          }
+        }
+      ]
+    }
+  ],
+  "random_sequence": "oborokage:entities/swordsman"
+}

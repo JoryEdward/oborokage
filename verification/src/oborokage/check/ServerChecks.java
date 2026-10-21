@@ -32,6 +32,16 @@ public final class ServerChecks implements ModInitializer {
   ExpansionChecks expansion;
   UltimateChecks ultimates;
   SoloChecks solo;
+  V1Checks v1;
+  V2Checks v2;
+  V3Checks v3;
+
+  /** One focused check, ticked until it reports done. */
+  interface Focused {
+    boolean tick() throws Exception;
+  }
+
+  final List<Focused> focused = new ArrayList<>();
 
   @Override
   public void onInitialize() {
@@ -74,7 +84,7 @@ public final class ServerChecks implements ModInitializer {
 
   void tick() throws Exception {
     if (stage >= 5 && player != null) Feats.tick(player);
-    if (++age > 600) throw new AssertionError("Timeout stage " + stage);
+    if (++age > (stage == 30 ? 6000 : 600)) throw new AssertionError("Timeout stage " + stage);
     if (stage == 0) {
       check(
           level.registryAccess().lookupOrThrow(Registries.ITEM) != null,
@@ -83,8 +93,8 @@ public final class ServerChecks implements ModInitializer {
           BuiltInRegistries.ITEM.keySet().stream()
                   .filter(i -> i.getNamespace().equals("oborokage"))
                   .count()
-              == 5,
-          "Exactly five weapons");
+              == 23,
+          "Six blades and seventeen 1.0 items are registered");
       CreativeModeTabs.tryRebuildTabContents(level.enabledFeatures(), true, level.registryAccess());
       var tab = BuiltInRegistries.CREATIVE_MODE_TAB.getValue(Oborokage.id("equipment"));
       check(
@@ -94,9 +104,10 @@ public final class ServerChecks implements ModInitializer {
           tab.getSearchTabDisplayItems().stream().anyMatch(i -> i.is(Oborokage.TACHI)),
           "Creative search includes tachi");
       check(
-          tab.getDisplayItems().size() == 5
-              && tab.getDisplayItems().stream().anyMatch(i -> i.is(Oborokage.WAKIZASHI)),
-          "Independent tab contains five blades");
+          tab.getDisplayItems().size() == 23
+              && tab.getDisplayItems().stream().anyMatch(i -> i.is(Oborokage.WAKIZASHI))
+              && tab.getDisplayItems().stream().anyMatch(i -> i.is(Content.WHETSTONE_ITEM)),
+          "Independent tab holds the six blades and the 1.0 items");
       check(
           !BuiltInRegistries.CREATIVE_MODE_TAB
               .getValue(net.minecraft.resources.Identifier.withDefaultNamespace("combat"))
@@ -179,7 +190,30 @@ public final class ServerChecks implements ModInitializer {
       ((TachiItem) Oborokage.TACHI).releaseUsing(player.getMainHandItem(), level, player, 71980);
       stage = 1;
       age = 0;
+      // run.py --only=tomb: just the checks for the change at hand, not the whole suite.
+      String only = System.getProperty("oborokage.only", "");
+      if (!only.isEmpty()) {
+        for (String name : only.split(","))
+          focused.add(
+              switch (name) {
+                case "tomb" -> new TombChecks(this)::tick;
+                case "lord" -> new LordChecks(this)::tick;
+                case "candles" -> new CandleChecks(this)::tick;
+                case "perf" -> new PerfChecks(this)::tick;
+                case "ai" -> new AiChecks(this)::tick;
+                case "lang" -> new LangChecks(this)::tick;
+                default -> throw new IllegalArgumentException(name);
+              });
+        stage = 30;
+      }
       return;
+    }
+    if (stage == 30) {
+      // The focused checks run one after another; each returns true when done.
+      if (focused.isEmpty() || focused.get(0).tick()) {
+        if (!focused.isEmpty()) focused.remove(0);
+        if (focused.isEmpty()) finish();
+      }
     }
     if (stage == 1 && age == 30) {
       check(target.hits == 1, "Partial dash damages the same target exactly once");
@@ -488,6 +522,24 @@ public final class ServerChecks implements ModInitializer {
       return;
     }
     if (stage == 18 && solo.tick()) {
+      v1 = new V1Checks(this);
+      stage = 19;
+      age = 0;
+      return;
+    }
+    if (stage == 19 && v1.tick()) {
+      v2 = new V2Checks(this);
+      stage = 20;
+      age = 0;
+      return;
+    }
+    if (stage == 20 && v2.tick()) {
+      v3 = new V3Checks(this);
+      stage = 21;
+      age = 0;
+      return;
+    }
+    if (stage == 21 && v3.tick()) {
       flawlessWindowBoundary();
       ReviewChecks.run(this);
       finish();
@@ -532,7 +584,7 @@ public final class ServerChecks implements ModInitializer {
           server
               .getRecipeManager()
               .getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING, input, level);
-      check(recipe.isPresent(), "Netherite and diamond-block recipe matches " + name);
+      check(recipe.isPresent(), "The kazuuchi-era recipe matches " + name);
       var result = recipe.orElseThrow().value().assemble(input);
       check(
           result.is(name.equals("tachi") ? Oborokage.TACHI : Oborokage.WAKIZASHI)

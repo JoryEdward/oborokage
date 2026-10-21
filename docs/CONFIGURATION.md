@@ -39,6 +39,12 @@
 | ultimateGuard | true | 0.5.0：奥义进行中，生物与投射物的攻击无法打断 |
 | zanshinTicks | 100 | 0–400；奥义结束后“残心”速度 I 的时长，0 为关闭 |
 | techniqueIntent / iaidoIntent | 6 / 10 | 0–100；本刀技、居合每命中一个敌人获得的剑意 |
+| hungerCost | 1.0 | 0–10；刀的各项本领消耗饥饿的倍率（1.0 起）。0 关闭饥饿消耗 |
+| fatigueFoodLevel | 6 | -1–20；饥饿值不高于此值时“力竭”：刀的特性与终式失效，空中斩与弦步不可用。-1 关闭力竭 |
+| plungeCooldownTicks | 20 | 0–200；空中斩落地后的冷却（轻身铭文减半） |
+| stringDashCooldownTicks | 40 | 0–400；弦步冷却（轻身铭文减半） |
+| honeTicks | 6000 | 0–72000；磨刀石开刃的持续时间（tick） |
+| swordsmanSpawns | true | 樱花树林中剑客与樱下鬼的自然生成；修改后需重启服务端（刀冢里的樱下鬼、道场里的剑客与落英剑主由结构决定，不受此项影响） |
 
 斩物数量=`floor(1+(terrainMaxBlocks-1)×charge²)`；起始硬度以2为基准，并随蓄力增长到配置上限。主刀普通战斗不触发斩物。方块原生事件、冒险规则、世界边界、正确工具掉落仍有效。默认5硬度不能斩黑曜石。
 
@@ -48,14 +54,15 @@
 {"replace":false,"values":["anothermod:immortal_boss"]}
 ```
 
-这是实体类型标签；测试注入过盔甲架豁免，发布JAR内默认值为空。
+这是实体类型标签（`replace:false` 会与默认值合并）；发布JAR内默认只含 `oborokage:training_dummy`，让训练木桩如实显示满蓄居合的普通伤害；测试另注入过盔甲架豁免。
 
 ## 客户端
 
-完整可复制文件：`config-examples/oborokage-client.properties`。修改后重启客户端。
+完整可复制文件：`config-examples/oborokage-client.properties`。修改后重启客户端（`language` 除外：在游戏中切换立即生效，也会写回这个文件）。
 
 | 字段 | 默认 | 范围/意义 |
 |---|---:|---|
+| language | auto | 本模组文字的语言：`auto` 跟随游戏，或 `zh_cn`、`en_us`、`ja_jp`。只影响本模组的文字；游戏中可在招式图鉴右上角或 Mod Menu 的设置按钮切换 |
 | cinematic / screenShake / thirdPersonUltimate | true | 镜头演出、震动、本人奥义第三人称分别控制 |
 | localPrediction | true | 自己的双刀起手先播放，服务端确认/拒绝后校正 |
 | trailShaderCompat | true | 原生自发光透明实体层；false回退beacon层 |

@@ -1,12 +1,12 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_netherite": {
+    "has_item": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
-            "items": "minecraft:netherite_ingot"
+            "items": "oborokage:kazuuchi"
           }
         ]
       }
@@ -20,7 +20,7 @@
   },
   "requirements": [
     [
-      "has_netherite",
+      "has_item",
       "has_the_recipe"
     ]
   ],

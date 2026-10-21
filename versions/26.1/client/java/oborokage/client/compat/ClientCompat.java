@@ -11,6 +11,15 @@ import net.minecraft.client.Minecraft;
  * line.
  */
 public final class ClientCompat {
+  public static void openScreen(Minecraft c, net.minecraft.client.gui.screens.Screen screen) {
+    c.setScreen(screen);
+  }
+
+  /** Whether the GUI is hidden (F1); name tags and the post's readout hide with it. */
+  public static boolean hudHidden(Minecraft c) {
+    return c.options.hideGui;
+  }
+
   public static boolean screenOpen(Minecraft c) {
     return c.screen != null;
   }

@@ -100,7 +100,17 @@ final class SlashFx {
       float t,
       float dur,
       float yaw,
-      float pitch) {}
+      float pitch,
+      int[] pal,
+      boolean honed) {}
+
+  /** 绯月 inscription: crimson light edged in gold, whatever the blade. */
+  private static final int[] CRIMSON = {0xff3b4a, 0x7a0f22, 0xffd27a};
+
+  private static int[] palette(BladeStyle style, net.minecraft.world.item.ItemStack stack) {
+    if (Inscription.has(stack, Inscription.CRIMSON)) return CRIMSON;
+    return new int[] {style.primary, style.secondary, style.accent};
+  }
 
   private static List<Live> live(Minecraft c, float partial) {
     List<Live> out = new ArrayList<>();
@@ -149,7 +159,24 @@ final class SlashFx {
           yaw = scene.cutYaw[w];
           pitch = scene.cutPitch[w];
         }
-        out.add(new Live(scene, e, cut, style, big, hand, t, dur, yaw, pitch));
+        var stack =
+            e instanceof Player pl
+                ? logical == 1 && !Move.ultimate(id) ? pl.getOffhandItem() : pl.getMainHandItem()
+                : net.minecraft.world.item.ItemStack.EMPTY;
+        out.add(
+            new Live(
+                scene,
+                e,
+                cut,
+                style,
+                big,
+                hand,
+                t,
+                dur,
+                yaw,
+                pitch,
+                palette(style, stack),
+                Hone.honed(stack, c.level.getGameTime())));
       }
     }
     return out;
@@ -281,6 +308,8 @@ final class SlashFx {
     // The void's string spans the whole cut and hangs there until it fades.
     if (st == BladeStyle.VOIDSTRING) tail = 0;
     float fade = t <= dur ? 1 : Math.max(0, 1 - (t - dur) / linger(st));
+    // A honed edge burns brighter.
+    if (l.honed) fade = Math.min(1.25f, fade * 1.25f);
     // Through the player's own eyes the light sits an arm's length away: keep it fine.
     float big = (l.big ? 1.35f : 1) * (fr.scale() < 1 ? .35f : 1);
     double r = l.cut.radius() * (l.big ? 1.12 : 1) * fr.scale();
@@ -299,7 +328,7 @@ final class SlashFx {
     // 1. The swept sheet: transparent near the hilt, brightest under the edge, fading to the tail.
     if (head > tail) {
       float sheetA = (st == BladeStyle.VOIDSTRING ? .5f : .34f) * fade * (l.big ? 1.15f : 1);
-      int dark = st == BladeStyle.VOIDSTRING ? st.secondary : st.primary;
+      int dark = st == BladeStyle.VOIDSTRING ? l.pal[1] : l.pal[0];
       for (int i = 0; i < n; i++) {
         double u0 = tail + (head - tail) * i / (double) n,
             u1 = tail + (head - tail) * (i + 1) / (double) n;
@@ -307,7 +336,7 @@ final class SlashFx {
             k1 = (float) ((u1 - tail) / (head - tail));
         double a0 = from + span * u0, a1 = from + span * u1;
         int o0 = Geo.argb(dark, sheetA * k0), o1 = Geo.argb(dark, sheetA * k1);
-        int in = Geo.argb(st.secondary, 0);
+        int in = Geo.argb(l.pal[1], 0);
         g.quad(fr.at(a0, r * .42), fr.at(a0, r), fr.at(a1, r), fr.at(a1, r * .42), in, o0, o1, in);
       }
     }
@@ -326,7 +355,7 @@ final class SlashFx {
             eh,
             r * (1 - .06 * k),
             edgeW * .8,
-            st.secondary,
+            l.pal[1],
             .42f * fade / k,
             n / 2,
             eye);
@@ -337,8 +366,8 @@ final class SlashFx {
         case RAIKIRI -> {
           // Jagged and re-struck every tick, with short branches flying off the arc.
           long seed = (long) (t * 3) * 7919L + l.scene.event.actionId();
-          bolt(g, fr, from, span, tail, head, r, edgeW * .7, st.primary, .9f * fade, eye, seed);
-          bolt(g, fr, from, span, tail, head, r, edgeW * .2, st.accent, fade, eye, seed);
+          bolt(g, fr, from, span, tail, head, r, edgeW * .7, l.pal[0], .9f * fade, eye, seed);
+          bolt(g, fr, from, span, tail, head, r, edgeW * .2, l.pal[2], fade, eye, seed);
           Random rnd = new Random(seed);
           int branches = l.big ? 5 : 3;
           for (int b = 0; b < branches; b++) {
@@ -348,7 +377,7 @@ final class SlashFx {
             Vec3 p1 =
                 p0.add(out.scale((.4 + rnd.nextDouble() * .7) * fr.scale()))
                     .add(0, (rnd.nextDouble() - .3) * .6 * fr.scale(), 0);
-            g.bolt(p0, p1, .03 * big, st.secondary, .8f * fade, eye, seed + b, 4);
+            g.bolt(p0, p1, .03 * big, l.pal[1], .8f * fade, eye, seed + b, 4);
           }
         }
         case VOIDSTRING -> {
@@ -364,16 +393,16 @@ final class SlashFx {
               head,
               r + wobble,
               edgeW * 3.2,
-              st.secondary,
+              l.pal[1],
               .55f * fade,
               n,
               eye);
-          edge(g, fr, from, span, tail, head, r + wobble, edgeW, st.primary, .95f * fade, n, eye);
+          edge(g, fr, from, span, tail, head, r + wobble, edgeW, l.pal[0], .95f * fade, n, eye);
           edge(g, fr, from, span, tail, head, r + wobble, .018 * big, 0xffffff, fade, n, eye);
         }
         default -> {
-          edge(g, fr, from, span, tail, head, r, edgeW, st.primary, .9f * fade, n, eye);
-          edge(g, fr, from, span, tail, head, r, edgeW * .22, st.accent, fade, n, eye);
+          edge(g, fr, from, span, tail, head, r, edgeW, l.pal[0], .9f * fade, n, eye);
+          edge(g, fr, from, span, tail, head, r, edgeW * .22, l.pal[2], fade, n, eye);
         }
       }
     }
@@ -387,7 +416,7 @@ final class SlashFx {
         Vec3 base = fr.at(from + span * u, r - .05);
         Vec3 out = base.subtract(fr.center).normalize().add(0, .25, 0);
         double len = (.3 + .25 * ((i * 37) % 5) / 4.0) * grow * big;
-        g.spike(base, out, len, .14 * big, st.primary, .85f * fade);
+        g.spike(base, out, len, .14 * big, l.pal[0], .85f * fade);
       }
     }
     // 5. A glint rides the edge's head.
@@ -401,19 +430,19 @@ final class SlashFx {
       across = across.normalize();
       Vec3 rise = across.cross(view).normalize();
       double s = .3 * glint;
-      g.disc(tip, across, rise, .1 * glint, st.accent, st.primary, .45f, 10);
+      g.disc(tip, across, rise, .1 * glint, l.pal[2], l.pal[0], .45f, 10);
       g.beam(
           tip.subtract(across.scale(s)),
           tip.add(across.scale(s)),
           .025 * glint,
-          st.accent,
+          l.pal[2],
           .85f,
           eye);
       g.beam(
           tip.subtract(rise.scale(s * .6)),
           tip.add(rise.scale(s * .6)),
           .02 * glint,
-          st.accent,
+          l.pal[2],
           .7f,
           eye);
     }
@@ -422,8 +451,8 @@ final class SlashFx {
       float k = Math.min(1, (t - dur * .6f) / 7);
       double ring = .6 + 3.4 * Math.sqrt(k);
       Vec3 c = new Vec3(0, .06, 0), x = new Vec3(1, 0, 0), z = new Vec3(0, 0, 1);
-      g.ring(c, x, z, ring - .18, ring, st.primary, .7f * (1 - k), 40);
-      g.ring(c, x, z, ring - .04, ring, st.accent, .9f * (1 - k), 40);
+      g.ring(c, x, z, ring - .18, ring, l.pal[0], .7f * (1 - k), 40);
+      g.ring(c, x, z, ring - .04, ring, l.pal[2], .9f * (1 - k), 40);
     }
   }
 

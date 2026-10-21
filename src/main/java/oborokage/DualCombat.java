@@ -64,6 +64,11 @@ public final class DualCombat {
     List<LivingEntity> ultTargets = new ArrayList<>();
     final Set<UUID> frozen = new HashSet<>(), struck = new HashSet<>();
     Vec3 ultOrigin = Vec3.ZERO;
+    // 1.0: the aerial plunge (start height, landing tick) and 空弦's string dash.
+    long plungeUntil, stringUntil;
+    double plungeFrom, plungeFall;
+    int plungeLanded = -1;
+    LivingEntity dashTarget;
     float beforeDamageTotal = Float.NaN;
     ItemStack main, off;
     final Set<String> hits = new HashSet<>();
@@ -95,8 +100,8 @@ public final class DualCombat {
 
   /**
    * Whether a left click on this entity belongs to the blade chains instead of the vanilla attack.
-   * Riding, gliding and spectating keep the vanilla behaviour: the chains refuse those states, so
-   * taking the click there would swallow it.
+   * The chains also cut from the saddle, a boat, a minecart, elytra flight and creative flight;
+   * only spectating keeps the vanilla behaviour.
    */
   public static boolean ownsAttack(Player p, Entity target) {
     return target instanceof LivingEntity && chainsReady(p);
@@ -104,7 +109,17 @@ public final class DualCombat {
 
   /** The player state in which a left click starts a blade chain. */
   public static boolean chainsReady(Player p) {
-    return holdsBlade(p) && !p.isSpectator() && !p.isPassenger() && !p.isFallFlying();
+    return holdsBlade(p) && !p.isSpectator();
+  }
+
+  /** On a mount, in a boat or minecart, or gliding on elytra. */
+  public static boolean mounted(Player p) {
+    return p.isPassenger() || p.isFallFlying();
+  }
+
+  /** Moves that carry the wielder on their own feet: not available mounted or gliding. */
+  private static boolean needsFeet(int id) {
+    return Move.ultimate(id) || id == Move.DODGE || id == Move.STRING_DASH || id == Move.PLUNGE;
   }
 
   public static boolean equipped(Player p) {
@@ -153,13 +168,19 @@ public final class DualCombat {
     // The ultimate and the plain chain belong to whichever blade is drawn; guard and step need
     // both.
     boolean dual = equipped(p);
-    if (!((request.action() == 4 || request.action() == 0) ? holdsBlade(p) : dual)
+    // 空弦 with a live string turns the step key into the string dash, one blade or two.
+    boolean string =
+        request.action() == 3
+            && BladeStyle.of(p.getMainHandItem()) == BladeStyle.VOIDSTRING
+            && BladeArts.tethered(p) != null;
+    if (!((request.action() == 4 || request.action() == 0 || string) ? holdsBlade(p) : dual)
         || !p.isAlive()
         || p.isSpectator()
-        || p.isPassenger()
-        || p.isFallFlying()
         || LegacyIaido.active(p.getUUID())
-        || p.isUsingItem()) {
+        || p.isUsingItem()
+        // Riding or gliding, the blade still cuts and guards; the step, the string dash and the
+        // ultimate need the wielder's own feet.
+        || mounted(p) && (request.action() == 3 || request.action() == 4)) {
       reject(s, request.sequence());
       return;
     }
@@ -172,6 +193,12 @@ public final class DualCombat {
             s.bufferedUntil = now + 8;
             s.bufferedSequence = request.sequence();
           } else reject(s, request.sequence());
+          return;
+        }
+        // A click in mid-air is the aerial plunge.
+        if (airborne(p)) {
+          if (now >= s.plungeUntil && !Vigor.fatigued(p)) begin(s, Move.PLUNGE);
+          else reject(s, request.sequence());
           return;
         }
         if (dual && now < s.counterUntil && s.counterSource != null) {
@@ -210,16 +237,28 @@ public final class DualCombat {
         }
       }
       case 3 -> {
+        if (string) {
+          if (s.move == null && now >= s.stringUntil && !Vigor.fatigued(p))
+            begin(s, Move.STRING_DASH);
+          else reject(s, request.sequence());
+          return;
+        }
         if (s.move == null && now >= s.dodgeUntil) {
           begin(s, Move.DODGE);
           s.dodgeUntil = now + ServerConfig.get().dodgeCooldownTicks;
         } else reject(s, request.sequence());
       }
       case 4 -> {
-        if (s.move == null && now >= s.ultimateUntil && s.intent >= 100) {
+        BladeStyle drawn = BladeStyle.of(p.getMainHandItem());
+        if (s.move == null
+            && now >= s.ultimateUntil
+            && s.intent >= 100
+            && drawn != null
+            && drawn.hasUltimate()) {
           s.intent -= 100;
           s.ultimateUntil = now + ServerConfig.get().ultimateCooldownTicks;
-          begin(s, BladeStyle.of(p.getMainHandItem()).ultimate);
+          Vigor.spend(p, Vigor.ULTIMATE);
+          begin(s, drawn.ultimate);
         } else reject(s, request.sequence());
       }
     }
@@ -249,6 +288,12 @@ public final class DualCombat {
     s.ultTargets.clear();
     s.main = s.p.getMainHandItem();
     s.off = s.p.getOffhandItem();
+    s.plungeLanded = -1;
+    if (id == Move.PLUNGE) {
+      s.plungeFrom = s.p.getY();
+      s.plungeFall = s.p.fallDistance;
+    }
+    if (id == Move.STRING_DASH) s.dashTarget = BladeArts.tethered(s.p);
     Vec3 forward = forward(s.yaw);
     if (id == Move.DODGE) {
       s.chainHands = 0;
@@ -287,10 +332,9 @@ public final class DualCombat {
         continue;
       }
       live.add(p.getUUID());
-      boolean single = s.move != null && (Move.ultimate(s.move.id()) || Move.solo(s.move.id()));
+      boolean single = s.move != null && Move.single(s.move.id());
       if (!(single ? holdsBlade(p) : equipped(p))
-          || p.isPassenger()
-          || p.isFallFlying()
+          || mounted(p) && s.move != null && needsFeet(s.move.id())
           || p.isUsingItem()
           || LegacyIaido.active(p.getUUID())) {
         if (s.move != null || s.guarding) cancel(p);
@@ -336,8 +380,12 @@ public final class DualCombat {
           move(s, s.direction.scale(.3));
         }
         if (Move.ultimate(id)) Ultimates.tick(s, age);
+        if (id == Move.PLUNGE) plunge(s, age);
+        if (id == Move.STRING_DASH && age == 1) stringDash(s);
         for (int i = 0; i < s.move.hits().length; i++) if (age == s.move.hits()[i]) hit(s, i);
-        if (age >= s.move.length()) {
+        int length =
+            id == Move.PLUNGE && s.plungeLanded >= 0 ? s.plungeLanded + 8 : s.move.length();
+        if (age >= length) {
           if (Move.ultimate(id)) Ultimates.finish(s);
           if (id == Move.DODGE && s.dodgeDistance >= 2 && !s.blocked) s.stepFollowUntil = now + 12;
           s.move = null;
@@ -363,7 +411,8 @@ public final class DualCombat {
   }
 
   private static void move(State s, Vec3 delta) {
-    if (s.blocked) return;
+    // A mount or a glide carries the wielder; the cut's own step would only fight it.
+    if (s.blocked || mounted(s.p)) return;
     Vec3 permitted =
         Entity.collideBoundingBox(s.p, delta, s.p.getBoundingBox(), s.level, List.of());
     if (permitted.horizontalDistanceSqr() < delta.horizontalDistanceSqr() * .96) s.blocked = true;
@@ -402,7 +451,7 @@ public final class DualCombat {
     // A solo ultimate has no offhand blade; its offhand beats are cut by the main blade.
     ItemStack blade = hand == 0 || BladeStyle.of(s.off) == null ? s.main : s.off;
     Item style = s.main.getItem();
-    boolean arts = BladeArts.enabled();
+    boolean arts = BladeArts.enabled(s.p);
     float reach = m.id() == Move.ULTIMATE ? (float) cfg.ultimateReach : m.reach();
     boolean solo = Move.solo(m.id());
     // 胧月 · 落花: alone in the hand, the short blade's finisher is a full turn.
@@ -488,6 +537,8 @@ public final class DualCombat {
       boolean useful =
           before > target.getHealth() + target.getAbsorptionAmount() || !target.isAlive();
       if (!useful) continue;
+      // 赤霆 · 积雷: every landed blow of the thunder blade lays a mark.
+      BladeArts.thunderMark(s.p, blade, target);
       if (Feats.enemy(target)) {
         struck.add(target);
         s.chainHands |= hand == 0 ? 1 : 2;
@@ -532,6 +583,9 @@ public final class DualCombat {
       s.level.playSound(
           null, s.p.blockPosition(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1, 1.2f);
     }
+    if (!ultimate && targets > 0) Vigor.spend(s.p, Vigor.SWING);
+    // 胧影 · 月相: a swing of the tachi that lands on an enemy waxes the moon.
+    if (!ultimate && !struck.isEmpty() && blade == s.main) Moon.wax(s.p, blade);
     // Like a vanilla sword, an ordinary chain swing that meets nothing does not wear the blade.
     if (targets > 0 || ultimate)
       blade.hurtAndBreak(
@@ -571,9 +625,11 @@ public final class DualCombat {
       // 胧影 · 残月: the blade's hazy shadow cuts everything it struck once more.
       BladeArts.scheduleEcho(s.p, s.main, struck, baseDamage * .45f, 6);
     } else if (style == Oborokage.WAKIZASHI) {
-      // 胧月 · 落花: landing the turn lightens the feet for the next exchange.
-      if (!struck.isEmpty())
+      // 胧月 · 落花: landing the turn lightens the feet and leaves a ring of healing petals.
+      if (!struck.isEmpty()) {
         s.p.addEffect(new MobEffectInstance(MobEffects.SPEED, 40, 0, false, false, true));
+        BladeArts.bloom(s.p, s.p.position());
+      }
     } else if (style == Oborokage.RAIKIRI) {
       // 赤霆 · 雷闪: lightning leaps on from each struck enemy, four arcs at most.
       int arcs = 0;
@@ -632,9 +688,198 @@ public final class DualCombat {
   }
 
   private static void gainIntent(State s, int amount) {
-    s.intent =
-        Math.min(
-            100, s.intent + (int) Math.round(amount * ServerConfig.get().intentGainMultiplier));
+    double k = ServerConfig.get().intentGainMultiplier;
+    // 聚意: an inscribed blade gathers intent 15% faster.
+    if (Inscription.has(s.p.getMainHandItem(), Inscription.FOCUS)) k *= 1.15;
+    s.intent = Math.min(100, s.intent + (int) Math.round(amount * k));
+  }
+
+  /** A flat amount of intent, as from an intent crystal. */
+  public static void addIntent(ServerPlayer p, int amount) {
+    State s = state(p);
+    s.intent = Math.min(100, s.intent + amount);
+    s.lastUsefulHit = s.level.getGameTime();
+  }
+
+  /** 轻身 halves the recovery of the aerial plunge and the string dash. */
+  private static int recovery(State s, int ticks) {
+    return Inscription.has(s.main, Inscription.FEATHER) ? ticks / 2 : ticks;
+  }
+
+  /** Whether the player is in the middle of an ultimate; never creates state. */
+  public static boolean inUltimate(ServerPlayer p) {
+    State s = states.get(p.getUUID());
+    return s != null && s.move != null && Move.ultimate(s.move.id());
+  }
+
+  /** In the air with room below: a click becomes the aerial plunge. */
+  public static boolean airborne(Player p) {
+    if (p.onGround()
+        || p.isInWater()
+        || p.isInLava()
+        || p.onClimbable()
+        || p.isFallFlying()
+        || p.isPassenger()
+        || p.getAbilities().flying) return false;
+    var below =
+        p.level()
+            .clip(
+                new ClipContext(
+                    p.position(),
+                    p.position().add(0, -.8, 0),
+                    ClipContext.Block.COLLIDER,
+                    ClipContext.Fluid.ANY,
+                    p));
+    return below.getType() == HitResult.Type.MISS;
+  }
+
+  /** The plunge cushions this much of its own dive; a fall before it and any drop past it count. */
+  public static final double PLUNGE_CUSHION = 12;
+
+  /** Hangs for a beat, then drives straight down; the landing is the blow. */
+  private static void plunge(State s, int age) {
+    ServerPlayer p = s.p;
+    if (s.plungeLanded >= 0) return;
+    // Set only while airborne: a positive fall distance on the ground would hurt on every step.
+    p.fallDistance = s.plungeFall + Math.max(0, s.plungeFrom - p.getY() - PLUNGE_CUSHION);
+    boolean down = age > 1 && (p.onGround() || p.isInWater() || p.isInLava());
+    if (!down && age < 30) {
+      Vec3 v = p.getDeltaMovement();
+      p.setDeltaMovement(v.x * .3, age < 2 ? .12 : -2.0, v.z * .3);
+      if (p.connection != null)
+        p.connection.send(
+            new net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket(p));
+      else p.move(MoverType.SELF, p.getDeltaMovement());
+      return;
+    }
+    s.plungeLanded = age;
+    land(s);
+  }
+
+  private static void land(State s) {
+    ServerPlayer p = s.p;
+    var cfg = ServerConfig.get();
+    ItemStack blade = s.main;
+    BladeStyle style = BladeStyle.of(blade);
+    Vec3 c = p.position();
+    double radius = s.move.reach(), drop = Math.max(0, s.plungeFrom - p.getY());
+    // The higher the fall, the heavier the blow: three more per block, up to eight blocks.
+    float base = s.move.damage() + 3 * (float) Math.min(drop, 8);
+    float damage = WeaponDamage.scaled(p, blade, base) * BladeStyle.power(blade);
+    List<LivingEntity> struck = new ArrayList<>();
+    for (LivingEntity e :
+        s.level.getEntitiesOfClass(
+            LivingEntity.class, new AABB(c, c).inflate(radius, 2, radius), e -> allowed(p, e))) {
+      if (struck.size() >= cfg.maxTargetsPerWindow) break;
+      Vec3 d = e.position().subtract(c);
+      if (d.horizontalDistanceSqr() > radius * radius) continue;
+      if (s.level
+              .clip(
+                  new ClipContext(
+                      c.add(0, .5, 0),
+                      e.getBoundingBox().getCenter(),
+                      ClipContext.Block.COLLIDER,
+                      ClipContext.Fluid.NONE,
+                      p))
+              .getType()
+          != HitResult.Type.MISS) continue;
+      oborokage.compat.Compat.resetHurtCooldown(e);
+      if (!WeaponDamage.apply(p, e, blade, damage, true)) continue;
+      struck.add(e);
+      Vec3 out = new Vec3(d.x, 0, d.z);
+      out = out.lengthSqr() < 1e-4 ? s.direction : out.normalize();
+      if (e.isAlive()) {
+        e.push(out.x * .5, .35, out.z * .5);
+        oborokage.compat.Compat.syncMotion(e);
+      }
+      reward(p, e, cfg.hitIntent);
+      BladeArts.thunderMark(p, blade, e);
+      send(s, ActionEvent.IMPACT, e.getBoundingBox().getCenter());
+    }
+    if (BladeArts.enabled(p) && style != null)
+      switch (style) {
+        case TACHI -> {
+          // 新月坠: the enemies it lands among stagger; the moon waxes.
+          for (LivingEntity e : struck)
+            if (e.isAlive()) e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 30, 1), p);
+          if (struck.stream().anyMatch(Feats::enemy)) Moon.wax(p, blade);
+        }
+        case WAKIZASHI -> p.addEffect(new MobEffectInstance(MobEffects.SPEED, 40, 0, false, false));
+        case RAIKIRI -> {
+          // 雷落: the bolt follows the blade down.
+          var bolt = oborokage.compat.Compat.visualLightning(s.level, c.x, c.y, c.z);
+          s.level.addFreshEntity(bolt);
+          for (LivingEntity e : struck) BladeArts.thunderMark(p, blade, e);
+        }
+        case FROSTMOON -> {
+          for (LivingEntity e : struck) BladeArts.frostHit(p, e);
+          BladeArts.iceFloor(p, c, 3);
+        }
+        case VOIDSTRING -> {
+          // 虚陷: the ground folds inward and draws the ring toward the blade.
+          for (LivingEntity e :
+              s.level.getEntitiesOfClass(
+                  LivingEntity.class,
+                  new AABB(c, c).inflate(radius * 1.8, 2, radius * 1.8),
+                  e -> allowed(p, e) && e.isAlive())) {
+            Vec3 in = c.subtract(e.position()).multiply(1, 0, 1);
+            if (in.lengthSqr() < 1) continue;
+            in = in.normalize().scale(.55);
+            e.push(in.x, .1, in.z);
+            oborokage.compat.Compat.syncMotion(e);
+          }
+        }
+      }
+    Vigor.spend(p, Vigor.PLUNGE);
+    if (!struck.isEmpty()) blade.hurtAndBreak(1, p, EquipmentSlot.MAINHAND);
+    s.level.playSound(
+        null,
+        p.blockPosition(),
+        SoundEvents.GENERIC_EXPLODE.value(),
+        SoundSource.PLAYERS,
+        .5f,
+        1.5f);
+    s.level.playSound(
+        null, p.blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1, .6f);
+    TechniqueEvent.send(
+        p,
+        TechniqueEvent.PLUNGE,
+        c.add(0, .1, 0),
+        c.add(radius, .1, 0),
+        style == null ? 0 : style.ordinal() / 4f);
+    s.plungeUntil = s.level.getGameTime() + recovery(s, cfg.plungeCooldownTicks);
+  }
+
+  /** Along 空弦's string to its target, and one cut on arrival. */
+  private static void stringDash(State s) {
+    ServerPlayer p = s.p;
+    LivingEntity t = s.dashTarget;
+    s.stringUntil = s.level.getGameTime() + recovery(s, ServerConfig.get().stringDashCooldownTicks);
+    BladeArts.untether(p);
+    if (t == null || !t.isAlive() || t.level() != p.level()) return;
+    Vec3 from = p.position();
+    Vec3 flat = t.position().subtract(from).multiply(1, 0, 1);
+    if (flat.lengthSqr() > 1e-4) {
+      Vec3 dir = flat.normalize();
+      Vec3 dest = t.position().subtract(dir.scale(t.getBbWidth() * .5 + 1.0));
+      p.setDeltaMovement(Vec3.ZERO);
+      p.move(MoverType.SELF, dest.subtract(from));
+      if (p.connection != null)
+        p.connection.teleport(
+            new net.minecraft.world.entity.PositionMoveRotation(p.position(), Vec3.ZERO, 0, 0),
+            java.util.Set.of(Relative.Y_ROT, Relative.X_ROT));
+      s.direction = dir;
+    }
+    oborokage.compat.Compat.resetHurtCooldown(t);
+    float damage = WeaponDamage.scaled(p, s.main, s.move.damage()) * BladeStyle.power(s.main);
+    if (p.distanceToSqr(t) < 4.5 * 4.5 && WeaponDamage.apply(p, t, s.main, damage, false)) {
+      reward(p, t, ServerConfig.get().hitIntent);
+      send(s, ActionEvent.IMPACT, t.getBoundingBox().getCenter());
+    }
+    TechniqueEvent.send(p, TechniqueEvent.EDGE, from.add(0, 1, 0), p.position().add(0, 1, 0), 1);
+    s.level.playSound(
+        null, p.blockPosition(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 1, .8f);
+    Vigor.spend(p, Vigor.STRING_DASH);
   }
 
   public static boolean allowed(ServerPlayer p, LivingEntity e) {

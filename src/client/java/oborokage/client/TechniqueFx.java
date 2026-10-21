@@ -37,6 +37,9 @@ public final class TechniqueFx {
       case TechniqueEvent.ECHO -> 9;
       case TechniqueEvent.ARC -> 7;
       case TechniqueEvent.EDGE -> 11;
+      case TechniqueEvent.PLUNGE -> 16;
+      case TechniqueEvent.BLOOM -> oborokage.BladeArts.BLOOM_TICKS;
+      case TechniqueEvent.ICE -> oborokage.BladeArts.ICE_TICKS;
       default -> 0;
     };
   }
@@ -56,6 +59,7 @@ public final class TechniqueFx {
                       if (effects.size() >= 48) effects.removeFirst();
                       if (life(e.style()) > 0) effects.add(new Fx(e, 0));
                       if (e.style() < TechniqueEvent.RING) DualClient.technique(e);
+                      arrived(e);
                     }));
     ClientTickEvents.END_CLIENT_TICK.register(
         c -> {
@@ -66,7 +70,10 @@ public final class TechniqueFx {
           for (int i = effects.size() - 1; i >= 0; i--) {
             Fx f = effects.get(i);
             if (f.age >= life(f.event.style())) effects.remove(i);
-            else effects.set(i, new Fx(f.event, f.age + 1));
+            else {
+              particles(c, f);
+              effects.set(i, new Fx(f.event, f.age + 1));
+            }
           }
         });
     LevelRenderEvents.COLLECT_SUBMITS.register(
@@ -126,7 +133,187 @@ public final class TechniqueFx {
         g.bolt(Vec3.ZERO, end, .02, st.accent, flicker, eye, seed, 8);
       }
       case TechniqueEvent.EDGE -> voidLine(g, end, .35f, age, fade, eye, false);
+      case TechniqueEvent.PLUNGE -> plunge(g, end.length(), styleOf(e), age, fade, eye);
+      case TechniqueEvent.BLOOM -> bloom(g, end.length(), age);
+      case TechniqueEvent.ICE -> ice(g, end.length(), age);
       default -> {}
+    }
+  }
+
+  /** The plunge's event carries the blade as ordinal / 4 in its charge. */
+  private static BladeStyle styleOf(TechniqueEvent e) {
+    int i = Math.round(e.charge() * 4);
+    BladeStyle[] all = BladeStyle.values();
+    return all[Math.clamp(i, 0, all.length - 1)];
+  }
+
+  /** First sight of an event: land the actor's plunge, note it in the codex, burst particles. */
+  private static void arrived(TechniqueEvent e) {
+    var c = Minecraft.getInstance();
+    if (c.level == null || c.player == null) return;
+    boolean local = e.actor() == c.player.getId();
+    switch (e.style()) {
+      case TechniqueEvent.PLUNGE -> {
+        DualClient.landed(e.actor());
+        BladeStyle st = styleOf(e);
+        var r = c.level.getRandom();
+        var particle =
+            switch (st) {
+              case WAKIZASHI -> Oborokage.PETAL;
+              case RAIKIRI -> Oborokage.SPARK;
+              case FROSTMOON -> Oborokage.SHARD;
+              case VOIDSTRING -> Oborokage.MOTE;
+              default -> net.minecraft.core.particles.ParticleTypes.END_ROD;
+            };
+        for (int i = 0; i < 40; i++) {
+          double a = r.nextDouble() * Math.PI * 2;
+          c.level.addParticle(
+              particle,
+              e.origin().x,
+              e.origin().y + .2,
+              e.origin().z,
+              Math.cos(a) * .45,
+              .12 + r.nextDouble() * .25,
+              Math.sin(a) * .45);
+        }
+      }
+      case TechniqueEvent.BLOOM -> {
+        if (local) Codex.see("moon_bloom");
+      }
+      case TechniqueEvent.ICE -> {
+        if (local) Codex.see("frost_ice");
+      }
+      case TechniqueEvent.ARC -> {
+        if (local
+            && BladeStyle.of(c.player.getMainHandItem()) == BladeStyle.RAIKIRI
+            && e.charge() >= 2) Codex.see("storm_mark");
+      }
+      default -> {}
+    }
+  }
+
+  /** Lingering fields shed particles while they last. */
+  private static void particles(Minecraft c, Fx f) {
+    if (c.level == null) return;
+    var e = f.event;
+    var r = c.level.getRandom();
+    double radius = e.end().subtract(e.origin()).length();
+    if (e.style() == TechniqueEvent.BLOOM && f.age % 3 == 0) {
+      double a = r.nextDouble() * Math.PI * 2, d = radius * Math.sqrt(r.nextDouble());
+      c.level.addParticle(
+          Oborokage.PETAL,
+          e.origin().x + Math.cos(a) * d,
+          e.origin().y + 1.6 + r.nextDouble(),
+          e.origin().z + Math.sin(a) * d,
+          0,
+          -.02,
+          0);
+    }
+    if (e.style() == TechniqueEvent.ICE && f.age % 4 == 0) {
+      double a = r.nextDouble() * Math.PI * 2, d = radius * Math.sqrt(r.nextDouble());
+      c.level.addParticle(
+          net.minecraft.core.particles.ParticleTypes.SNOWFLAKE,
+          e.origin().x + Math.cos(a) * d,
+          e.origin().y + .2,
+          e.origin().z + Math.sin(a) * d,
+          0,
+          .02,
+          0);
+    }
+  }
+
+  /** The plunge's landing: a shock ring, cracks and the blade's own mark. */
+  private static void plunge(Geo g, double radius, BladeStyle st, float age, float fade, Vec3 eye) {
+    Vec3 c = Vec3.ZERO, x = new Vec3(1, 0, 0), z = new Vec3(0, 0, 1);
+    double r = radius * (.3 + .9 * ease(age / 5));
+    g.ring(c, x, z, Math.max(0, r - .25), r, st.primary, .75f * fade, 48);
+    g.ring(c, x, z, Math.max(0, r - .05), r, st.accent, fade, 48);
+    double crack = radius * ease(age / 3);
+    for (int i = 0; i < 8; i++) {
+      double a = i * Math.PI / 4 + (i % 2) * .2;
+      Vec3 d = new Vec3(Math.cos(a), 0, Math.sin(a)), side = new Vec3(-d.z, 0, d.x);
+      g.band(
+          c.add(0, .02, 0),
+          d.scale(crack * (.6 + .4 * (i % 3) / 2.0)).add(0, .02, 0),
+          side,
+          .09,
+          st.secondary,
+          .8f * fade);
+    }
+    switch (st) {
+      case RAIKIRI -> {
+        long seed = (long) (age / 2) * 911L;
+        if (age < 8) {
+          g.bolt(new Vec3(0, 9, 0), c, .22, st.primary, .9f * fade, eye, seed, 10);
+          g.bolt(new Vec3(0, 9, 0), c, .06, st.accent, fade, eye, seed, 10);
+        }
+      }
+      case FROSTMOON -> {
+        for (int i = 0; i < 12; i++) {
+          double a = i * Math.PI / 6;
+          Vec3 d = new Vec3(Math.cos(a), 0, Math.sin(a));
+          float grow = ease((age - 1) / 3);
+          g.spike(
+              d.scale(radius * .7),
+              d.scale(.3).add(UP),
+              (.5 + .3 * (i % 3) / 2.0) * grow,
+              .2,
+              st.primary,
+              .85f * fade);
+        }
+      }
+      case VOIDSTRING -> {
+        for (int k = 0; k < 3; k++) {
+          double rr = radius * 1.8 * Math.max(0, 1 - (age + k * 3) / 12);
+          if (rr > .2) g.ring(c, x, z, rr - .06, rr, st.primary, .7f * fade, 40);
+        }
+      }
+      default -> {
+        // 胧影 and 胧月: a crescent stands where the blade went in.
+        Vec3 side = eye.cross(UP);
+        side = side.lengthSqr() < 1e-4 ? x : side.normalize();
+        double rise = 1.4 * ease(age / 4);
+        g.crescent(
+            c.add(0, rise * .3, 0),
+            side,
+            UP,
+            1.3,
+            .3,
+            Math.toRadians(20),
+            Math.toRadians(160),
+            st.primary,
+            .8f * fade,
+            16);
+      }
+    }
+  }
+
+  /** 花阵: a slow ring of petals around a soft blush on the ground. */
+  private static void bloom(Geo g, double radius, float age) {
+    BladeStyle st = BladeStyle.WAKIZASHI;
+    float life = oborokage.BladeArts.BLOOM_TICKS;
+    float a = Math.min(1, age / 6) * Math.min(1, (life - age) / 10);
+    Vec3 c = Vec3.ZERO, x = new Vec3(1, 0, 0), z = new Vec3(0, 0, 1);
+    g.disc(c.add(0, .02, 0), x, z, radius, 0xfff0fb, st.primary, .14f * a, 32);
+    g.ring(c, x, z, radius - .1, radius, st.primary, .7f * a, 48);
+    for (int i = 0; i < 10; i++) {
+      double ang = i * Math.PI / 5 + age * .03;
+      g.crescent(c.add(0, .04, 0), x, z, radius * .82, .22, ang, ang + .4, 0xfff0fb, .6f * a, 6);
+    }
+  }
+
+  /** 冰面: a pale glaze with a frost glyph and a hard rim. */
+  private static void ice(Geo g, double radius, float age) {
+    BladeStyle st = BladeStyle.FROSTMOON;
+    float life = oborokage.BladeArts.ICE_TICKS;
+    float a = Math.min(1, age / 4) * Math.min(1, (life - age) / 12);
+    Vec3 c = Vec3.ZERO, x = new Vec3(1, 0, 0), z = new Vec3(0, 0, 1);
+    g.disc(c.add(0, .02, 0), x, z, radius, 0xeefcff, st.primary, .22f * a, 40);
+    g.ring(c, x, z, radius - .12, radius, st.accent, .8f * a, 48);
+    for (int i = 0; i < 6; i++) {
+      double ang = i * Math.PI / 3;
+      Vec3 d = new Vec3(Math.cos(ang), 0, Math.sin(ang)), s = new Vec3(-d.z, 0, d.x);
+      g.band(c.add(0, .03, 0), d.scale(radius * .85).add(0, .03, 0), s, .06, st.accent, .55f * a);
     }
   }
 

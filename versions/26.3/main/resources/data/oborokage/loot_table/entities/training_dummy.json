@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "oborokage:training_dummy"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "oborokage:entities/training_dummy"
+}

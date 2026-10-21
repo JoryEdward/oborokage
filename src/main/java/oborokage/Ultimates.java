@@ -44,7 +44,9 @@ final class Ultimates {
     var cfg = ServerConfig.get();
     if (cfg.zanshinTicks > 0 && s.p.connection != null) {
       // 残心: after the ultimate the body stays light and ready for a moment.
-      s.p.addEffect(new MobEffectInstance(MobEffects.SPEED, cfg.zanshinTicks, 0, true, false));
+      // 残心 inscription: twice as long.
+      int ticks = cfg.zanshinTicks * (Inscription.has(s.main, Inscription.ZANSHIN) ? 2 : 1);
+      s.p.addEffect(new MobEffectInstance(MobEffects.SPEED, ticks, 0, true, false));
     }
     BladeStyle style = BladeStyle.ofUltimate(s.move.id());
     if (style != null) Feats.awardCriterion(s.p, "all_ultimates", style.key);
@@ -264,6 +266,7 @@ final class Ultimates {
     if (WeaponDamage.apply(s.p, e, s.main, scaled(s, base), sweeping)) {
       s.struck.add(e.getUUID());
       afterStrike(s, e);
+      BladeArts.thunderMark(s.p, s.main, e);
     }
   }
 

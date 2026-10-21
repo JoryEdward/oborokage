@@ -1,19 +1,46 @@
 {
   "model": {
     "type": "minecraft:select",
-    "property": "minecraft:display_context",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
     "cases": [
       {
-        "when": "gui",
+        "when": "ancient",
         "model": {
-          "type": "minecraft:model",
-          "model": "oborokage:item/waki_icon"
+          "type": "minecraft:select",
+          "property": "minecraft:display_context",
+          "cases": [
+            {
+              "when": "gui",
+              "model": {
+                "type": "minecraft:model",
+                "model": "oborokage:item/ancient_waki_icon"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "oborokage:item/ancient_wakizashi"
+          }
         }
       }
     ],
     "fallback": {
-      "type": "minecraft:model",
-      "model": "oborokage:item/wakizashi"
+      "type": "minecraft:select",
+      "property": "minecraft:display_context",
+      "cases": [
+        {
+          "when": "gui",
+          "model": {
+            "type": "minecraft:model",
+            "model": "oborokage:item/waki_icon"
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "oborokage:item/wakizashi"
+      }
     }
   }
 }

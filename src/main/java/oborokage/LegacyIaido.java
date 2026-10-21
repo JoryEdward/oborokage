@@ -40,14 +40,15 @@ public final class LegacyIaido {
   }
 
   public static boolean start(ServerPlayer p, float charge) {
-    if (active(p.getUUID())
-        || !p.isAlive()
-        || p.isSpectator()
-        || p.isPassenger()
-        || p.isFallFlying()) return false;
+    if (active(p.getUUID()) || !p.isAlive() || p.isSpectator()) return false;
     float q = Math.max(0, Math.min(1, charge));
+    // On the ground the draw runs level; gliding or flying it follows the eyes, so a dive released
+    // at the bottom of the stoop lands on what the wielder is looking at.
     Vec3 d =
-        new Vec3(-Math.sin(Math.toRadians(p.getYRot())), 0, Math.cos(Math.toRadians(p.getYRot())));
+        p.isFallFlying() || p.getAbilities().flying
+            ? p.getLookAngle().normalize()
+            : new Vec3(
+                -Math.sin(Math.toRadians(p.getYRot())), 0, Math.cos(Math.toRadians(p.getYRot())));
     ACTIVE.put(p.getUUID(), new Strike(p, q, d));
     broadcast(p, new SlashPayload(p.getId(), p.position(), p.getYRot(), q, 0));
     return true;
@@ -66,11 +67,7 @@ public final class LegacyIaido {
     while (it.hasNext()) {
       Strike s = it.next();
       ServerPlayer p = s.player;
-      if (!p.isAlive()
-          || p.isRemoved()
-          || p.isSpectator()
-          || p.level() != s.level
-          || p.isPassenger()) {
+      if (!p.isAlive() || p.isRemoved() || p.isSpectator() || p.level() != s.level) {
         it.remove();
         continue;
       }
@@ -94,14 +91,19 @@ public final class LegacyIaido {
             .8f,
             .75f);
       }
-      if (age < delay + 6 && !s.blocked) {
+      if (age < delay + 6 && !s.blocked && p.isPassenger()) {
+        // Mounted: the mount keeps its course and the draw's line runs on ahead of the rider.
+        Vec3 requested = s.direction.scale(s.full ? 2.5 : .9 + 1.1 * s.charge);
+        Vec3 from = s.ahead == null ? p.position() : s.ahead;
+        s.ahead = from.add(requested);
+        sweep(s, from, s.ahead);
+      } else if (age < delay + 6 && !s.blocked) {
         Vec3 from = p.position();
         Vec3 requested = s.direction.scale(s.full ? 2.5 : .9 + 1.1 * s.charge);
         p.setDeltaMovement(Vec3.ZERO);
         p.move(MoverType.SELF, requested);
         Vec3 to = p.position();
-        s.blocked =
-            to.subtract(from).horizontalDistanceSqr() < requested.horizontalDistanceSqr() * .96;
+        s.blocked = to.subtract(from).lengthSqr() < requested.lengthSqr() * .96;
         // Rotation is sent as relative zero: the client keeps the view it is turning, instead of
         // snapping back to the server's last known angles every tick of the dash.
         if (p.connection != null)
@@ -111,6 +113,13 @@ public final class LegacyIaido {
                   net.minecraft.world.entity.Relative.Y_ROT,
                   net.minecraft.world.entity.Relative.X_ROT));
         sweep(s, from, to);
+      }
+      if (age == delay + 6 && p.isFallFlying()) {
+        // Out of the stoop the glide carries on along the line of the cut.
+        p.setDeltaMovement(s.direction.scale(1.2));
+        if (p.connection != null)
+          p.connection.send(
+              new net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket(p));
       }
       if (age == delay + 9 && !s.full) {
         s.level.playSound(
@@ -268,6 +277,10 @@ public final class LegacyIaido {
     final float charge;
     final boolean full;
     final Vec3 direction;
+
+    /** Mounted draws: how far ahead of the rider the line has run. */
+    Vec3 ahead;
+
     final Set<UUID> hit = new HashSet<>();
     final List<LivingEntity> marked = new ArrayList<>();
     int age, kills;

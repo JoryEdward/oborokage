@@ -2,16 +2,16 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "pattern": [
-    " ID",
-    " ND",
-    "BP "
+    "XDY",
+    "DKD",
+    " N "
   ],
   "key": {
-    "I": "minecraft:blue_ice",
-    "D": "minecraft:diamond_block",
-    "N": "minecraft:netherite_ingot",
-    "B": "minecraft:blaze_rod",
-    "P": "minecraft:prismarine_crystals"
+    "X": "minecraft:blue_ice",
+    "Y": "minecraft:prismarine_crystals",
+    "D": "minecraft:diamond",
+    "K": "oborokage:kazuuchi",
+    "N": "minecraft:netherite_ingot"
   },
   "result": {
     "id": "oborokage:frostmoon"

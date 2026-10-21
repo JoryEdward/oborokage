@@ -1,0 +1,11 @@
+{
+  "required": false,
+  "package": "oborokage.client.compatmixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "JerMobTooltipGuard"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

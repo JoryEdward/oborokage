@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:smooth_stone",
+    "oborokage:intent_crystal",
+    "oborokage:intent_crystal",
+    "minecraft:phantom_membrane"
+  ],
+  "result": {
+    "id": "oborokage:inscription_feather"
+  }
+}
