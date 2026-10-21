@@ -7,9 +7,9 @@ import oborokage.ModLanguage;
 
 /**
  * The mod's own language setting: each choice gives every mod string from its own file, the game's
- * strings are untouched, "auto" follows the game, arguments still fill in, and a bad value falls
- * back to "auto". (The client wraps the game's language through a mixin; here it is wrapped by
- * hand, which is the same call.)
+ * strings are untouched, "auto" leaves the game's language object in place, arguments still fill
+ * in, and a bad value falls back to "auto". (The client wraps the game's language through a mixin;
+ * here it is wrapped by hand, which is the same call.)
  */
 final class LangChecks {
   private final ServerChecks t;
@@ -29,17 +29,24 @@ final class LangChecks {
 
   boolean tick() throws Exception {
     Language game = Language.getInstance();
-    Language wrapped = ModLanguage.wrap(game);
     try {
+      ModLanguage.choose("auto");
+      t.check(
+          ModLanguage.wrap(game) == game,
+          "Following the game leaves the game's language object untouched");
       Set<String> keys = file("zh_cn").keySet();
       for (String code : List.of("zh_cn", "en_us", "ja_jp")) {
         Map<String, String> own = file(code);
         ModLanguage.choose(code);
+        Language wrapped = ModLanguage.wrap(game);
         int wrong = 0;
         for (String key : keys)
           if (!Objects.equals(wrapped.getOrDefault(key), own.get(key))) wrong++;
         t.check(
-            own.keySet().equals(keys) && wrong == 0 && ModLanguage.choice().equals(code),
+            wrapped instanceof ModLanguage.Wrapped
+                && own.keySet().equals(keys)
+                && wrong == 0
+                && ModLanguage.choice().equals(code),
             "Language "
                 + code
                 + ": all "
@@ -49,6 +56,7 @@ final class LangChecks {
                 + ")");
       }
       ModLanguage.choose("ja_jp");
+      Language wrapped = ModLanguage.wrap(game);
       t.check(
           wrapped
                   .getOrDefault("block.minecraft.stone")
@@ -61,10 +69,8 @@ final class LangChecks {
       t.check(phase.equals("月相：満月（8 / 8）"), "Arguments still fill in: " + phase);
       ModLanguage.choose("auto");
       t.check(
-          wrapped
-              .getOrDefault("item.oborokage.tachi")
-              .equals(game.getOrDefault("item.oborokage.tachi")),
-          "Auto follows the game: " + wrapped.getOrDefault("item.oborokage.tachi"));
+          ModLanguage.wrap(wrapped) == game,
+          "Back to following the game, the wrapper is taken off again");
       ModLanguage.choose("xx_yy");
       t.check(ModLanguage.choice().equals("auto"), "An unknown language falls back to auto");
     } finally {

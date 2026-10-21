@@ -66,7 +66,11 @@ final class LordChecks {
       moonLord.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Oborokage.TACHI));
       for (int i = 0; i < 3; i++) {
         double a = Math.PI * 2 * i / 3;
-        ring.add(spawn(Content.BLOSSOM_ONI, X + 6.5 + Math.cos(a) * 3, Z + 6.5 + Math.sin(a) * 3));
+        BlossomOni oni =
+            spawn(Content.BLOSSOM_ONI, X + 6.5 + Math.cos(a) * 3, Z + 6.5 + Math.sin(a) * 3);
+        // Facing the master, so each could parry if its ultimate allowed it.
+        oni.setYRot((float) Math.toDegrees(Math.atan2(Math.cos(a), -Math.sin(a))));
+        ring.add(oni);
       }
       guard = spawn(Content.SWORDSMAN, X + 6.5, Z + 10);
       moonLord.setTarget(ring.get(0));

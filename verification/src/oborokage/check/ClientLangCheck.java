@@ -94,14 +94,17 @@ public final class ClientLangCheck implements ClientModInitializer {
     switch (at) {
       case 0 -> {
         check(
-            Language.getInstance() instanceof ModLanguage.Wrapped,
-            "The game's language is wrapped by the mod (mixin applied)");
+            !(Language.getInstance() instanceof ModLanguage.Wrapped),
+            "Following the game, the game's language object is left alone");
         Component cached = Component.translatable("item.oborokage.tachi");
         String before = cached.getString();
         check(
             before.equals("胧影太刀") && I18n.get("item.oborokage.tachi").equals("胧影太刀"),
             "Auto follows the game's Chinese: " + before);
         ClientConfig.setLanguage("ja_jp");
+        check(
+            Language.getInstance() instanceof ModLanguage.Wrapped,
+            "Once a language is chosen the mod's wrapper is installed (mixin applied)");
         check(
             cached.getString().equals("朧影太刀")
                 && I18n.get("item.oborokage.tachi").equals("朧影太刀")

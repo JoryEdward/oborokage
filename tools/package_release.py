@@ -14,7 +14,9 @@ with zipfile.ZipFile(evidence, 'w', compression=zipfile.ZIP_DEFLATED, compressle
         if p.is_file() and not any(part.startswith('._') or part in ['__pycache__', 'WORK_LOG.md', '.DS_Store'] for part in p.parts):
             z.write(p, p.relative_to(ROOT))
 exclude = [f'*/verification/release-{version}/screenshots', f'*/verification/release-{version}/screenshots/*', f'*/verification/release-{version}/sheets', f'*/verification/release-{version}/sheets/*', '*/verification/release-0.*', '._*', '*/._*', '__pycache__', '*/__pycache__', '*/__pycache__/*', '__MACOSX', '*/__MACOSX/*', 'WORK_LOG.md', '*/WORK_LOG.md', '.DS_Store', '*/.DS_Store', '*/.pytest_cache/*', '*/.git/*', '*/.gradle/*', '*/build/*', '*/backups/*', '*/release/*']
-cmd = ['tar'] + [f'--exclude={pattern}' for pattern in exclude] + ['-czf', str(archive), '-C', str(ROOT.parent)] + [ROOT.name + '/' + name for name in include]
+# The archive's top folder is oborokage-<version>, whatever the project folder is called.
+PREFIX = f'oborokage-{version}'
+cmd = ['tar'] + [f'--exclude={pattern}' for pattern in exclude] + ['-s', f',^{ROOT.name}/,{PREFIX}/,', '-czf', str(archive), '-C', str(ROOT.parent)] + [ROOT.name + '/' + name for name in include]
 env = os.environ.copy()
 env['COPYFILE_DISABLE'] = '1'
 subprocess.run(cmd, env=env, check=True)
@@ -22,9 +24,9 @@ with tarfile.open(archive) as tar:
     members = tar.getmembers()
     bad = [m.name for m in members if any(p.startswith('._') or p in ['__pycache__','__MACOSX','WORK_LOG.md','.DS_Store'] for p in Path(m.name).parts)]
     assert not bad, bad
-    production_files = [m for m in members if m.isfile() and m.name.startswith(ROOT.name + '/src/')]
+    production_files = [m for m in members if m.isfile() and m.name.startswith(PREFIX + '/src/')]
     for m in production_files:
-        source = ROOT / Path(m.name).relative_to(ROOT.name)
+        source = ROOT / Path(m.name).relative_to(PREFIX)
         assert tar.extractfile(m).read() == source.read_bytes(), m.name
 # One JAR (and sources JAR) per Minecraft line, as produced by verification/matrix.py into dist/.
 jars = sorted(p for p in (ROOT / 'dist').glob(f'oborokage-tachi-{version}+*.jar'))

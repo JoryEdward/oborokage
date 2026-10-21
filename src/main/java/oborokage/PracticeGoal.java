@@ -4,6 +4,7 @@ import java.util.EnumSet;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.phys.AABB;
 
 /**
  * A living swordsman with nothing to fight sometimes goes to the nearest training post on its
@@ -23,11 +24,15 @@ public class PracticeGoal extends Goal {
   @Override
   public boolean canUse() {
     if (mob.getTarget() != null || mob.getRandom().nextInt(reducedTickDelay(60)) != 0) return false;
+    // The posts on its ground (it may have wandered to the far side of it), or near it.
+    AABB area =
+        mob.hasHome()
+            ? new AABB(mob.getHomePosition())
+                .inflate(mob.getHomeRadius() + 1, 3, mob.getHomeRadius() + 1)
+                .minmax(mob.getBoundingBox().inflate(6, 3, 6))
+            : mob.getBoundingBox().inflate(12, 3, 12);
     post =
-        mob
-            .level()
-            .getEntitiesOfClass(TrainingDummy.class, mob.getBoundingBox().inflate(12, 3, 12))
-            .stream()
+        mob.level().getEntitiesOfClass(TrainingDummy.class, area).stream()
             .filter(
                 p ->
                     !mob.hasHome()

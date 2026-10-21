@@ -171,6 +171,22 @@ public class PetalLord extends Swordsman {
     e.hurtServer(level, level.damageSources().mobAttack(this), damage);
   }
 
+  private boolean ultimateBlow;
+
+  /** Whether the blow now landing is part of an ultimate, which no blade can parry. */
+  public boolean ultimateBlow() {
+    return ultimateBlow;
+  }
+
+  private void ultimateStrike(ServerLevel level, LivingEntity e, float damage) {
+    ultimateBlow = true;
+    try {
+      strike(level, e, damage);
+    } finally {
+      ultimateBlow = false;
+    }
+  }
+
   /** Its cuts sweep: foes beside the one struck take half the blow. */
   @Override
   public boolean doHurtTarget(ServerLevel level, Entity target) {
@@ -410,7 +426,7 @@ public class PetalLord extends Swordsman {
           if (bolts++ >= 8) break;
           var bolt = oborokage.compat.Compat.visualLightning(level, e.getX(), e.getY(), e.getZ());
           level.addFreshEntity(bolt);
-          strike(level, e, attack() * 1.6f);
+          ultimateStrike(level, e, attack() * 1.6f);
           if (e.isAlive()) e.thunderHit(level, bolt);
         }
         level.playSound(
@@ -423,7 +439,7 @@ public class PetalLord extends Swordsman {
         for (LivingEntity e : foes(level, getBoundingBox().inflate(9, 3, 9))) {
           e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 6), this);
           e.setTicksFrozen(Math.max(e.getTicksFrozen(), 200));
-          strike(level, e, attack() * 2.2f);
+          ultimateStrike(level, e, attack() * 2.2f);
           level.sendParticles(ice, e.getX(), e.getY() + 1, e.getZ(), 30, .4, .6, .4, .1);
         }
         for (int i = 0; i < 48; i++) {
@@ -469,7 +485,7 @@ public class PetalLord extends Swordsman {
           Vec3 c = e.getBoundingBox().getCenter();
           double along = c.subtract(from).dot(dir);
           if (along < 0 || along > 32 || c.distanceTo(from.add(dir.scale(along))) > 1.8) continue;
-          strike(level, e, attack() * 2.4f);
+          ultimateStrike(level, e, attack() * 2.4f);
           Vec3 back = position().subtract(e.position()).multiply(1, 0, 1);
           if (back.lengthSqr() > 1) {
             back = back.normalize().scale(1.1);
@@ -493,7 +509,7 @@ public class PetalLord extends Swordsman {
     if (!isAlive()) return;
     for (LivingEntity e : foes(level, getBoundingBox().inflate(6, 2, 6)))
       if (e.distanceToSqr(this) < 6.5 * 6.5) {
-        strike(level, e, attack() * weight);
+        ultimateStrike(level, e, attack() * weight);
         nature(level, e);
       }
     for (int i = 0; i < 24; i++) {

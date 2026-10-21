@@ -171,6 +171,7 @@ public class Swordsman extends Monster {
         && source.getDirectEntity() == attacker
         && !(attacker instanceof net.minecraft.server.level.ServerPlayer sp
             && DualCombat.inUltimate(sp))
+        && !(attacker instanceof PetalLord lord && lord.ultimateBlow())
         && facing(attacker)
         && getRandom().nextFloat() < parry) {
       parry(level, attacker);

@@ -1,10 +1,10 @@
 {
   "26.1": {
-    "jar": "oborokage-tachi-1.0.0-beta+26.1.jar",
-    "sha256": "5ae001d94831328b690d1597968a3b275c8f524ebcb4f6dc7daf00b10991d0c4",
+    "jar": "oborokage-tachi-1.0.0+26.1.jar",
+    "sha256": "35987a5ae1e1da00ec6e184a1ea609cd5539e99d04a356c5e1cdccecfcb371d9",
     "server": {
       "exit": 0,
-      "pass": 238,
+      "pass": 250,
       "log": "matrix-26.1-server.log"
     },
     "client": {
@@ -14,11 +14,11 @@
     }
   },
   "26.1.1": {
-    "jar": "oborokage-tachi-1.0.0-beta+26.1.jar",
-    "sha256": "5ae001d94831328b690d1597968a3b275c8f524ebcb4f6dc7daf00b10991d0c4",
+    "jar": "oborokage-tachi-1.0.0+26.1.jar",
+    "sha256": "35987a5ae1e1da00ec6e184a1ea609cd5539e99d04a356c5e1cdccecfcb371d9",
     "server": {
       "exit": 0,
-      "pass": 238,
+      "pass": 250,
       "log": "matrix-26.1.1-server.log"
     },
     "client": {
@@ -28,11 +28,11 @@
     }
   },
   "26.1.2": {
-    "jar": "oborokage-tachi-1.0.0-beta+26.1.jar",
-    "sha256": "5ae001d94831328b690d1597968a3b275c8f524ebcb4f6dc7daf00b10991d0c4",
+    "jar": "oborokage-tachi-1.0.0+26.1.jar",
+    "sha256": "35987a5ae1e1da00ec6e184a1ea609cd5539e99d04a356c5e1cdccecfcb371d9",
     "server": {
       "exit": 0,
-      "pass": 238,
+      "pass": 250,
       "log": "matrix-26.1.2-server.log"
     },
     "client": {
@@ -42,11 +42,11 @@
     }
   },
   "26.2": {
-    "jar": "oborokage-tachi-1.0.0-beta+26.2.jar",
-    "sha256": "02d91db5dfa20c8da1f34cebdb1066632a2062563e862e4d2d2c0bd106f9ce90",
+    "jar": "oborokage-tachi-1.0.0+26.2.jar",
+    "sha256": "f7eadb59b487b41e187625355470b02f5174251155e2d0b526dcd52c72b9f4da",
     "server": {
       "exit": 0,
-      "pass": 238,
+      "pass": 250,
       "log": "matrix-26.2-server.log"
     },
     "client": {
@@ -56,11 +56,11 @@
     }
   },
   "26.3": {
-    "jar": "oborokage-tachi-1.0.0-beta+26.3.jar",
-    "sha256": "6b216c10a961145a0559a76e5147e13ae381c87804cc05a6e3ad250adef2e282",
+    "jar": "oborokage-tachi-1.0.0+26.3.jar",
+    "sha256": "d1e08a0a1adcb750ee0716b10db18902bd57343d1a112c9c54c46a2cfc892c95",
     "server": {
       "exit": 0,
-      "pass": 238,
+      "pass": 250,
       "log": "matrix-26.3-server.log"
     },
     "client": {

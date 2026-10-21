@@ -10,10 +10,12 @@ import net.minecraft.util.FormattedCharSequence;
 
 /**
  * The mod's own language setting: follow the game, or show the mod's text in Chinese, English or
- * Japanese whatever language the game is in. The game's language is wrapped (on the client, each
- * time the game installs one) so that the mod's keys come from the chosen language, read straight
- * from the JAR, and every other key from the game. Switching installs the game's language again,
- * which wraps it anew and so drops every translation cached against the old one.
+ * Japanese whatever language the game is in. Only while a language is chosen is the game's language
+ * wrapped (on the client, each time the game installs one) so that the mod's keys come from that
+ * language, read straight from the JAR, and every other key from the game; following the game
+ * leaves the game's own language object in place, so other mods see exactly what they would without
+ * this one. Switching installs the game's language again, which wraps it anew (or not) and so drops
+ * every translation cached against the old one.
  */
 public final class ModLanguage {
   /** "auto" follows the game; the others are the languages the mod ships. */
@@ -48,11 +50,14 @@ public final class ModLanguage {
     return Map.copyOf(strings);
   }
 
-  /** Wraps the language the game is installing; called from the client's mixin. */
+  /**
+   * The language to install in place of the one the game is installing: wrapped while a language is
+   * chosen, the game's own otherwise. Called from the client's mixin.
+   */
   public static Language wrap(Language language) {
     if (language instanceof Wrapped w) language = w.game;
     base = language;
-    Wrapped wrapped = new Wrapped(language);
+    Language wrapped = choice.equals("auto") ? language : new Wrapped(language);
     // Up to 26.1 the client's I18n keeps a language of its own, set just before this one.
     try {
       var i18n =
