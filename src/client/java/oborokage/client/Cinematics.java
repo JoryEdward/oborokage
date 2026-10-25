@@ -285,17 +285,18 @@ public final class Cinematics {
       end();
       return;
     }
-    if (previous != null
-        && (oborokage.client.compat.ClientCompat.screenOpen(c)
-            || c.options.getCameraType() != CameraType.THIRD_PERSON_BACK)) {
-      // The player took the camera back (F5 or a screen): stop steering it.
+    if (previous != null && c.options.getCameraType() != CameraType.THIRD_PERSON_BACK) {
+      // The player took the camera back (F5): stop steering it and leave their choice alone. A
+      // screen only pauses the steering; the view they had is still given back at the end.
       previous = null;
     }
   }
 
-  /** True while this class steers the camera. */
+  /** True while this class steers the camera (not while a screen is open over it). */
   public static boolean cameraActive() {
-    return playing() && previous != null;
+    return playing()
+        && previous != null
+        && !oborokage.client.compat.ClientCompat.screenOpen(Minecraft.getInstance());
   }
 
   private static float ease(float x) {

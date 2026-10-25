@@ -234,6 +234,13 @@ public final class LegacyIaido {
     }
   }
 
+  private static boolean fullDraw;
+
+  /** Whether the blow now landing is a full-charge draw (奥义 · 胧月一闪), which no blade parries. */
+  public static boolean fullDrawBlow() {
+    return fullDraw;
+  }
+
   public static void strikeTarget(
       ServerLevel level, ServerPlayer owner, LivingEntity target, float q) {
     if (!TargetRules.allowed(owner, target)) return;
@@ -253,7 +260,12 @@ public final class LegacyIaido {
       target.setAbsorptionAmount(0);
       target.stopUsingItem();
     }
-    target.hurtServer(level, source, damage(q));
+    fullDraw = q >= 1;
+    try {
+      target.hurtServer(level, source, damage(q));
+    } finally {
+      fullDraw = false;
+    }
     // Custom high-health / damage-cancelling entities still use their normal death callback.
     if (execute && target.isAlive()) {
       target.setHealth(0);

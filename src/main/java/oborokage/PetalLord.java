@@ -95,6 +95,12 @@ public class PetalLord extends Swordsman {
     return 40;
   }
 
+  /** The master parries as often hurt as whole: two in five, never more. */
+  @Override
+  protected float hurtParryBonus() {
+    return 0;
+  }
+
   @Override
   protected float stepChance() {
     return .3f;
@@ -129,7 +135,11 @@ public class PetalLord extends Swordsman {
 
   @Override
   public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
-    return super.hurtServer(level, source, Math.min(amount, MAX_BLOW));
+    // /kill and the void are not blows: they are not capped.
+    boolean sourceless =
+        source.getEntity() == null
+            && source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY);
+    return super.hurtServer(level, source, sourceless ? amount : Math.min(amount, MAX_BLOW));
   }
 
   @Override

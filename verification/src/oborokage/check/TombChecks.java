@@ -58,7 +58,11 @@ final class TombChecks {
     t.check(
         ownIsFine && TombGuard.robbed(box, theirs),
         "Putting your own item in and taking it out again is not robbery; taking the tomb's is");
-    woke = TombGuard.awaken(level, chest, be, t.player);
+    // The taking itself wakes the tomb, though the test player stands some 45 blocks away.
+    woke =
+        Boolean.TRUE.equals(
+            ((net.fabricmc.fabric.api.attachment.v1.AttachmentTarget) be)
+                .getAttached(TombGuard.AWAKENED));
     return false;
   }
 

@@ -1,7 +1,7 @@
 {
   "26.1": {
-    "jar": "oborokage-tachi-1.0.0+26.1.jar",
-    "sha256": "35987a5ae1e1da00ec6e184a1ea609cd5539e99d04a356c5e1cdccecfcb371d9",
+    "jar": "oborokage-tachi-1.0.1+26.1.jar",
+    "sha256": "2028713c03b26cc5ec654b25dabbc1603c35a19daef3e52664c8a139991d4181",
     "server": {
       "exit": 0,
       "pass": 250,
@@ -14,8 +14,8 @@
     }
   },
   "26.1.1": {
-    "jar": "oborokage-tachi-1.0.0+26.1.jar",
-    "sha256": "35987a5ae1e1da00ec6e184a1ea609cd5539e99d04a356c5e1cdccecfcb371d9",
+    "jar": "oborokage-tachi-1.0.1+26.1.jar",
+    "sha256": "2028713c03b26cc5ec654b25dabbc1603c35a19daef3e52664c8a139991d4181",
     "server": {
       "exit": 0,
       "pass": 250,
@@ -28,8 +28,8 @@
     }
   },
   "26.1.2": {
-    "jar": "oborokage-tachi-1.0.0+26.1.jar",
-    "sha256": "35987a5ae1e1da00ec6e184a1ea609cd5539e99d04a356c5e1cdccecfcb371d9",
+    "jar": "oborokage-tachi-1.0.1+26.1.jar",
+    "sha256": "2028713c03b26cc5ec654b25dabbc1603c35a19daef3e52664c8a139991d4181",
     "server": {
       "exit": 0,
       "pass": 250,
@@ -42,8 +42,8 @@
     }
   },
   "26.2": {
-    "jar": "oborokage-tachi-1.0.0+26.2.jar",
-    "sha256": "f7eadb59b487b41e187625355470b02f5174251155e2d0b526dcd52c72b9f4da",
+    "jar": "oborokage-tachi-1.0.1+26.2.jar",
+    "sha256": "773db06ea0c3156586c990caef8148b37d85b3902170f3ff5ec2ba9be9e07889",
     "server": {
       "exit": 0,
       "pass": 250,
@@ -56,8 +56,8 @@
     }
   },
   "26.3": {
-    "jar": "oborokage-tachi-1.0.0+26.3.jar",
-    "sha256": "d1e08a0a1adcb750ee0716b10db18902bd57343d1a112c9c54c46a2cfc892c95",
+    "jar": "oborokage-tachi-1.0.1+26.3.jar",
+    "sha256": "06c10770585ee0cecbe4a5b0ec586b725a331f023eb973dd0eeb28cde8f9e45f",
     "server": {
       "exit": 0,
       "pass": 250,

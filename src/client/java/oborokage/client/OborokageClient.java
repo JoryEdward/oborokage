@@ -23,6 +23,14 @@ public final class OborokageClient implements ClientModInitializer {
   /** A full-charge draw's presentation: windup, dash, stillness, the sheath at 34, aftermath. */
   static final int FULL_LENGTH = 64;
 
+  /**
+   * Whether the server is still running the player's own draw: it refuses every other move until
+   * then (a full draw to its end, a quick one for 14 ticks).
+   */
+  public static boolean drawing() {
+    return localAge >= 0 && localAge < (localFull ? oborokage.LegacyIaido.FULL_END : 14);
+  }
+
   public static void cancelPresentation(int id) {
     scenes.removeIf(s -> s.p.owner() == id);
     var c = Minecraft.getInstance();

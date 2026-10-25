@@ -62,6 +62,11 @@ public class Swordsman extends Monster {
     return 50;
   }
 
+  /** How much more often it parries when badly hurt (below three tenths of its health). */
+  protected float hurtParryBonus() {
+    return .15f;
+  }
+
   /** Chance to step back after taking a hit. */
   protected float stepChance() {
     return .25f;
@@ -162,7 +167,7 @@ public class Swordsman extends Monster {
 
   @Override
   public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
-    float parry = parryChance() + (getHealth() < getMaxHealth() * .3f ? .15f : 0);
+    float parry = parryChance() + (getHealth() < getMaxHealth() * .3f ? hurtParryBonus() : 0);
     if (parryCooldown <= 0
         && parryChance() > 0
         && !isDeadOrDying()
@@ -172,6 +177,7 @@ public class Swordsman extends Monster {
         && !(attacker instanceof net.minecraft.server.level.ServerPlayer sp
             && DualCombat.inUltimate(sp))
         && !(attacker instanceof PetalLord lord && lord.ultimateBlow())
+        && !LegacyIaido.fullDrawBlow()
         && facing(attacker)
         && getRandom().nextFloat() < parry) {
       parry(level, attacker);

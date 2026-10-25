@@ -13,7 +13,9 @@ with zipfile.ZipFile(evidence, 'w', compression=zipfile.ZIP_DEFLATED, compressle
     for p in sorted((ROOT/f'verification/release-{version}').rglob('*')):
         if p.is_file() and not any(part.startswith('._') or part in ['__pycache__', 'WORK_LOG.md', '.DS_Store'] for part in p.parts):
             z.write(p, p.relative_to(ROOT))
-exclude = [f'*/verification/release-{version}/screenshots', f'*/verification/release-{version}/screenshots/*', f'*/verification/release-{version}/sheets', f'*/verification/release-{version}/sheets/*', '*/verification/release-0.*', '._*', '*/._*', '__pycache__', '*/__pycache__', '*/__pycache__/*', '__MACOSX', '*/__MACOSX/*', 'WORK_LOG.md', '*/WORK_LOG.md', '.DS_Store', '*/.DS_Store', '*/.pytest_cache/*', '*/.git/*', '*/.gradle/*', '*/build/*', '*/backups/*', '*/release/*']
+# Earlier releases' evidence stays in the project but goes into neither archive.
+older = [d.name for d in (ROOT/'verification').glob('release-*') if d.name != f'release-{version}']
+exclude = [f'*/verification/{d}' for d in older] + [f'*/verification/{d}/*' for d in older] + [f'*/verification/release-{version}/screenshots', f'*/verification/release-{version}/screenshots/*', f'*/verification/release-{version}/sheets', f'*/verification/release-{version}/sheets/*', '*/verification/release-0.*', '._*', '*/._*', '__pycache__', '*/__pycache__', '*/__pycache__/*', '__MACOSX', '*/__MACOSX/*', 'WORK_LOG.md', '*/WORK_LOG.md', '.DS_Store', '*/.DS_Store', '*/.pytest_cache/*', '*/.git/*', '*/.gradle/*', '*/build/*', '*/backups/*', '*/release/*']
 # The archive's top folder is oborokage-<version>, whatever the project folder is called.
 PREFIX = f'oborokage-{version}'
 cmd = ['tar'] + [f'--exclude={pattern}' for pattern in exclude] + ['-s', f',^{ROOT.name}/,{PREFIX}/,', '-czf', str(archive), '-C', str(ROOT.parent)] + [ROOT.name + '/' + name for name in include]

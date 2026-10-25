@@ -34,6 +34,14 @@ public class DuelGoal extends Goal {
         : null;
   }
 
+  /**
+   * Whether `t` is gathering a draw: a player charging one of the mod's blades (not raising a
+   * shield, which the swordsman edges round instead, nor eating).
+   */
+  public static boolean drawing(LivingEntity t) {
+    return t instanceof Player p && p.isUsingItem() && Oborokage.mainBlade(p.getUseItem());
+  }
+
   @Override
   public boolean canUse() {
     return target() != null;
@@ -78,7 +86,7 @@ public class DuelGoal extends Goal {
     boolean see = mob.getSensing().hasLineOfSight(t);
     boolean ready = cooldown <= 0;
     // A player gathering a draw is open: close in before it lands.
-    boolean charging = t instanceof Player p && p.isUsingItem() && mob.strafes();
+    boolean charging = drawing(t) && mob.strafes();
     boolean hurt = mob.getHealth() < mob.getMaxHealth() * .3f && mob.strafes();
     if (ready && mob.isWithinMeleeAttackRange(t) && see) {
       mob.getNavigation().stop();

@@ -78,14 +78,22 @@ public final class TombGuard {
   /** Called after items leave a container's slot; cheap checks first (hoppers call it). */
   public static void taken(ServerLevel level, BlockPos pos, BlockEntity chest, int slot) {
     if (!(chest instanceof ChestBlockEntity box)
-        || Boolean.TRUE.equals(chest.getAttached(AWAKENED))
-        || !robbed(box, slot)) return;
-    var near = level.getNearestPlayer(pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5, 8, false);
-    if (!(near instanceof ServerPlayer robber) || robber.isSpectator()) return;
-    awaken(level, pos, chest, robber);
+        || Boolean.TRUE.equals(chest.getAttached(AWAKENED))) return;
+    // Taken before anyone opened it (a hopper below it): all it held was the tomb's own.
+    boolean unopened = !box.hasAttached(ORIGINAL) && rod(level, pos) != null;
+    if (!unopened && !robbed(box, slot)) return;
+    // A robbery wakes the tomb even with nobody at the chest (a hopper did it, or the robber
+    // stepped away): the dead turn on whoever is near, if anyone is.
+    double x = pos.getX() + .5, y = pos.getY() + .5, z = pos.getZ() + .5;
+    var near = level.getNearestPlayer(x, y, z, 8, false);
+    if (near == null) near = level.getNearestPlayer(x, y, z, 32, false);
+    awaken(level, pos, chest, near instanceof ServerPlayer p && !p.isSpectator() ? p : null);
   }
 
-  /** Wakes the tomb around this chest for this robber, once; false if it is no tomb or awake. */
+  /**
+   * Wakes the tomb around this chest for this robber (null: nobody near), once; false if it is no
+   * tomb or awake.
+   */
   public static boolean awaken(
       ServerLevel level, BlockPos pos, BlockEntity chest, ServerPlayer robber) {
     if (Boolean.TRUE.equals(chest.getAttached(AWAKENED))) return false;

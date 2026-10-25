@@ -28,16 +28,21 @@ public final class UltimateFx {
     final int kind;
     final long key;
     final Vec3 origin;
+
+    /** The ground below the origin: an ultimate may begin in mid-air, as after a Warden's blow. */
+    final Vec3 floor;
+
     final float yaw;
     final List<Vec3> trail = new ArrayList<>();
     final List<Vec3> marks = new ArrayList<>();
     int spawned = -1;
     float charge = 1;
 
-    State(int kind, long key, Vec3 origin, float yaw) {
+    State(int kind, long key, Vec3 origin, Vec3 floor, float yaw) {
       this.kind = kind;
       this.key = key;
       this.origin = origin;
+      this.floor = floor;
       this.yaw = yaw;
     }
   }
@@ -80,6 +85,20 @@ public final class UltimateFx {
     return out;
   }
 
+  /** The ground below `origin` (a liquid's surface counts), never above it; the origin if none. */
+  private static Vec3 floor(Minecraft c, Vec3 origin) {
+    var hit =
+        c.level.clip(
+            new net.minecraft.world.level.ClipContext(
+                origin.add(0, .5, 0),
+                origin.add(0, -24, 0),
+                net.minecraft.world.level.ClipContext.Block.COLLIDER,
+                net.minecraft.world.level.ClipContext.Fluid.ANY,
+                net.minecraft.world.phys.shapes.CollisionContext.empty()));
+    if (hit.getType() == net.minecraft.world.phys.HitResult.Type.MISS) return origin;
+    return new Vec3(origin.x, Math.min(origin.y, hit.getLocation().y), origin.z);
+  }
+
   private static void tick(Minecraft c) {
     if (world != c.level) {
       states.clear();
@@ -91,7 +110,7 @@ public final class UltimateFx {
       live.add(sc.actor);
       State s = states.get(sc.actor);
       if (s == null || s.key != sc.key || s.kind != sc.kind) {
-        s = new State(sc.kind, sc.key, sc.origin, sc.yaw);
+        s = new State(sc.kind, sc.key, sc.origin, floor(c, sc.origin), sc.yaw);
         s.charge = sc.charge;
         states.put(sc.actor, s);
       }
@@ -227,7 +246,7 @@ public final class UltimateFx {
             add(
                 c,
                 Oborokage.SHARD,
-                s.origin.add(Math.cos(a) * 12, .3, Math.sin(a) * 12),
+                s.floor.add(Math.cos(a) * 12, .3, Math.sin(a) * 12),
                 -Math.cos(a) * .3,
                 .3 + r.nextDouble() * .3,
                 -Math.sin(a) * .3);
@@ -363,12 +382,13 @@ public final class UltimateFx {
 
   private static void draw(Geo g, State s, float t, Vec3 eye, List<Vec3> trail, List<Vec3> marks) {
     Vec3 f = forward(s.yaw), r = f.cross(UP).normalize();
+    double drop = s.floor.y - s.origin.y;
     switch (s.kind) {
       case Move.ULTIMATE -> tachi(g, t, f, r);
-      case Move.ULT_MOON -> moon(g, t, f, r);
+      case Move.ULT_MOON -> moon(g, t, f, r, drop);
       case Move.ULT_STORM -> storm(g, s, t, eye, trail);
-      case Move.ULT_FROST -> frost(g, s, t, f, r, marks);
-      case Move.ULT_VOID -> voidCut(g, t, f, r, eye);
+      case Move.ULT_FROST -> frost(g, s, t, f, r, marks, drop);
+      case Move.ULT_VOID -> voidCut(g, t, f, r, eye, drop);
       case Cinematics.IAIDO -> iaido(g, s, t, f, r, eye, trail, marks);
       case QUICK_DRAW -> quickDraw(g, s, t, f, r, eye, trail);
       default -> {}
@@ -489,7 +509,7 @@ public final class UltimateFx {
   }
 
   /** 胧月 · 百花缭乱: eight whirling cuts weave a cage of light; a lotus blooms and bursts. */
-  private static void moon(Geo g, float t, Vec3 f, Vec3 r) {
+  private static void moon(Geo g, float t, Vec3 f, Vec3 r, double drop) {
     Vec3 c = new Vec3(0, 1, 0);
     int[] colors = {0xffffff, 0xd9cdff, 0xffc8ea};
     for (int k = 0; k < 8; k++) {
@@ -510,7 +530,7 @@ public final class UltimateFx {
         double lift = Math.toRadians((1 - open) * 34 - bloom * 6);
         Vec3 d = dir.scale(Math.cos(lift)).add(UP.scale(Math.sin(lift)));
         double len = 5.6 + 2.4 * bloom;
-        Vec3 base = new Vec3(0, .06, 0),
+        Vec3 base = new Vec3(0, drop + .06, 0),
             tip = base.add(d.scale(len)),
             mid = base.add(d.scale(len * .45));
         Vec3 side = UP.cross(dir).normalize().scale(1.05 + .3 * bloom);
@@ -529,7 +549,7 @@ public final class UltimateFx {
     if (t >= 32 && t < 44) {
       float s = (t - 32) / 12;
       double R = 1 + 11 * ease(s);
-      g.ring(new Vec3(0, .08, 0), r, f, Math.max(0, R - .7), R, 0xffc8ea, .8f * (1 - s), 56);
+      g.ring(new Vec3(0, drop + .08, 0), r, f, Math.max(0, R - .7), R, 0xffc8ea, .8f * (1 - s), 56);
     }
   }
 
@@ -591,10 +611,12 @@ public final class UltimateFx {
   }
 
   /** 霜天 · 镜月冰河: a mirror lake freezes outward, spires seize the foes, the moon cracks. */
-  private static void frost(Geo g, State s, float t, Vec3 f, Vec3 r, List<Vec3> marks) {
+  private static void frost(
+      Geo g, State s, float t, Vec3 f, Vec3 r, List<Vec3> marks, double drop) {
     double R = 12 * ease(t / 18);
     float a = fadeIn(t, 0, 4) * fadeOut(t, 48, 58);
-    Vec3 c = new Vec3(0, .05, 0);
+    // The lake lies on the ground and the mirror moon hangs above it, wherever the cast began.
+    Vec3 c = new Vec3(0, drop + .05, 0);
     g.disc(c, r, f, R, 0xe8fbff, 0x7fe6ff, .2f * a, 48);
     g.ring(c, r, f, Math.max(0, R - .35), R, 0xffffff, .9f * a, 64);
     g.ring(c.add(0, .01, 0), r, f, R + .2, R + .9, 0x7fe6ff, .3f * a, 64);
@@ -621,7 +643,7 @@ public final class UltimateFx {
     }
     if (t >= 16 && t < 48) {
       float m = fadeIn(t, 16, 22) * fadeOut(t, 40, 48);
-      Vec3 top = new Vec3(0, 11, 0);
+      Vec3 top = new Vec3(0, drop + 11, 0);
       g.disc(top, r, f, 4.2, 0xffffff, 0x9fe8ff, .85f * m, 40);
       g.ring(top, r, f, 4.2, 6.2, 0x7fe6ff, .25f * m, 40);
       g.disc(c.add(0, .03, 0), r, f, 4.2, 0xffffff, 0x9fe8ff, .35f * m, 40);
@@ -647,7 +669,7 @@ public final class UltimateFx {
   }
 
   /** 空弦 · 断界: the sky's string is drawn back; released, it severs the world along a line. */
-  private static void voidCut(Geo g, float t, Vec3 f, Vec3 r, Vec3 eye) {
+  private static void voidCut(Geo g, float t, Vec3 f, Vec3 r, Vec3 eye, double drop) {
     Vec3 blade = new Vec3(0, 1.4, 0).add(f.scale(.4));
     Vec3 A = f.scale(-10).add(r.scale(22)).add(0, 16, 0),
         B = f.scale(-10).add(r.scale(-22)).add(0, 16, 0);
@@ -671,8 +693,20 @@ public final class UltimateFx {
         g.band(edge, edge.add(0, 30, 0), r, .7, 0xffffff, wallA);
       }
       float scar = fadeOut(t, 54, 62);
-      g.band(new Vec3(0, .06, 0), f.scale(48).add(0, .06, 0), r, .8, 0x7a3dff, .6f * scar);
-      g.band(new Vec3(0, .07, 0), f.scale(48).add(0, .07, 0), r, .22, 0xffffff, .85f * scar);
+      g.band(
+          new Vec3(0, drop + .06, 0),
+          f.scale(48).add(0, drop + .06, 0),
+          r,
+          .8,
+          0x7a3dff,
+          .6f * scar);
+      g.band(
+          new Vec3(0, drop + .07, 0),
+          f.scale(48).add(0, drop + .07, 0),
+          r,
+          .22,
+          0xffffff,
+          .85f * scar);
       double w = t < 40 ? .7 : .7 * Math.max(0, 1 - (t - 40) / 14);
       float fis = fadeOut(t, 50, 62);
       if (w > 0) {
@@ -684,7 +718,7 @@ public final class UltimateFx {
         float sw = (t - 40) / 10;
         for (int i = 0; i < 6; i++)
           g.ring(
-              f.scale(6 + 8 * i).add(0, .08, 0),
+              f.scale(6 + 8 * i).add(0, drop + .08, 0),
               r,
               f,
               3.4 * sw,

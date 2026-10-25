@@ -248,7 +248,10 @@ public final class DualClient {
         && (action == 4 || action == 0 || action == 3 && stringReady(c)
             ? DualCombat.holdsBlade(c.player)
             : DualCombat.equipped(c.player))
-        && !c.player.isUsingItem()) {
+        && !c.player.isUsingItem()
+        // While the player's own draw runs the server refuses every move: predicting one would
+        // only flash it, and its refusal used to cut the draw's cinematic short.
+        && !OborokageClient.drawing()) {
       Scene old = scenes.get(c.player.getId());
       long now = c.level.getGameTime();
       if (action == 2 && old != null && old.event.move() == Move.GUARD)
@@ -383,7 +386,8 @@ public final class DualClient {
           && previous.predicted
           && previous.event.sequence() == e.sequence()) {
         scenes.remove(e.actor());
-        OborokageClient.cancelPresentation(e.actor());
+        // A refused prediction takes back only what it started: its own ultimate's cinematic.
+        if (Move.ultimate(previous.event.move())) Cinematics.cancel();
       }
       return;
     }
@@ -564,7 +568,7 @@ public final class DualClient {
       if (local && (!held || c.player.isUsingItem())) {
         it.remove();
         pendingAttack = -1;
-        OborokageClient.cancelPresentation(scene.event.actor());
+        if (Move.ultimate(sm)) Cinematics.cancel();
         continue;
       }
       if (scene.event.move() == Move.GUARD) {
