@@ -203,6 +203,8 @@ public final class ServerChecks implements ModInitializer {
                 case "ai" -> new AiChecks(this)::tick;
                 case "lang" -> new LangChecks(this)::tick;
                 case "bugs" -> new BugChecks(this)::tick;
+                case "survey" -> new SurveyChecks(this)::tick;
+                case "density" -> new DensityChecks(this)::tick;
                 default -> throw new IllegalArgumentException(name);
               });
         stage = 30;

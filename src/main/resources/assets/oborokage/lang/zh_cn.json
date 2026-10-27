@@ -264,7 +264,7 @@
   "codex.oborokage.petal_lord.input": "剑客道场",
   "codex.oborokage.petal_lord.desc": "道场之主，手持胧影、赤霆、霜轮、空弦之一（各 25%），守在堂内，常架刀反击（架不住奥义和满蓄力的居合）。每隔几秒蓄势后瞬步斩至你身旁，刀上带着该刀的性质；半血后出手更频繁。单次受到的伤害不超过 60。樱下鬼与其他亡灵都会攻击它。只有它会掉落残刀（自身的刀，7.9%）。普攻会横扫身旁的敌人，瞬步斩会斩伤沿途所有敌人；面对多个敌人、强敌或半血后，会施展手中刀的奥义（双月归寂、万雷天降、镜月冰河、断界），施展前屏幕上会出现奥义名。蓄势时站定不动。它一盯上敌人，附近的剑客弟子也会转向同一个敌人；脱战一段时间后会慢慢回血。它会开口：见到挑战者、被逼到半血、倒下时各有一句。",
   "codex.oborokage.dojo": "剑客道场",
-  "codex.oborokage.dojo.input": "樱花树林中罕见的建筑",
+  "codex.oborokage.dojo.input": "樱花树林中的建筑（一百格见方以上的樱花林，多半能找到一座）",
   "codex.oborokage.dojo.desc": "鸟居、石灯笼与碎石庭院后的一座道场。院中有剑客与训练木桩，堂内是落英剑主，身后的箱子里有数打太刀、剑魄、剑意结晶，偶尔还有铭石。",
   "subtitles.oborokage.entity.blossom_oni.ambient": "樱下鬼低语",
   "subtitles.oborokage.entity.blossom_oni.hurt": "樱下鬼呜咽",

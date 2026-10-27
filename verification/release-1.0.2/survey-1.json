@@ -1,0 +1,55 @@
+{
+  "seed": 1,
+  "radius": 6144,
+  "step": 16,
+  "cherry_area_m2": 654848.0,
+  "cherry_share_pct": 0.4336886935763889,
+  "groves": 79,
+  "grove_sizes": {
+    "under_10k": 63,
+    "10k_up": 11,
+    "40k_up": 5,
+    "90k_up": 0,
+    "250k_up": 0
+  },
+  "tombs": 216,
+  "tomb_salt": 1462731005,
+  "verified": "8/8",
+  "options": [
+    {
+      "configured": true,
+      "spacing": 10,
+      "separation": 4,
+      "dojos": 28,
+      "dojos_per_km2_cherry": 42.75801407349492,
+      "outside_grid_groves": 0,
+      "groves_2k_up": 35,
+      "covered_2k_up": 16,
+      "groves_10k_up": 16,
+      "covered_10k_up": 13,
+      "groves_40k_up": 5,
+      "covered_40k_up": 5,
+      "max_in_one_grove": 4,
+      "closest_pair_blocks": 82,
+      "tombs_within_2_chunks": 1
+    },
+    {
+      "configured": false,
+      "spacing": 32,
+      "separation": 12,
+      "dojos": 0,
+      "dojos_per_km2_cherry": 0.0,
+      "outside_grid_groves": 0,
+      "groves_2k_up": 35,
+      "covered_2k_up": 0,
+      "groves_10k_up": 16,
+      "covered_10k_up": 0,
+      "groves_40k_up": 5,
+      "covered_40k_up": 0,
+      "max_in_one_grove": 0,
+      "closest_pair_blocks": -1,
+      "tombs_within_2_chunks": 0
+    }
+  ],
+  "seconds": 67.350229125
+}

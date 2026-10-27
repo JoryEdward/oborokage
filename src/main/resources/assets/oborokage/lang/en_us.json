@@ -264,7 +264,7 @@
   "codex.oborokage.petal_lord.input": "Swordsman dojo",
   "codex.oborokage.petal_lord.desc": "The dojo's master, carrying Oborokage, Raikiri, Frostmoon or Voidstring (25% each); keeps to its hall, parries and counters often (never an ultimate or a full-charge draw). Every few seconds it gathers itself, flash-steps to your side and cuts with its blade's nature; below half health it draws more often. No single blow takes more than 60 from it. The Oni Beneath the Blossoms and other undead attack it. The only mob that drops broken blades (its own, 7.9%). Its cuts sweep, its flash-step cuts everything on the way, and against several foes, a strong one, or below half health it calls its blade's ultimate (named on screen as it gathers). It stands still while it gathers. When it takes a foe, its students nearby turn on it too; out of a fight for a while, it slowly recovers. It speaks: to a challenger, at half health, and as it falls.",
   "codex.oborokage.dojo": "Swordsman dojo",
-  "codex.oborokage.dojo.input": "A rare building in cherry groves",
+  "codex.oborokage.dojo.input": "A building in cherry groves (most groves a hundred blocks across or more have one)",
   "codex.oborokage.dojo.desc": "A dojo behind a torii, stone lanterns and a gravel yard. Swordsmen and training posts in the yard, the Lord of Fallen Petals in the hall, and behind it a chest with kazuuchi, blade souls, intent crystals and now and then an inscription stone.",
   "subtitles.oborokage.entity.blossom_oni.ambient": "Oni Beneath the Blossoms whispers",
   "subtitles.oborokage.entity.blossom_oni.hurt": "Oni Beneath the Blossoms sobs",

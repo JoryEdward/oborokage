@@ -135,9 +135,11 @@ def structure_json(line):
 
 
 def worldgen():
+    # 1.0.2: cherry groves are small (0.1-0.5% of the land); spacing 10 / separation 4 puts a dojo in
+    # about 70% of groves 100 blocks across or more (survey over six seeds, docs/REVIEW_1.0.2.md).
     write(DATA / 'worldgen/structure_set/dojo.json', {
-        'placement': {'type': 'minecraft:random_spread', 'salt': 1985061137, 'separation': 12,
-                      'spacing': 32},
+        'placement': {'type': 'minecraft:random_spread', 'salt': 1985061137, 'separation': 4,
+                      'spacing': 10},
         'structures': [{'structure': 'oborokage:dojo', 'weight': 1}]})
     write(DATA / 'worldgen/template_pool/dojo/start.json', {
         'elements': [{'element': {'element_type': 'minecraft:single_pool_element',
