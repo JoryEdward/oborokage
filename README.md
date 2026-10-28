@@ -3,6 +3,16 @@
 支持 Minecraft **26.x 全部正式版**（26.1 / 26.1.1 / 26.1.2 / 26.2 / 26.3），Java **25**。
 五把原创刀各有专属外观、粒子、刀光与奥义动画；单持任一把刀有自己的三段连斩，双持有双刀连招，另有四刀流派终式、见切与影返、架刀反击（含远程）、可控斩物及十八项成就。
 
+![樱花林中的剑客道场 · Dojo in a cherry grove](docs/screenshots/01-dojo.jpg)
+
+## 截图 · Screenshots
+
+| | | |
+|---|---|---|
+| [![道场正堂](docs/screenshots/02-hall.jpg)](docs/screenshots/02-hall.jpg)<br>道场正堂：落英剑主与剑客 · The hall | [![百花缭乱](docs/screenshots/03-hundred-flowers.jpg)](docs/screenshots/03-hundred-flowers.jpg)<br>百花缭乱 · Hundred Flowers | [![万雷天降](docs/screenshots/04-ten-thousand-thunders.jpg)](docs/screenshots/04-ten-thousand-thunders.jpg)<br>万雷天降 · Ten Thousand Thunders |
+| [![镜月冰河](docs/screenshots/05-mirror-moon.jpg)](docs/screenshots/05-mirror-moon.jpg)<br>镜月冰河 · Mirror Moon, Frozen River | [![双月归寂](docs/screenshots/06-twin-moons.jpg)](docs/screenshots/06-twin-moons.jpg)<br>双月归寂 · Twin Moons: Silence | [![断界](docs/screenshots/07-severing-the-realms.jpg)](docs/screenshots/07-severing-the-realms.jpg)<br>断界 · Severing the Realms |
+| [![胧月一闪](docs/screenshots/08-moonflash.jpg)](docs/screenshots/08-moonflash.jpg)<br>胧月一闪 · Moonflash | [![剑客](docs/screenshots/09-swordsmen.jpg)](docs/screenshots/09-swordsmen.jpg)<br>剑客与六把刀 · Swordsmen | [![刀冢](docs/screenshots/10-blade-tomb.jpg)](docs/screenshots/10-blade-tomb.jpg)<br>刀冢与樱下鬼 · Blade tomb |
+
 ## 选择对应版本的 JAR
 
 | 你的 Minecraft | 放入 mods 的文件 | Fabric Loader | Fabric API |
