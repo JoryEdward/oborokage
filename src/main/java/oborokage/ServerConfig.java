@@ -55,6 +55,10 @@ public final class ServerConfig {
     public int stringDashCooldownTicks = 40;
     public int honeTicks = 6000;
     public boolean swordsmanSpawns = true;
+    // 1.1.0: 百鬼夜行, the full-moon parade of the 樱下鬼 (NightParade).
+    public boolean nightParade = true;
+    public double nightParadeChance = .2;
+    public int nightParadeMax = 12;
   }
 
   private static volatile Values current = new Values();
@@ -114,6 +118,9 @@ public final class ServerConfig {
                 + "stringDashCooldownTicks=40\n"
                 + "honeTicks=6000\n"
                 + "swordsmanSpawns=true\n"
+                + "nightParade=true\n"
+                + "nightParadeChance=0.2\n"
+                + "nightParadeMax=12\n"
                 + "terrainCutEnabled=true\n"
                 + "terrainMaxBlocks=32\n"
                 + "terrainBlocksPerTick=4\n"
@@ -187,6 +194,9 @@ public final class ServerConfig {
         (int) ConfigIO.number(p, "stringDashCooldownTicks", next.stringDashCooldownTicks, 0, 400);
     next.honeTicks = (int) ConfigIO.number(p, "honeTicks", next.honeTicks, 0, 72000);
     next.swordsmanSpawns = ConfigIO.bool(p, "swordsmanSpawns", next.swordsmanSpawns);
+    next.nightParade = ConfigIO.bool(p, "nightParade", next.nightParade);
+    next.nightParadeChance = ConfigIO.number(p, "nightParadeChance", next.nightParadeChance, 0, 1);
+    next.nightParadeMax = (int) ConfigIO.number(p, "nightParadeMax", next.nightParadeMax, 1, 24);
     next.terrainCutEnabled = ConfigIO.bool(p, "terrainCutEnabled", true);
     next.terrainMaxBlocks = (int) ConfigIO.number(p, "terrainMaxBlocks", 32, 1, 128);
     next.terrainBlocksPerTick = (int) ConfigIO.number(p, "terrainBlocksPerTick", 4, 1, 8);

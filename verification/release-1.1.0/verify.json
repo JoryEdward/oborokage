@@ -1,0 +1,130 @@
+{
+  "version": "1.1.0",
+  "jars": {
+    "26.1": "68669883012e1e38d86b4514f4aa4621f012071aab64b090102add4e81aeff5b",
+    "26.2": "e6cc02ee45b6689e7e8e9d930b15c5d5f57e9400c25cd79db53355da792abc1b",
+    "26.3": "d533f8845b82449414cce1c4b0e4bdbd1a6724c23d693b416cf3467ca67073c9"
+  },
+  "results": {
+    "26.1": {
+      "server": {
+        "exit": 0,
+        "pass": 250
+      },
+      "smoke": {
+        "exit": 0,
+        "pass": 29
+      },
+      "focused": {
+        "exit": 0,
+        "pass": 132,
+        "fail": [],
+        "checks": "tomb,lord,candles,ai,lang,bugs,density,withered,structures,parade,grind,commands,lord2"
+      }
+    },
+    "26.1.1": {
+      "server": {
+        "exit": 0,
+        "pass": 250
+      },
+      "smoke": {
+        "exit": 0,
+        "pass": 29
+      },
+      "focused": {
+        "exit": 0,
+        "pass": 132,
+        "fail": [],
+        "checks": "tomb,lord,candles,ai,lang,bugs,density,withered,structures,parade,grind,commands,lord2"
+      }
+    },
+    "26.1.2": {
+      "server": {
+        "exit": 0,
+        "pass": 250
+      },
+      "smoke": {
+        "exit": 0,
+        "pass": 29
+      },
+      "focused": {
+        "exit": 0,
+        "pass": 132,
+        "fail": [],
+        "checks": "tomb,lord,candles,ai,lang,bugs,density,withered,structures,parade,grind,commands,lord2"
+      },
+      "bugcheck": {
+        "exit": 0,
+        "pass": 6,
+        "fail": []
+      },
+      "langcheck": {
+        "exit": 0,
+        "pass": 12,
+        "fail": []
+      },
+      "settingscheck": {
+        "exit": 0,
+        "pass": 4,
+        "fail": []
+      }
+    },
+    "26.2": {
+      "server": {
+        "exit": 0,
+        "pass": 250
+      },
+      "smoke": {
+        "exit": 0,
+        "pass": 29
+      },
+      "focused": {
+        "exit": 0,
+        "pass": 132,
+        "fail": [],
+        "checks": "tomb,lord,candles,ai,lang,bugs,density,withered,structures,parade,grind,commands,lord2"
+      },
+      "bugcheck": {
+        "exit": 0,
+        "pass": 6,
+        "fail": []
+      }
+    },
+    "26.3": {
+      "server": {
+        "exit": 0,
+        "pass": 250
+      },
+      "smoke": {
+        "exit": 0,
+        "pass": 29
+      },
+      "focused": {
+        "exit": 0,
+        "pass": 132,
+        "fail": [],
+        "checks": "tomb,lord,candles,ai,lang,bugs,density,withered,structures,parade,grind,commands,lord2"
+      },
+      "bugcheck": {
+        "exit": 0,
+        "pass": 6,
+        "fail": []
+      },
+      "langcheck": {
+        "exit": 0,
+        "pass": 13,
+        "fail": []
+      },
+      "settingscheck": {
+        "exit": 0,
+        "pass": 4,
+        "fail": []
+      },
+      "compatcheck": {
+        "exit": 0,
+        "pass": 2,
+        "fail": []
+      }
+    }
+  }
+}

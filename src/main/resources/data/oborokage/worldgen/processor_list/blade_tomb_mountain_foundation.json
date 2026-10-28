@@ -1,0 +1,13 @@
+{
+  "processors": [
+    {
+      "processor_type": "oborokage:foundation",
+      "max_depth": 32,
+      "stones": [
+        "minecraft:cobbled_deepslate",
+        "minecraft:andesite",
+        "minecraft:tuff"
+      ]
+    }
+  ]
+}

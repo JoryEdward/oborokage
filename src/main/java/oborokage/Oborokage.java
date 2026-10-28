@@ -106,6 +106,7 @@ public final class Oborokage implements ModInitializer {
                     output.accept(Content.SWORDSMAN_SPAWN_EGG);
                     output.accept(Content.BLOSSOM_ONI_SPAWN_EGG);
                     output.accept(Content.PETAL_LORD_SPAWN_EGG);
+                    output.accept(Content.WITHERED_LORD_SPAWN_EGG);
                   })
               .build());
   public static final net.minecraft.core.particles.SimpleParticleType CRESCENT =

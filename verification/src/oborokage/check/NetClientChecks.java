@@ -20,8 +20,41 @@ public final class NetClientChecks implements ClientModInitializer {
     results.add("PASS " + text);
   }
 
+  /** The screenshot API moved between lines; take whichever form this line offers. */
   void shot(Minecraft c, String name) {
-    Screenshot.grab(c.gameDirectory, name + ".png", c.gameRenderer.mainRenderTarget(), 1, m -> {});
+    try {
+      net.minecraft.client.Screenshot.class
+          .getMethod("grab", Minecraft.class, boolean.class)
+          .invoke(null, c, false);
+      return;
+    } catch (ReflectiveOperationException ignored) {
+      // Older lines take a file name.
+    }
+    try {
+      Object target;
+      try {
+        target = Minecraft.class.getMethod("getMainRenderTarget").invoke(c);
+      } catch (NoSuchMethodException e) {
+        target = c.gameRenderer.getClass().getMethod("mainRenderTarget").invoke(c.gameRenderer);
+      }
+      net.minecraft.client.Screenshot.class
+          .getMethod(
+              "grab",
+              java.io.File.class,
+              String.class,
+              com.mojang.blaze3d.pipeline.RenderTarget.class,
+              int.class,
+              java.util.function.Consumer.class)
+          .invoke(
+              null,
+              c.gameDirectory,
+              name + ".png",
+              target,
+              1,
+              (java.util.function.Consumer<Object>) m -> {});
+    } catch (ReflectiveOperationException e) {
+      results.add("NOTE screenshot unavailable on this line");
+    }
   }
 
   public void onInitializeClient() {
@@ -68,7 +101,7 @@ public final class NetClientChecks implements ClientModInitializer {
             DualClient.intent == 100, "Confirmed server hits synchronize full intent over network");
       if (ready == 95) DualClient.request(4);
       if (ready == 111) {
-        check(OborokageClient.cameraActive(), "Attacker receives own ultimate camera");
+        check(Cinematics.cameraActive(), "Attacker receives own ultimate camera");
         shot(c, "network-attacker-ultimate");
       }
       if (ready == 160)
@@ -82,7 +115,7 @@ public final class NetClientChecks implements ClientModInitializer {
             sawMain && sawUltimate, "Observer receives ordered remote combo and ultimate actions");
         check(RenderObservations.dual > 0, "Observer renders remote dual arm animation");
         check(
-            !OborokageClient.cameraActive() && c.options.getCameraType() == CameraType.FIRST_PERSON,
+            !Cinematics.cameraActive() && c.options.getCameraType() == CameraType.FIRST_PERSON,
             "Observer camera is never taken over");
       }
     }
@@ -119,10 +152,29 @@ public final class NetClientChecks implements ClientModInitializer {
     }
     if (!actor && ready == 240)
       check(sawCounter, "Observer receives and renders the real counter after idle cancel");
-    if (ready == 250) {
+    if (ready == 250)
       check(c.getConnection() != null, "Client remains connected after dual actions");
-      finish(c);
+    // 1.1.0: a master between the two players and a parade near the observer (NetServerChecks).
+    if (actor && ready == 255)
+      net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new NetSignal(2));
+    if (!actor && ready == 340) {
+      // The parade walks the ground (y -60 in this flat world), far below the players' platform.
+      var near = c.player.getBoundingBox().inflate(96, 256, 96);
+      var oni = c.level.getEntitiesOfClass(oborokage.BlossomOni.class, near);
+      long generals = oni.stream().filter(oborokage.BlossomOni::elite).count();
+      check(
+          generals == 1 && oni.size() >= 7,
+          "The observer sees the Night Parade and its 鬼将 (elite flag synced): "
+              + generals
+              + " general, "
+              + oni.size()
+              + " in all; entities "
+              + c.level.getEntitiesOfClass(net.minecraft.world.entity.Entity.class, near).size()
+              + " at "
+              + c.player.blockPosition().toShortString());
+      shot(c, "network-observer-parade");
     }
+    if (ready == 380) finish(c);
   }
 
   void finish(Minecraft c) {

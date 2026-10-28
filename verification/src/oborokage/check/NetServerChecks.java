@@ -16,6 +16,11 @@ import oborokage.*;
 
 public final class NetServerChecks implements ModInitializer {
   private boolean two, kill;
+
+  /** 1.1.0: a master between the two players (its health counts them) and a parade near one. */
+  private oborokage.PetalLord lord;
+
+  private int lordAge;
   private LivingEntity victim, counterTarget;
   private boolean counterRecorded;
 
@@ -42,6 +47,10 @@ public final class NetServerChecks implements ModInitializer {
                 .server()
                 .execute(
                     () -> {
+                      if (signal.phase() == 2) {
+                        party(context.server());
+                        return;
+                      }
                       var p = context.player();
                       var mob = EntityTypes.HUSK.create(p.level(), EntitySpawnReason.COMMAND);
                       mob.setNoAi(true);
@@ -113,6 +122,78 @@ public final class NetServerChecks implements ModInitializer {
             kill = true;
             record("PASS Networked dual ultimate executes 1024 HP hostile");
           }
+          if (lord != null) {
+            lordAge++;
+            if (lordAge % 10 == 0)
+              lord.hurtServer((ServerLevel) lord.level(), lord.damageSources().generic(), 1);
+            if (lordAge == 35) {
+              var l = (ServerLevel) lord.level();
+              var oni =
+                  l.getEntitiesOfClass(
+                      oborokage.BlossomOni.class, lord.getBoundingBox().inflate(128, 256, 128));
+              record(
+                  "NOTE parade after 35 ticks: "
+                      + oni.size()
+                      + " alive, dark "
+                      + l.isDarkOutside()
+                      + ", bright "
+                      + l.isBrightOutside()
+                      + (oni.isEmpty() ? "" : " at " + oni.get(0).blockPosition().toShortString()));
+            }
+            if (lordAge == 45) {
+              record(
+                  (lord.party() == 2 && lord.getMaxHealth() == 300 ? "PASS" : "FAIL")
+                      + " A master's health counts the two players fighting it over the network: "
+                      + lord.party()
+                      + " players, "
+                      + lord.getMaxHealth());
+              lord.discard();
+              lord = null;
+              for (ServerPlayer p : s.getPlayerList().getPlayers())
+                if (!p.getName().getString().equals("BladeActor")) p.setGameMode(GameType.CREATIVE);
+            }
+          }
         });
+  }
+
+  /** Night; the observer fights too (creative players are not counted); a master held still. */
+  private void party(net.minecraft.server.MinecraftServer server) {
+    server
+        .getCommands()
+        .performPrefixedCommand(
+            server.createCommandSourceStack().withSuppressedOutput(), "time set 18000");
+    ServerLevel level = server.overworld();
+    ServerPlayer observer = null;
+    for (ServerPlayer p : server.getPlayerList().getPlayers())
+      if (!p.getName().getString().equals("BladeActor")) observer = p;
+    if (observer == null) return;
+    observer.setGameMode(GameType.SURVIVAL);
+    // Down to the ground (y -60 here): a mob more than 128 blocks from every player despawns, and
+    // the parade walks the ground, far below the platform the duel checks use.
+    for (ServerPlayer p : server.getPlayerList().getPlayers())
+      p.connection.teleport(
+          p == observer ? 8.5 : .5, -60, p == observer ? 4.5 : .5, p == observer ? 110 : 0, 5);
+    lord = oborokage.Content.PETAL_LORD.create(level, EntitySpawnReason.COMMAND);
+    lord.setPos(4.5, -60, -16.5);
+    lord.setNoAi(true);
+    try {
+      for (String f : new String[] {"artCooldown", "ultCooldown", "finalCooldown"}) {
+        var field = oborokage.LordArts.class.getDeclaredField(f);
+        field.setAccessible(true);
+        field.setInt(lord.arts(), 100000);
+      }
+    } catch (ReflectiveOperationException e) {
+      throw new RuntimeException(e);
+    }
+    level.addFreshEntity(lord);
+    var leader = oborokage.NightParade.start(level, observer.position());
+    record(
+        (leader != null ? "PASS" : "FAIL")
+            + " A parade comes out near the observer on a full-moon night: "
+            + (leader == null ? "-" : leader.blockPosition().toShortString())
+            + " observer "
+            + observer.blockPosition().toShortString()
+            + " dark "
+            + level.isDarkOutside());
   }
 }

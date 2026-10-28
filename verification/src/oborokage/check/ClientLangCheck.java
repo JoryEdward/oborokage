@@ -130,8 +130,8 @@ public final class ClientLangCheck implements ClientModInitializer {
         screenshot(c, "lang-codex-ja");
         Button language = button(codex, 0);
         check(
-            language.getMessage().getString().equals("语言 · Language · 言語"),
-            "The codex has the language button: " + language.getMessage().getString());
+            language.getMessage().getString().equals("设置 · Settings · 設定"),
+            "The codex has the settings button: " + language.getMessage().getString());
         press(language);
       }
       case 2 -> {
@@ -158,7 +158,18 @@ public final class ClientLangCheck implements ClientModInitializer {
       }
       case 3 -> {
         screenshot(c, "lang-settings-en");
-        press(button(settings, 1));
+        press(
+            settings.children().stream()
+                .filter(Button.class::isInstance)
+                .map(Button.class::cast)
+                .filter(
+                    b ->
+                        b.getMessage()
+                            .getString()
+                            .equals(
+                                net.minecraft.network.chat.CommonComponents.GUI_DONE.getString()))
+                .findFirst()
+                .orElseThrow());
         check(current(c) == codex, "Done goes back to the codex: " + current(c));
         if (!FabricLoader.getInstance().isModLoaded("modmenu")) {
           results.add("NOTE Mod Menu not installed in this run; its entry not checked");

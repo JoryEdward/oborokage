@@ -36,16 +36,17 @@ final class LordChecks {
     return mob;
   }
 
+  /** A field of the master's arts (cooldowns and windups live in {@link LordArts}). */
   private static Object field(PetalLord lord, String name) throws Exception {
-    var f = PetalLord.class.getDeclaredField(name);
+    var f = LordArts.class.getDeclaredField(name);
     f.setAccessible(true);
-    return f.get(lord);
+    return f.get(lord.arts());
   }
 
   private static void ready(PetalLord lord) throws Exception {
-    var f = PetalLord.class.getDeclaredField("ultCooldown");
+    var f = LordArts.class.getDeclaredField("ultCooldown");
     f.setAccessible(true);
-    f.setInt(lord, 0);
+    f.setInt(lord.arts(), 0);
   }
 
   boolean tick() throws Exception {

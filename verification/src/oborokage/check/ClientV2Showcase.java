@@ -165,9 +165,9 @@ public final class ClientV2Showcase implements ClientModInitializer {
           c,
           p -> {
             try {
-              var f = PetalLord.class.getDeclaredField("artCooldown");
+              var f = oborokage.LordArts.class.getDeclaredField("artCooldown");
               f.setAccessible(true);
-              f.setInt(lord, 0);
+              f.setInt(lord.arts(), 0);
             } catch (ReflectiveOperationException e) {
               throw new RuntimeException(e);
             }

@@ -33,7 +33,16 @@ public final class Codex {
               "world",
               0xffc0d8,
               List.of(
-                  "kazuuchi", "swordsman", "blossom_oni", "petal_lord", "dojo", "tomb", "dummy")),
+                  "kazuuchi",
+                  "swordsman",
+                  "blossom_oni",
+                  "petal_lord",
+                  "withered_lord",
+                  "dojo",
+                  "ruined_dojo",
+                  "night_parade",
+                  "tomb",
+                  "dummy")),
           new Page(
               "tachi", 0xbca6f4, List.of("tachi_solo", "tachi_iaido", "tachi_moon", "tachi_ult")),
           new Page(

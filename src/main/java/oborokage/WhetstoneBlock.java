@@ -78,8 +78,9 @@ public final class WhetstoneBlock extends Block {
   }
 
   /**
-   * Six 剑魄 grind a kazuuchi down into a wakizashi (creative players need none). Reached from {@link
-   * KazuuchiItem#useOn}: a sneaking player holding an item never reaches the block's own use.
+   * Six 剑魄 grind a kazuuchi down into a wakizashi (creative players need none); the blade keeps its
+   * enchantments, inscription and name. Reached from {@link KazuuchiItem#useOn}: a sneaking player
+   * holding an item never reaches the block's own use.
    */
   static InteractionResult grind(
       ServerLevel server, BlockPos pos, Player player, InteractionHand hand) {
@@ -101,7 +102,17 @@ public final class WhetstoneBlock extends Block {
         left -= take;
       }
     }
-    player.setItemInHand(hand, new ItemStack(Oborokage.WAKIZASHI));
+    // What the kazuuchi carried goes with it, its enchantments, inscription and name; its wear
+    // does not (the new blade is whole).
+    ItemStack old = player.getItemInHand(hand), blade = new ItemStack(Oborokage.WAKIZASHI);
+    var enchantments = old.get(net.minecraft.core.component.DataComponents.ENCHANTMENTS);
+    if (enchantments != null)
+      blade.set(net.minecraft.core.component.DataComponents.ENCHANTMENTS, enchantments);
+    String inscription = old.get(Components.INSCRIPTION);
+    if (inscription != null) blade.set(Components.INSCRIPTION, inscription);
+    var name = old.get(net.minecraft.core.component.DataComponents.CUSTOM_NAME);
+    if (name != null) blade.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, name);
+    player.setItemInHand(hand, blade);
     server.playSound(null, pos, SoundEvents.GRINDSTONE_USE, SoundSource.BLOCKS, 1, .7f);
     server.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1, 1.2f);
     server.sendParticles(

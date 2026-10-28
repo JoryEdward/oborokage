@@ -109,7 +109,7 @@ public final class TombGuard {
    * A tomb is known by its layout, whichever way it was turned: the chiseled stele right behind the
    * chest and the lightning rod three blocks in front of it. Returns the rod, or null.
    */
-  static BlockPos rod(ServerLevel level, BlockPos chest) {
+  public static BlockPos rod(ServerLevel level, BlockPos chest) {
     for (var dir : net.minecraft.core.Direction.Plane.HORIZONTAL) {
       BlockPos stele = chest.relative(dir.getOpposite()), rod = chest.relative(dir, 3);
       if (level
@@ -120,6 +120,14 @@ public final class TombGuard {
               .getPath()
               .endsWith("lightning_rod")) return rod;
     }
+    return null;
+  }
+
+  /** The chest of a blade tomb within six blocks of `pos`, or null. */
+  public static BlockPos chestNear(ServerLevel level, BlockPos pos) {
+    for (BlockPos p : BlockPos.betweenClosed(pos.offset(-6, -2, -6), pos.offset(6, 2, 6)))
+      if (level.getBlockState(p).is(net.minecraft.world.level.block.Blocks.CHEST)
+          && rod(level, p.immutable()) != null) return p.immutable();
     return null;
   }
 

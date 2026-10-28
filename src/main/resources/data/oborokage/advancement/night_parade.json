@@ -1,0 +1,28 @@
+{
+  "parent": "oborokage:first_moon",
+  "display": {
+    "icon": {
+      "id": "minecraft:soul_torch"
+    },
+    "title": {
+      "translate": "advancement.oborokage.night_parade.title"
+    },
+    "description": {
+      "translate": "advancement.oborokage.night_parade.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "criteria": {
+    "complete": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "complete"
+    ]
+  ]
+}

@@ -24,7 +24,7 @@ public final class CodexScreen extends Screen {
 
   @Override
   protected void init() {
-    Component language = Component.literal("语言 · Language · 言語");
+    Component language = Component.literal("设置 · Settings · 設定");
     addRenderableWidget(
         Button.builder(
                 language,

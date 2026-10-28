@@ -1,0 +1,7 @@
+PASS Two independent clients connected to local dedicated server
+PASS Networked dual ultimate executes 1024 HP hostile
+PASS Delayed native attack is precisely guarded before counter
+PASS Networked counter damages the actual parried source
+PASS A parade comes out near the observer on a full-moon night: -36, -60, -7 observer 8, -60, 4 dark false
+NOTE parade after 35 ticks: 9 alive, dark true, bright false at -37, -60, -4
+PASS A master's health counts the two players fighting it over the network: 2 players, 300.0

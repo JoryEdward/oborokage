@@ -93,10 +93,7 @@ public final class TombCandles {
 
   /** The chest of the blade tomb a candle belongs to, or null. */
   private static BlockPos tombChest(ServerLevel level, BlockPos candle) {
-    for (BlockPos p : BlockPos.betweenClosed(candle.offset(-6, -2, -6), candle.offset(6, 2, 6)))
-      if (level.getBlockState(p).is(net.minecraft.world.level.block.Blocks.CHEST)
-          && TombGuard.rod(level, p.immutable()) != null) return p.immutable();
-    return null;
+    return TombGuard.chestNear(level, candle);
   }
 
   private TombCandles() {}

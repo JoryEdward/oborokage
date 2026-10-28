@@ -7,7 +7,7 @@ import oborokage.ConfigIO;
 import oborokage.ModLanguage;
 
 public final class ClientConfig {
-  public static final class Values {
+  public static final class Values implements Cloneable {
     public boolean cinematic = true;
     public boolean screenShake = true;
     public boolean thirdPersonUltimate = true;
@@ -23,6 +23,14 @@ public final class ClientConfig {
     public int trailVertexBudget = 16384;
     public int trailDistance = 48;
     public String language = "auto";
+
+    Values copy() {
+      try {
+        return (Values) clone();
+      } catch (CloneNotSupportedException e) {
+        throw new AssertionError(e);
+      }
+    }
   }
 
   private static volatile Values current = new Values();
@@ -39,9 +47,7 @@ public final class ClientConfig {
     Properties p =
         ConfigIO.read(
             file(),
-            "# Oborokage client settings. Restart the client after changing (except language).\n"
-                + "# Language of this mod's text: auto (follow the game), zh_cn, en_us or ja_jp.\n"
-                + "# Also set in game: move codex (K) or Mod Menu.\n"
+            HEADER
                 + "language=auto\n"
                 + "cinematic=true\n"
                 + "screenShake=true\n"
@@ -82,26 +88,74 @@ public final class ClientConfig {
     ModLanguage.choose(next.language);
   }
 
-  /**
-   * Switches the mod's language now and keeps it in the file (other lines are left as they are).
-   */
-  public static void setLanguage(String language) {
-    current.language = language;
-    ModLanguage.choose(language);
+  private static final String HEADER =
+      "# Oborokage client settings. The settings screen (move codex K, or Mod Menu) changes them at"
+          + " once;\n# edits made here take effect on the next start.\n"
+          + "# Language of this mod's text: auto (follow the game), zh_cn, en_us or ja_jp.\n";
+
+  /** Changes the settings now: what reads them sees the change at once (save() keeps them). */
+  public static void update(java.util.function.Consumer<Values> change) {
+    Values next = current.copy();
+    change.accept(next);
+    current = next;
+    ModLanguage.choose(next.language);
+    OborokageClient.applyConfig();
+  }
+
+  /** Back to the defaults (language included). */
+  public static void reset() {
+    current = new Values();
+    ModLanguage.choose(current.language);
+    OborokageClient.applyConfig();
+  }
+
+  /** Writes every setting to the file. */
+  public static void save() {
+    Values v = current;
+    String text =
+        HEADER
+            + "language="
+            + v.language
+            + "\ncinematic="
+            + v.cinematic
+            + "\nscreenShake="
+            + v.screenShake
+            + "\nthirdPersonUltimate="
+            + v.thirdPersonUltimate
+            + "\nlocalPrediction="
+            + v.localPrediction
+            + "\ntrailShaderCompat="
+            + v.trailShaderCompat
+            + "\ntutorial="
+            + v.tutorial
+            + "\nkeyConflictWarning="
+            + v.keyConflictWarning
+            + "\nhudScale="
+            + v.hudScale
+            + "\nhudOffsetX="
+            + v.hudOffsetX
+            + "\nhudOffsetY="
+            + v.hudOffsetY
+            + "\ntrailMaxPlayers="
+            + v.trailMaxPlayers
+            + "\ntrailSegments="
+            + v.trailSegments
+            + "\ntrailVertexBudget="
+            + v.trailVertexBudget
+            + "\ntrailDistance="
+            + v.trailDistance
+            + "\n";
     try {
-      List<String> lines =
-          Files.exists(file()) ? new ArrayList<>(Files.readAllLines(file())) : new ArrayList<>();
-      boolean found = false;
-      for (int i = 0; i < lines.size(); i++)
-        if (lines.get(i).trim().startsWith("language=")) {
-          lines.set(i, "language=" + language);
-          found = true;
-        }
-      if (!found) lines.add("language=" + language);
-      Files.write(file(), lines);
+      Files.writeString(file(), text);
     } catch (Exception e) {
-      ConfigIO.LOG.warn("Cannot save the language setting: {}", e.toString());
+      ConfigIO.LOG.warn("Cannot save the client settings: {}", e.toString());
     }
+  }
+
+  /** Switches the mod's language now and keeps it in the file. */
+  public static void setLanguage(String language) {
+    update(v -> v.language = language);
+    save();
   }
 
   private ClientConfig() {}

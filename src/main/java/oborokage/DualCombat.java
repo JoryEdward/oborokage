@@ -694,6 +694,13 @@ public final class DualCombat {
     s.intent = Math.min(100, s.intent + (int) Math.round(amount * k));
   }
 
+  /** Sets a player's intent outright (0 to 100), as /oborokage intent does. */
+  public static void setIntent(ServerPlayer p, int value) {
+    State s = state(p);
+    s.intent = Math.max(0, Math.min(100, value));
+    s.lastUsefulHit = s.level.getGameTime();
+  }
+
   /** A flat amount of intent, as from an intent crystal. */
   public static void addIntent(ServerPlayer p, int amount) {
     State s = state(p);

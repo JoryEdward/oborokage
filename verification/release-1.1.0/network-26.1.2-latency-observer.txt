@@ -1,0 +1,7 @@
+PASS Observer receives ordered remote combo and ultimate actions
+PASS Observer renders remote dual arm animation
+PASS Observer camera is never taken over
+PASS Idle right-click sends no stale cancel to observer
+PASS Observer receives and renders the real counter after idle cancel
+PASS Client remains connected after dual actions
+PASS The observer sees the Night Parade and its 鬼将 (elite flag synced): 1 general, 11 in all; entities 45 at 8, -60, 4

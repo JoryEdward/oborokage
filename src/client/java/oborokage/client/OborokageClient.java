@@ -114,6 +114,8 @@ public final class OborokageClient implements ClientModInitializer {
         Content.PETAL_LORD,
         ctx ->
             new BladeHumanoidRenderer<>(ctx, Oborokage.id("textures/entity/petal_lord.png"), 1.1f));
+    net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(
+        Content.WITHERED_LORD, WitheredLordRenderer::new);
     net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry.registerModelLayer(
         TrainingDummyRenderer.LAYER, TrainingDummyRenderer.Model::create);
     net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(
@@ -139,6 +141,11 @@ public final class OborokageClient implements ClientModInitializer {
 
   private static void readConfig() {
     ClientConfig.load();
+    applyConfig();
+  }
+
+  /** Takes up the settings that are kept here (called again whenever they change). */
+  static void applyConfig() {
     var cfg = ClientConfig.get();
     cinematic = cfg.cinematic;
     screenShake = cfg.screenShake;
@@ -211,10 +218,17 @@ public final class OborokageClient implements ClientModInitializer {
         c.level.getEntitiesOfClass(
             net.minecraft.world.entity.Mob.class, c.player.getBoundingBox().inflate(12))) {
       if (e.getType() == Content.SWORDSMAN) Codex.see("swordsman");
-      if (e instanceof BlossomOni) Codex.see("blossom_oni");
-      if (e instanceof PetalLord) {
+      if (e instanceof BlossomOni o) {
+        Codex.see("blossom_oni");
+        if (o.elite()) Codex.see("night_parade");
+      }
+      if (e.getType() == Content.PETAL_LORD) {
         Codex.see("petal_lord");
         Codex.see("dojo");
+      }
+      if (e instanceof oborokage.WitheredLord) {
+        Codex.see("withered_lord");
+        Codex.see("ruined_dojo");
       }
       if (e instanceof TrainingDummy) Codex.see("dummy");
     }

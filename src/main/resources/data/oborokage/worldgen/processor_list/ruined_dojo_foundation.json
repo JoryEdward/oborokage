@@ -1,0 +1,14 @@
+{
+  "processors": [
+    {
+      "processor_type": "oborokage:foundation",
+      "max_depth": 48,
+      "stones": [
+        "minecraft:mossy_cobblestone",
+        "minecraft:cobblestone",
+        "minecraft:mossy_stone_bricks",
+        "minecraft:cracked_stone_bricks"
+      ]
+    }
+  ]
+}

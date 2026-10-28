@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "oborokage",
   "version": "${version}",
-  "name": "胧影太刀 · Oborokage",
+  "name": "胧影剑录 · Oborokage",
   "description": "长刃居合、双刀连斩、精准架刀与双月奥义。",
   "authors": [
     "Jory Edward"
@@ -19,7 +19,9 @@
     ],
     "modmenu": [
       "oborokage.client.ModMenuEntry"
-    ]
+    ],
+    "jei_mod_plugin": ["oborokage.compat.jei.OborokageJei"],
+    "jade": ["oborokage.compat.jade.OborokageJade"]
   },
   "mixins": [
     {

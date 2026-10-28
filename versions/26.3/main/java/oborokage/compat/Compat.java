@@ -48,4 +48,10 @@ public final class Compat {
   }
 
   private Compat() {}
+
+  /** The server's structure templates. */
+  public static net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager
+      templates(net.minecraft.server.level.ServerLevel level) {
+    return level.getStructureTemplateManager();
+  }
 }

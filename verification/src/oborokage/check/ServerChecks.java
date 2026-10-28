@@ -93,8 +93,8 @@ public final class ServerChecks implements ModInitializer {
           BuiltInRegistries.ITEM.keySet().stream()
                   .filter(i -> i.getNamespace().equals("oborokage"))
                   .count()
-              == 23,
-          "Six blades and seventeen 1.0 items are registered");
+              == 24,
+          "Six blades, seventeen 1.0 items and 1.1.0's spawn egg are registered");
       CreativeModeTabs.tryRebuildTabContents(level.enabledFeatures(), true, level.registryAccess());
       var tab = BuiltInRegistries.CREATIVE_MODE_TAB.getValue(Oborokage.id("equipment"));
       check(
@@ -104,10 +104,12 @@ public final class ServerChecks implements ModInitializer {
           tab.getSearchTabDisplayItems().stream().anyMatch(i -> i.is(Oborokage.TACHI)),
           "Creative search includes tachi");
       check(
-          tab.getDisplayItems().size() == 23
+          tab.getDisplayItems().size() == 24
               && tab.getDisplayItems().stream().anyMatch(i -> i.is(Oborokage.WAKIZASHI))
-              && tab.getDisplayItems().stream().anyMatch(i -> i.is(Content.WHETSTONE_ITEM)),
-          "Independent tab holds the six blades and the 1.0 items");
+              && tab.getDisplayItems().stream().anyMatch(i -> i.is(Content.WHETSTONE_ITEM))
+              && tab.getDisplayItems().stream()
+                  .anyMatch(i -> i.is(Content.WITHERED_LORD_SPAWN_EGG)),
+          "Independent tab holds the six blades, the 1.0 items and 1.1.0's spawn egg");
       check(
           !BuiltInRegistries.CREATIVE_MODE_TAB
               .getValue(net.minecraft.resources.Identifier.withDefaultNamespace("combat"))
@@ -205,6 +207,13 @@ public final class ServerChecks implements ModInitializer {
                 case "bugs" -> new BugChecks(this)::tick;
                 case "survey" -> new SurveyChecks(this)::tick;
                 case "density" -> new DensityChecks(this)::tick;
+                case "fit" -> new FitChecks(this)::tick;
+                case "withered" -> new WitheredChecks(this)::tick;
+                case "structures" -> new StructureChecks(this)::tick;
+                case "parade" -> new ParadeChecks(this)::tick;
+                case "grind" -> new GrindChecks(this)::tick;
+                case "commands" -> new CommandChecks(this)::tick;
+                case "lord2" -> new LordFinalChecks(this)::tick;
                 default -> throw new IllegalArgumentException(name);
               });
         stage = 30;

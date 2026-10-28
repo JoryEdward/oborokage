@@ -178,10 +178,13 @@ def payload(t, v):
 W, H, D = 17, 12, 17
 
 
-def dojo():
+def dojo(ruin=None, path='dojo/dojo'):
     """A dojo on an andesite yard: a vermilion (mangrove) torii at the gate, a stone path, stone lanterns, a cherry
     hedge around the yard; the hall has paper walls on dark posts, a bamboo floor, a deepslate tile
-    gable roof, and the master's chest between a whetstone and lanterns at the back."""
+    gable roof, and the master's chest between a whetstone and lanterns at the back.
+
+    `ruin`, if given, is called as ruin(put, name_at, entity) before the template is written and
+    returns the entities to place instead (1.1.0's ruined dojo, create_data_v3); `path` names it."""
     r = random.Random(1985061137)
     palette, index, blocks = [], {}, {}
 
@@ -294,6 +297,11 @@ def dojo():
                 entity('oborokage:swordsman', 8.5, 1.0, 5.5, 180),
                 entity('oborokage:training_dummy', 3.5, 1.0, 6.5, 90, False),
                 entity('oborokage:training_dummy', 13.5, 1.0, 6.5, 270, False)]
+    if ruin:
+        def name_at(x, y, z):
+            got = blocks.get((x, y, z))
+            return palette[got[0]]['Name'][1] if got else None
+        entities = ruin(put, name_at, entity)
     block_list = []
     for (x, y, z), (s, nbt) in sorted(blocks.items()):
         e = {'pos': (9, (3, [x, y, z])), 'state': (3, s)}
@@ -303,7 +311,7 @@ def dojo():
     root = {'DataVersion': (3, 4786), 'size': (9, (3, [W, H, D])), 'palette': (9, (10, palette)),
             'blocks': (9, (10, block_list)), 'entities': (9, (10, entities))}
     data = bytes([10]) + tag_string('') + payload(10, root)
-    out = DATA / 'structure/dojo/dojo.nbt'
+    out = DATA / f'structure/{path}.nbt'
     out.parent.mkdir(parents=True, exist_ok=True)
     buf = io.BytesIO()
     with gzip.GzipFile(fileobj=buf, mode='wb', mtime=0) as g:

@@ -19,5 +19,25 @@
     "sounds": [
       "oborokage:blossom_oni/death1"
     ]
+  },
+  "entity.withered_lord.ambient": {
+    "subtitle": "subtitles.oborokage.entity.withered_lord.ambient",
+    "sounds": [
+      "oborokage:withered_lord/ambient1",
+      "oborokage:withered_lord/ambient2"
+    ]
+  },
+  "entity.withered_lord.hurt": {
+    "subtitle": "subtitles.oborokage.entity.withered_lord.hurt",
+    "sounds": [
+      "oborokage:withered_lord/hurt1",
+      "oborokage:withered_lord/hurt2"
+    ]
+  },
+  "entity.withered_lord.death": {
+    "subtitle": "subtitles.oborokage.entity.withered_lord.death",
+    "sounds": [
+      "oborokage:withered_lord/death1"
+    ]
   }
 }

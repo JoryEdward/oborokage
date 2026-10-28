@@ -18,7 +18,10 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.levelgen.Heightmap;
 
-/** Everything added in 1.0: the swordsman, the training dummy, the whetstone and their items. */
+/**
+ * Everything added in 1.0 and after: the swordsman, the 樱下鬼, the masters, the training dummy, the
+ * whetstone and their items.
+ */
 public final class Content {
   public static final EntityType<Swordsman> SWORDSMAN =
       entity(
@@ -40,6 +43,12 @@ public final class Content {
       BLOSSOM_ONI_AMBIENT = sound("entity.blossom_oni.ambient"),
       BLOSSOM_ONI_HURT = sound("entity.blossom_oni.hurt"),
       BLOSSOM_ONI_DEATH = sound("entity.blossom_oni.death");
+
+  /** 朽英剑主's voice: lower and slower than the 樱下鬼's, a breath more than a wail. */
+  public static final net.minecraft.sounds.SoundEvent
+      WITHERED_LORD_AMBIENT = sound("entity.withered_lord.ambient"),
+      WITHERED_LORD_HURT = sound("entity.withered_lord.hurt"),
+      WITHERED_LORD_DEATH = sound("entity.withered_lord.death");
 
   private static net.minecraft.sounds.SoundEvent sound(String name) {
     var id = Oborokage.id(name);
@@ -74,6 +83,17 @@ public final class Content {
                   MobCategory.MONSTER,
                   b -> b.defaultAttributes(PetalLord::createAttributes))
               .sized(.66f, 2.15f)
+              .clientTrackingRange(8));
+
+  /** 朽英剑主: the master of a ruined dojo; placed by the ruined dojo, never spawned by the world. */
+  public static final EntityType<WitheredLord> WITHERED_LORD =
+      entity(
+          "withered_lord",
+          FabricEntityType.Builder.createMob(
+                  WitheredLord::new,
+                  MobCategory.MONSTER,
+                  b -> b.defaultAttributes(WitheredLord::createAttributes))
+              .sized(.69f, 2.24f)
               .clientTrackingRange(8));
 
   public static final EntityType<TrainingDummy> TRAINING_DUMMY =
@@ -162,6 +182,12 @@ public final class Content {
   public static final Item PETAL_LORD_SPAWN_EGG =
       item("petal_lord_spawn_egg", SpawnEggItem::new, new Item.Properties().spawnEgg(PETAL_LORD));
 
+  public static final Item WITHERED_LORD_SPAWN_EGG =
+      item(
+          "withered_lord_spawn_egg",
+          SpawnEggItem::new,
+          new Item.Properties().spawnEgg(WITHERED_LORD));
+
   public static String relicName(BladeStyle s) {
     return switch (s) {
       case TACHI -> "tachi";
@@ -190,6 +216,10 @@ public final class Content {
   }
 
   static void init() {
+    oborokage.compat.FoundationProcessor.register();
+    NightParade.init();
+    TombLands.init();
+    OborokageCommands.init();
     TombGuard.init();
     TombCandles.init();
     // Every undead monster of the world hunts the living swordsmen and their master too (the
@@ -198,7 +228,7 @@ public final class Content {
         (entity, level) -> {
           // Neutral undead (zombified piglins) keep to themselves.
           if (entity instanceof Monster mob
-              && !(mob instanceof BlossomOni)
+              && !(mob instanceof Swordsman)
               && !(mob instanceof net.minecraft.world.entity.NeutralMob)
               && mob.is(net.minecraft.tags.EntityTypeTags.UNDEAD))
             ((oborokage.mixin.MobGoalsAccess) mob)
@@ -206,7 +236,10 @@ public final class Content {
                 .addGoal(
                     3,
                     new net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal<>(
-                        mob, Swordsman.class, true, (e, l) -> !(e instanceof BlossomOni)));
+                        mob,
+                        Swordsman.class,
+                        true,
+                        (e, l) -> e instanceof Swordsman s && !s.ofTheDead()));
         });
     // Swordsmen walk only the cherry groves, by day and by night; the 樱下鬼 rise there after dark,
     // and often.

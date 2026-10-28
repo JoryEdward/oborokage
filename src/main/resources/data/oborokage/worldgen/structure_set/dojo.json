@@ -3,11 +3,15 @@
     "type": "minecraft:random_spread",
     "salt": 1985061137,
     "separation": 4,
-    "spacing": 10
+    "spacing": 8
   },
   "structures": [
     {
       "structure": "oborokage:dojo",
+      "weight": 3
+    },
+    {
+      "structure": "oborokage:ruined_dojo",
       "weight": 1
     }
   ]

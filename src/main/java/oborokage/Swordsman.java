@@ -83,7 +83,7 @@ public class Swordsman extends Monster {
     goalSelector.addGoal(2, new DuelGoal(this, 1.15));
     // Like a guardian, each keeps to its ground: a chase may carry it out, then it walks back.
     goalSelector.addGoal(4, new MoveTowardsRestrictionGoal(this, 1));
-    if (!(this instanceof BlossomOni)) goalSelector.addGoal(5, new PracticeGoal(this));
+    if (!ofTheDead()) goalSelector.addGoal(5, new PracticeGoal(this));
     goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, .8));
     goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8));
     goalSelector.addGoal(7, new RandomLookAroundGoal(this));
@@ -91,12 +91,21 @@ public class Swordsman extends Monster {
     targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
     // The living and the dead are enemies: swordsmen (and their master) hunt the 樱下鬼, which
     // hunts them back. (Registered from the constructor: instanceof is safe, fields are not.)
-    if (this instanceof BlossomOni)
-      targetSelector.addGoal(
-          3,
-          new NearestAttackableTargetGoal<>(
-              this, Swordsman.class, true, (e, level) -> !(e instanceof BlossomOni)));
-    else targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, BlossomOni.class, true));
+    targetSelector.addGoal(
+        3,
+        new NearestAttackableTargetGoal<>(
+            this,
+            Swordsman.class,
+            true,
+            (e, level) -> e instanceof Swordsman s && s.ofTheDead() != ofTheDead()));
+  }
+
+  /**
+   * Whether it is one of the dead (the 樱下鬼): the dead and the living are enemies, and each side
+   * rallies its own. A constant per kind: it is asked while the goals are set up.
+   */
+  public boolean ofTheDead() {
+    return false;
   }
 
   /** Whether it is gathering an art and should stand still (the master's windups). */
@@ -116,7 +125,7 @@ public class Swordsman extends Monster {
 
   /** The dead and the living each stand with their own. */
   private boolean sameSide(Entity e) {
-    return e instanceof Swordsman s && (s instanceof BlossomOni) == (this instanceof BlossomOni);
+    return e instanceof Swordsman s && s.ofTheDead() == ofTheDead();
   }
 
   /** Attacked: the swordsmen of its side nearby with nothing to fight turn on the attacker. */
@@ -128,6 +137,11 @@ public class Swordsman extends Monster {
     for (Swordsman s :
         level.getEntitiesOfClass(Swordsman.class, getBoundingBox().inflate(16, 6, 16)))
       if (s != this && sameSide(s) && s.getTarget() == null && s.isAlive()) s.setTarget(attacker);
+  }
+
+  /** Whether it keeps to a ground of its own (not while marching in a parade). */
+  protected boolean keepsGround() {
+    return true;
   }
 
   /**
@@ -232,7 +246,9 @@ public class Swordsman extends Monster {
       setDropChance(EquipmentSlot.MAINHAND, 0);
     }
     // Its ground is where it first stood (saved with it, so a reload keeps the same ground).
-    if (!hasHome()) setHomeTo(blockPosition(), homeRadius());
+    if (!keepsGround()) {
+      if (hasHome()) clearHome();
+    } else if (!hasHome()) setHomeTo(blockPosition(), homeRadius());
     if (parryCooldown > 0) parryCooldown--;
     if (stepCooldown > 0) stepCooldown--;
     if (rallyCooldown > 0) rallyCooldown--;

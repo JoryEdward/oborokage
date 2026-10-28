@@ -1,8 +1,6 @@
 package oborokage;
 
-import java.util.List;
 import java.util.UUID;
-import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerBossEvent;
@@ -10,17 +8,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.BossEvent;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Monster;
@@ -28,41 +21,40 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 
 /**
  * 落英剑主 (Lord of Fallen Petals): the master of a cherry-grove dojo. It carries one of the four long
- * named blades (胧影, 赤霆, 霜轮, 空弦, equally likely) and fights with that blade's arts:
+ * named blades (胧影, 赤霆, 霜轮, 空弦, equally likely) and fights with that blade's arts ({@link
+ * LordArts}): sweeping cuts, a flash-step through every foe on the way, and the blade's ultimate.
  *
- * <ul>
- *   <li>its cuts sweep, catching foes beside the one it strikes;
- *   <li>every few seconds it gathers itself and flash-steps to its target, cutting every foe along
- *       the way with the blade's nature;
- *   <li>every twenty seconds or so (sooner below half health), when it faces several foes or a
- *       strong one, it calls its blade's ultimate after a plain warning: 胧影 双月归寂 (two crescent
- *       sweeps all around), 赤霆 万雷天降 (real lightning on every foe in reach), 霜轮 镜月冰河 (an ice ring
- *       that freezes, then shatters), 空弦 断界 (a line cut through walls that drags foes back).
- * </ul>
- *
- * Its foes are its target, players, the 樱下鬼 and other undead, and anything attacking it; never its
- * own swordsmen. It shows a boss bar to players nearby, never despawns, and no single blow takes
- * more than {@link #MAX_BLOW} from it. Only the 落英剑主 drops relics: the broken form of its own
- * blade, 7.9% of the time when a player fells it.
+ * <p>It shows a boss bar to players nearby, never despawns, and no single blow takes more than
+ * {@link #MAX_BLOW} from it. It turns its students on the foe it takes, challenges a player now and
+ * then, rages below half health, and collects itself when left alone. Only the masters drop relics:
+ * the broken form of their own blade, 7.9% of the time when a player fells the 落英剑主. The first time
+ * it wakes it clears its hall of leaves grown in from the grove ({@link Hall}). The 朽英剑主 ({@link
+ * WitheredLord}) is its undead form.
  */
 public class PetalLord extends Swordsman {
   public static final float RELIC_CHANCE = .079f, MAX_BLOW = 60;
-  private static final int WINDUP = 12, ULT_WINDUP = 24, BAR_RANGE = 40;
+  private static final int BAR_RANGE = 40;
 
+  // Its own kind's name (a field set up after the entity's type is known).
   private final ServerBossEvent bar =
       new ServerBossEvent(
           UUID.randomUUID(),
-          Component.translatable("entity.oborokage.petal_lord"),
+          getType().getDescription(),
           BossEvent.BossBarColor.PURPLE,
           BossEvent.BossBarOverlay.NOTCHED_10);
-  private int artCooldown = 60, windup, ultCooldown = 200, ultWindup, echo;
+  private final LordArts arts = new LordArts(this);
   private boolean enraged;
+
+  /** Whether it has cleared its hall of what grew in (once, the first time it wakes; saved). */
+  private boolean tidied;
+
+  /** The players it is fighting (1 or more): its health grows with them. */
+  private int party = 1;
+
+  private static final net.minecraft.resources.Identifier PARTY = Oborokage.id("party");
 
   /** Game time it last fought (had a target or was struck), and last spoke a challenge. */
   private long lastFight, lastChallenge = -10000;
@@ -83,6 +75,11 @@ public class PetalLord extends Swordsman {
         .add(Attributes.ARMOR_TOUGHNESS, 4)
         .add(Attributes.FOLLOW_RANGE, 32)
         .add(Attributes.KNOCKBACK_RESISTANCE, .8);
+  }
+
+  /** Its arts: cooldowns, windups, the flash-step and the ultimate. */
+  public LordArts arts() {
+    return arts;
   }
 
   @Override
@@ -119,7 +116,12 @@ public class PetalLord extends Swordsman {
 
   @Override
   protected boolean busy() {
-    return windup > 0 || ultWindup > 0;
+    return arts.busy();
+  }
+
+  /** Whether the blow now landing is part of an ultimate, which no blade can parry. */
+  public boolean ultimateBlow() {
+    return arts.ultimateBlow();
   }
 
   /** The master keeps to its hall. */
@@ -131,6 +133,68 @@ public class PetalLord extends Swordsman {
   @Override
   public boolean removeWhenFarAway(double distance) {
     return false;
+  }
+
+  /** The chance a player who fells it finds the relic of its blade. */
+  protected float relicChance() {
+    return RELIC_CHANCE;
+  }
+
+  /** Whether it is below half health and raging. */
+  public boolean enraged() {
+    return enraged;
+  }
+
+  /** Game time it last fought (had a target or was struck). */
+  protected long lastFight() {
+    return lastFight;
+  }
+
+  /** How many players it is fighting, as its health counts them. */
+  public int party() {
+    return party;
+  }
+
+  /**
+   * Fights `n` players: its greatest health is half again as much for each player after the first,
+   * two and a half times at most; its health keeps its share of it.
+   */
+  public void setParty(int n) {
+    n = Math.max(1, n);
+    if (n == party) return;
+    float share = getHealth() / getMaxHealth();
+    var health = getAttribute(Attributes.MAX_HEALTH);
+    health.removeModifier(PARTY);
+    double more = Math.min(1.5, .5 * (n - 1));
+    if (more > 0)
+      health.addTransientModifier(
+          new net.minecraft.world.entity.ai.attributes.AttributeModifier(
+              PARTY,
+              more,
+              net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation
+                  .ADD_MULTIPLIED_BASE));
+    party = n;
+    setHealth(share * getMaxHealth());
+  }
+
+  /** Players within 32 blocks who can fight it (not in creative, not watching). */
+  private int playersNear(ServerLevel level) {
+    int n = 0;
+    for (ServerPlayer p : level.players())
+      if (p.isAlive() && !p.isSpectator() && !p.isCreative() && distanceToSqr(p) < 32 * 32) n++;
+    return n;
+  }
+
+  @Override
+  protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput out) {
+    super.addAdditionalSaveData(out);
+    out.putBoolean("HallTidied", tidied);
+  }
+
+  @Override
+  protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput in) {
+    super.readAdditionalSaveData(in);
+    tidied = in.getBooleanOr("HallTidied", false);
   }
 
   @Override
@@ -154,84 +218,56 @@ public class PetalLord extends Swordsman {
     bar.removePlayer(player);
   }
 
-  // ----- foes and blows
-
-  /** Whom its arts strike: never itself or its own swordsmen; players, the dead, its attackers. */
-  boolean foe(LivingEntity e) {
-    if (e == this || !e.isAlive() || e.isSpectator()) return false;
-    if (e instanceof Swordsman s) return s instanceof BlossomOni;
-    if (e instanceof Player p) return !p.getAbilities().instabuild;
-    return e == getTarget()
-        || e == getLastHurtByMob()
-        || e instanceof Mob m && m.getTarget() == this
-        || e instanceof Monster && e.is(EntityTypeTags.UNDEAD);
-  }
-
-  List<LivingEntity> foes(ServerLevel level, AABB area) {
-    return level.getEntitiesOfClass(LivingEntity.class, area, this::foe);
-  }
-
-  /** Its cut's weight: the attack attribute, which includes the blade in hand. */
-  float attack() {
-    return (float) getAttributeValue(Attributes.ATTACK_DAMAGE);
-  }
-
-  private void strike(ServerLevel level, LivingEntity e, float damage) {
-    oborokage.compat.Compat.resetHurtCooldown(e);
-    e.hurtServer(level, level.damageSources().mobAttack(this), damage);
-  }
-
-  private boolean ultimateBlow;
-
-  /** Whether the blow now landing is part of an ultimate, which no blade can parry. */
-  public boolean ultimateBlow() {
-    return ultimateBlow;
-  }
-
-  private void ultimateStrike(ServerLevel level, LivingEntity e, float damage) {
-    ultimateBlow = true;
-    try {
-      strike(level, e, damage);
-    } finally {
-      ultimateBlow = false;
-    }
-  }
-
   /** Its cuts sweep: foes beside the one struck take half the blow. */
   @Override
   public boolean doHurtTarget(ServerLevel level, Entity target) {
     boolean hit = super.doHurtTarget(level, target);
-    if (hit) {
-      Vec3 look = Vec3.directionFromRotation(0, getYRot());
-      for (LivingEntity e : foes(level, getBoundingBox().inflate(2.5, .5, 2.5)))
-        if (e != target && e.position().subtract(position()).dot(look) > 0)
-          strike(level, e, attack() * .5f);
-      level.sendParticles(
-          ParticleTypes.SWEEP_ATTACK, getX() + look.x, getY(1), getZ() + look.z, 1, 0, 0, 0, 0);
-    }
+    if (hit) arts.sweep(level, target);
     return hit;
+  }
+
+  /** Client side, each tick: what drifts about it (cherry petals). */
+  protected void drift() {
+    if (getRandom().nextInt(5) == 0)
+      level()
+          .addParticle(
+              ParticleTypes.CHERRY_LEAVES,
+              getRandomX(1.2),
+              getY() + 1.6 + getRandom().nextDouble() * .8,
+              getRandomZ(1.2),
+              0,
+              -.03,
+              0);
+  }
+
+  /**
+   * One server tick of an art of its own kind, before the master's arts: true while it holds them
+   * back (the 朽英剑主's 「百鬼」). The 落英剑主 has none.
+   */
+  protected boolean ownArt(ServerLevel level) {
+    return false;
   }
 
   @Override
   public void aiStep() {
     super.aiStep();
     if (level().isClientSide()) {
-      // Petals drift about it.
-      if (getRandom().nextInt(5) == 0)
-        level()
-            .addParticle(
-                ParticleTypes.CHERRY_LEAVES,
-                getRandomX(1.2),
-                getY() + 1.6 + getRandom().nextDouble() * .8,
-                getRandomZ(1.2),
-                0,
-                -.03,
-                0);
+      drift();
       return;
     }
     if (!(level() instanceof ServerLevel level)) return;
+    if (!tidied && tickCount > 20) {
+      tidied = true;
+      Hall.tidy(level, blockPosition());
+    }
     long now = level.getGameTime();
     if (getTarget() != null || hurtTime > 0) lastFight = now;
+    // In a fight it counts the players against it (more may come; none leave the count until the
+    // fight is ten seconds over).
+    if (tickCount % 20 == 0) {
+      if (now - lastFight <= 200) setParty(Math.max(party, playersNear(level)));
+      else if (party > 1) setParty(1);
+    }
     // Left alone for ten seconds it collects itself: a point of health a second.
     if (now - lastFight > 200 && getHealth() < getMaxHealth() && tickCount % 20 == 0) {
       heal(1);
@@ -252,52 +288,24 @@ public class PetalLord extends Swordsman {
       level.sendParticles(
           ParticleTypes.SOUL_FIRE_FLAME, getX(), getY() + 1, getZ(), 30, .4, .6, .4, .04);
     }
-    if (echo > 0 && --echo == 0) crescent(level, 2.0f);
-    LivingEntity target = getTarget();
-    if (ultWindup > 0) {
-      getNavigation().stop();
-      gather(level, --ultWindup);
-      if (ultWindup == 0) ultimate(level, target);
-      return;
-    }
-    if (windup > 0) {
-      windup--;
-      level.sendParticles(
-          ParticleTypes.ENCHANTED_HIT, getX(), getY() + .9, getZ(), 4, .35, .5, .35, .05);
-      if (windup == 0 && target != null && target.isAlive()) draw(level, target);
-      return;
-    }
-    if (ultCooldown > 0) ultCooldown--;
-    if (artCooldown > 0) artCooldown--;
-    // Its arts are weighed five times a second, not every tick (each look is a ray cast).
-    if (target == null || !target.isAlive() || tickCount % 4 != 0) return;
-    double d = distanceToSqr(target);
-    if (ultCooldown == 0 && d < 16 * 16 && getSensing().hasLineOfSight(target)) {
-      int near = foes(level, getBoundingBox().inflate(10)).size();
-      if (near >= 2 || target.getMaxHealth() >= 100 || enraged) {
-        ultWindup = ULT_WINDUP;
-        ultCooldown = enraged ? 260 : 400;
-        announce(level);
-        return;
-      }
-    }
-    if (artCooldown == 0 && d > 3 * 3 && d < 12 * 12 && getSensing().hasLineOfSight(target)) {
-      windup = WINDUP;
-      artCooldown = enraged ? 80 : 140;
-      getNavigation().stop();
-      level.playSound(
-          null, blockPosition(), SoundEvents.ARMOR_EQUIP_IRON.value(), SoundSource.HOSTILE, 1, .6f);
-    }
+    if (!ownArt(level)) arts.tick(level, enraged);
   }
 
   // ----- its voice and its students
 
+  /** Where its lines are: ui.oborokage.<sayings>.<line>. */
+  protected String sayings() {
+    return "lord_says";
+  }
+
   /** A line to the players around it, in chat: the challenge, the turn at half health, its end. */
-  private void speak(ServerLevel level, String line) {
+  protected void speak(ServerLevel level, String line) {
     var said =
-        Component.translatable("entity.oborokage.petal_lord")
+        getType()
+            .getDescription()
+            .copy()
             .append(": ")
-            .append(Component.translatable("ui.oborokage.lord_says." + line))
+            .append(Component.translatable("ui.oborokage." + sayings() + "." + line))
             .withStyle(net.minecraft.ChatFormatting.LIGHT_PURPLE);
     for (ServerPlayer p : level.players())
       if (distanceToSqr(p) < 32 * 32) p.sendSystemMessage(said);
@@ -308,10 +316,13 @@ public class PetalLord extends Swordsman {
   public void setTarget(LivingEntity target) {
     LivingEntity before = getTarget();
     super.setTarget(target);
+    // What it really took: a target it cannot fight is refused, and then it calls no one (two
+    // masters would otherwise call each other without end).
+    target = getTarget();
     if (target == null || target == before || !(level() instanceof ServerLevel level)) return;
     for (Swordsman s :
         level.getEntitiesOfClass(Swordsman.class, getBoundingBox().inflate(20, 6, 20)))
-      if (s != this && !(s instanceof BlossomOni) && s.getTarget() == null && s.isAlive())
+      if (s != this && s.ofTheDead() == ofTheDead() && s.getTarget() == null && s.isAlive())
         s.setTarget(target);
     long now = level.getGameTime();
     if (target instanceof Player && now - lastChallenge > 1200) {
@@ -326,234 +337,11 @@ public class PetalLord extends Swordsman {
     super.die(source);
   }
 
-  // ----- the flash-step
-
-  /** To the target's side in one step if the way is clear; every foe along the way is cut. */
-  private void draw(ServerLevel level, LivingEntity target) {
-    Vec3 from = position();
-    Vec3 flat = target.position().subtract(from).multiply(1, 0, 1);
-    if (flat.lengthSqr() < 1e-4) return;
-    Vec3 dir = flat.normalize();
-    Vec3 dest =
-        target.position().subtract(dir.scale(target.getBbWidth() * .5 + getBbWidth() * .5 + .4));
-    AABB box = getBoundingBox().move(dest.subtract(from));
-    if (level.noCollision(this, box)) teleportTo(dest.x, dest.y, dest.z);
-    face(dir);
-    for (int i = 0; i <= 12; i++) {
-      Vec3 at = from.lerp(position(), i / 12.0).add(0, 1, 0);
-      level.sendParticles(ParticleTypes.SWEEP_ATTACK, at.x, at.y, at.z, 1, 0, 0, 0, 0);
-    }
-    level.playSound(
-        null, blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.HOSTILE, 1.3f, .7f);
-    oborokage.compat.Compat.swing(this, InteractionHand.MAIN_HAND);
-    AABB path = new AABB(from, position()).inflate(1.4, 1, 1.4);
-    for (LivingEntity e : foes(level, path.expandTowards(dir.scale(1.5)))) {
-      strike(level, e, attack() * 1.5f);
-      nature(level, e);
-    }
-  }
-
-  private void face(Vec3 dir) {
-    float yaw = (float) Math.toDegrees(Math.atan2(-dir.x, dir.z));
-    setYRot(yaw);
-    setYHeadRot(yaw);
-    setYBodyRot(yaw);
-  }
-
-  /** What a cut carries, by the blade in hand. */
-  private void nature(ServerLevel level, LivingEntity target) {
-    BladeStyle style = style();
-    if (style == null) return;
-    switch (style) {
-      case RAIKIRI -> {
-        level.addFreshEntity(
-            oborokage.compat.Compat.visualLightning(
-                level, target.getX(), target.getY(), target.getZ()));
-        strike(level, target, 4);
-      }
-      case FROSTMOON -> {
-        target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 80, 2), this);
-        target.setTicksFrozen(Math.max(target.getTicksFrozen(), 160));
-      }
-      case VOIDSTRING -> {
-        target.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 25, 0), this);
-        target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 30, 0), this);
-      }
-      default -> {
-        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 80, 0), this);
-        target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 0), this);
-      }
-    }
-  }
-
-  // ----- the ultimate
-
-  /** The ultimate's name for the players around, so the warning can be read. */
-  private void announce(ServerLevel level) {
-    BladeStyle style = style();
-    if (style == null) {
-      ultWindup = 0;
-      return;
-    }
-    var name =
-        Component.translatable("entity.oborokage.petal_lord")
-            .append(" · ")
-            .append(Component.translatable("ui.oborokage.lord_art." + style.key));
-    for (ServerPlayer p : level.players())
-      if (distanceToSqr(p) < 32 * 32) p.sendOverlayMessage(name);
-    level.playSound(
-        null, blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 1.4f, 1.6f);
-  }
-
-  /** The warning while it gathers: a ring closing in, in the blade's colour. */
-  private void gather(ServerLevel level, int left) {
-    BladeStyle style = style();
-    double r = 1.2 + left * .12;
-    for (int i = 0; i < 10; i++) {
-      double a = Math.PI * 2 * i / 10 + left * .3;
-      double x = getX() + Math.cos(a) * r, z = getZ() + Math.sin(a) * r;
-      var particle =
-          style == BladeStyle.RAIKIRI
-              ? ParticleTypes.ELECTRIC_SPARK
-              : style == BladeStyle.FROSTMOON
-                  ? ParticleTypes.SNOWFLAKE
-                  : style == BladeStyle.VOIDSTRING
-                      ? ParticleTypes.REVERSE_PORTAL
-                      : ParticleTypes.END_ROD;
-      level.sendParticles(particle, x, getY() + .2, z, 1, 0, .05, 0, 0);
-    }
-  }
-
-  private void ultimate(ServerLevel level, LivingEntity target) {
-    BladeStyle style = style();
-    if (style == null) return;
-    oborokage.compat.Compat.swing(this, InteractionHand.MAIN_HAND);
-    switch (style) {
-      case RAIKIRI -> {
-        // 万雷天降: real lightning on every foe within sixteen blocks, eight at most.
-        int bolts = 0;
-        for (LivingEntity e : foes(level, getBoundingBox().inflate(16, 6, 16))) {
-          if (bolts++ >= 8) break;
-          var bolt = oborokage.compat.Compat.visualLightning(level, e.getX(), e.getY(), e.getZ());
-          level.addFreshEntity(bolt);
-          ultimateStrike(level, e, attack() * 1.6f);
-          if (e.isAlive()) e.thunderHit(level, bolt);
-        }
-        level.playSound(
-            null, blockPosition(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.HOSTILE, 3, .9f);
-      }
-      case FROSTMOON -> {
-        // 镜月冰河: everything within nine blocks is frozen where it stands, then the ice shatters.
-        var ice =
-            new BlockParticleOption(ParticleTypes.BLOCK, Blocks.PACKED_ICE.defaultBlockState());
-        for (LivingEntity e : foes(level, getBoundingBox().inflate(9, 3, 9))) {
-          e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 6), this);
-          e.setTicksFrozen(Math.max(e.getTicksFrozen(), 200));
-          ultimateStrike(level, e, attack() * 2.2f);
-          level.sendParticles(ice, e.getX(), e.getY() + 1, e.getZ(), 30, .4, .6, .4, .1);
-        }
-        for (int i = 0; i < 48; i++) {
-          double a = Math.PI * 2 * i / 48;
-          level.sendParticles(
-              ParticleTypes.SNOWFLAKE,
-              getX() + Math.cos(a) * 8,
-              getY() + .2,
-              getZ() + Math.sin(a) * 8,
-              2,
-              .1,
-              .1,
-              .1,
-              .01);
-        }
-        level.playSound(
-            null, blockPosition(), SoundEvents.GLASS_BREAK, SoundSource.HOSTILE, 2, .5f);
-      }
-      case VOIDSTRING -> {
-        // 断界: a line cut thirty-two blocks long through walls toward the target; what it cuts is
-        // dragged back toward the master.
-        Vec3 dir =
-            target == null
-                ? Vec3.directionFromRotation(0, getYRot())
-                : target.getEyePosition().subtract(getEyePosition()).normalize();
-        face(new Vec3(dir.x, 0, dir.z).normalize());
-        Vec3 from = getEyePosition(), to = from.add(dir.scale(32));
-        for (int i = 0; i <= 64; i++) {
-          Vec3 at = from.lerp(to, i / 64.0);
-          level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y, at.z, 2, .05, .05, .05, 0);
-        }
-        level.sendParticles(
-            ParticleTypes.SONIC_BOOM,
-            from.x + dir.x * 2,
-            from.y,
-            from.z + dir.z * 2,
-            1,
-            0,
-            0,
-            0,
-            0);
-        for (LivingEntity e : foes(level, new AABB(from, to).inflate(1.5))) {
-          Vec3 c = e.getBoundingBox().getCenter();
-          double along = c.subtract(from).dot(dir);
-          if (along < 0 || along > 32 || c.distanceTo(from.add(dir.scale(along))) > 1.8) continue;
-          ultimateStrike(level, e, attack() * 2.4f);
-          Vec3 back = position().subtract(e.position()).multiply(1, 0, 1);
-          if (back.lengthSqr() > 1) {
-            back = back.normalize().scale(1.1);
-            e.push(back.x, .25, back.z);
-            oborokage.compat.Compat.syncMotion(e);
-          }
-        }
-        level.playSound(
-            null, blockPosition(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.HOSTILE, 1.5f, 1.4f);
-      }
-      default -> {
-        // 双月归寂: a crescent sweep all around, and a second, heavier one a moment later.
-        crescent(level, 1.5f);
-        echo = 8;
-      }
-    }
-  }
-
-  /** 胧影's crescent: everything within six blocks, all around. */
-  private void crescent(ServerLevel level, float weight) {
-    if (!isAlive()) return;
-    for (LivingEntity e : foes(level, getBoundingBox().inflate(6, 2, 6)))
-      if (e.distanceToSqr(this) < 6.5 * 6.5) {
-        ultimateStrike(level, e, attack() * weight);
-        nature(level, e);
-      }
-    for (int i = 0; i < 24; i++) {
-      double a = Math.PI * 2 * i / 24;
-      level.sendParticles(
-          ParticleTypes.SWEEP_ATTACK,
-          getX() + Math.cos(a) * 3.5,
-          getY() + 1,
-          getZ() + Math.sin(a) * 3.5,
-          1,
-          0,
-          0,
-          0,
-          0);
-      level.sendParticles(
-          ParticleTypes.END_ROD,
-          getX() + Math.cos(a) * 5.5,
-          getY() + 1.2,
-          getZ() + Math.sin(a) * 5.5,
-          1,
-          0,
-          .1,
-          0,
-          .01);
-    }
-    level.playSound(
-        null, blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.HOSTILE, 1.6f, .55f);
-  }
-
   @Override
   protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
     super.dropCustomDeathLoot(level, source, recentlyHit);
     BladeStyle style = style();
-    if (recentlyHit && style != null && getRandom().nextFloat() < RELIC_CHANCE) {
+    if (recentlyHit && style != null && getRandom().nextFloat() < relicChance()) {
       Item relic = Content.RELICS.get(style);
       if (relic != null) spawnAtLocation(level, new ItemStack(relic));
     }
