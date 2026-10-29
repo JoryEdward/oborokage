@@ -12,6 +12,8 @@
 | [![道场正堂](docs/screenshots/02-hall.jpg)](docs/screenshots/02-hall.jpg)<br>道场正堂：落英剑主与剑客 · The hall | [![百花缭乱](docs/screenshots/03-hundred-flowers.jpg)](docs/screenshots/03-hundred-flowers.jpg)<br>百花缭乱 · Hundred Flowers | [![万雷天降](docs/screenshots/04-ten-thousand-thunders.jpg)](docs/screenshots/04-ten-thousand-thunders.jpg)<br>万雷天降 · Ten Thousand Thunders |
 | [![镜月冰河](docs/screenshots/05-mirror-moon.jpg)](docs/screenshots/05-mirror-moon.jpg)<br>镜月冰河 · Mirror Moon, Frozen River | [![双月归寂](docs/screenshots/06-twin-moons.jpg)](docs/screenshots/06-twin-moons.jpg)<br>双月归寂 · Twin Moons: Silence | [![断界](docs/screenshots/07-severing-the-realms.jpg)](docs/screenshots/07-severing-the-realms.jpg)<br>断界 · Severing the Realms |
 | [![胧月一闪](docs/screenshots/08-moonflash.jpg)](docs/screenshots/08-moonflash.jpg)<br>胧月一闪 · Moonflash | [![剑客](docs/screenshots/09-swordsmen.jpg)](docs/screenshots/09-swordsmen.jpg)<br>剑客与六把刀 · Swordsmen | [![刀冢](docs/screenshots/10-blade-tomb.jpg)](docs/screenshots/10-blade-tomb.jpg)<br>刀冢与樱下鬼 · Blade tomb |
+| [![朽道场](docs/screenshots/11-ruined-dojo.jpg)](docs/screenshots/11-ruined-dojo.jpg)<br>樱花林中的朽道场 · Ruined dojo | [![朽英剑主](docs/screenshots/12-withered-lord.jpg)](docs/screenshots/12-withered-lord.jpg)<br>朽英剑主：白日打坐 · Lord of Withered Blossoms | [![百鬼](docs/screenshots/13-hundred-ghosts.jpg)](docs/screenshots/13-hundred-ghosts.jpg)<br>「百鬼」：入夜唤起樱下鬼 · Hundred Ghosts |
+| [![百鬼夜行](docs/screenshots/14-night-parade.jpg)](docs/screenshots/14-night-parade.jpg)<br>满月百鬼夜行，鬼将领队 · Night Parade | [![雪原刀冢](docs/screenshots/15-snow-tomb.jpg)](docs/screenshots/15-snow-tomb.jpg)<br>雪原刀冢 · Snow-land blade tomb | |
 
 ## 选择对应版本的 JAR
 
